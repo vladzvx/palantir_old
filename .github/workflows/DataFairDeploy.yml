@@ -20,15 +20,9 @@ jobs:
     - name: Build
 
   deploy:
-    name: SCP files to server
     runs-on: ubuntu-18.04
     steps:
-      - name: Copy files to server
-        uses: actions/setup-dotnet@v1
-        env:
-          USERNAME: ${{ secrets.MAIN_USERNAME }}
-          HOST: ${{ secrets.MAIN_HOST }}
-          PASSWORD: ${{ secrets.MAIN_PWD }}
-        with:
-          source: './*'
-          target: '/root/DataFair/'
+      - name: Stop the daemon
+        run: systemctl stop DataFair
+
+        
