@@ -23,6 +23,7 @@ jobs:
       run: dotnet build --no-restore
       
   deploy:
+    needs: build
     runs-on: ubuntu-18.04
     steps:
     - name: executing remote ssh commands using password
