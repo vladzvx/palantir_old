@@ -24,6 +24,8 @@ jobs:
         pwd
         dotnet build --output ./output
         ls
+    - name: check
+      run: ls
       
   deploy:
     needs: build
