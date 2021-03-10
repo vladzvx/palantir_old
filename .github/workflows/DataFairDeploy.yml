@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - name: Stop the daemon
-        run: ssh ${{ secrets.MAIN_USERNAME }}@${{ secrets.MAIN_HOST }} -p 22 -no-antispoof -pw ${{ secrets.MAIN_PWD }} systemctl stop DataFair
+        run: ssh ${{ secrets.MAIN_USERNAME }}@${{ secrets.MAIN_HOST }} -p 22 -pw ${{ secrets.MAIN_PWD }} systemctl stop DataFair
           
 
         
