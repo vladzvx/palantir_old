@@ -24,11 +24,12 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - name: Stop the daemon
-        run: systemctl stop DataFair
-        env:
+        with:
           USERNAME: ${{ secrets.MAIN_USERNAME }}
           HOST: ${{ secrets.MAIN_HOST }}
           PASSWORD: ${{ secrets.MAIN_PWD }}
-        
+          script: |
+            systemctl stop DataFair
+          
 
         
