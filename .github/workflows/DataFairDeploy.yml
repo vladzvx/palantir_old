@@ -17,15 +17,18 @@ jobs:
         dotnet-version: 5.0.x
     - name: Restore dependencies
       run: dotnet restore
-
+    - name: Build
+      run: dotnet build --no-restore
+      
   deploy:
     runs-on: ubuntu-18.04
     steps:
       - name: Stop the daemon
+        run: systemctl stop DataFair
         env:
           USERNAME: ${{ secrets.MAIN_USERNAME }}
           HOST: ${{ secrets.MAIN_HOST }}
           PASSWORD: ${{ secrets.MAIN_PWD }}
-        run: systemctl stop DataFair
+        
 
         
