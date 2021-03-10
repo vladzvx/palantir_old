@@ -19,6 +19,4 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore
-      
-  deploy:
-    needs = ["Build"]
+
