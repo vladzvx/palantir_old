@@ -263,5 +263,6 @@ __pycache__/
 *.pyc
 
 
-#deploy scripts
+#deploy
 deploy*.bat
+.github
