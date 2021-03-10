@@ -1,5 +1,10 @@
 name: .NET
 
+env:
+  USERNAME: ${{ secrets.MAIN_USERNAME }}
+  HOST: ${{ secrets.MAIN_HOST }}
+  PASSWORD: ${{ secrets.MAIN_PWD }}
+  
 on:
   push:
     branches: [ main ]
@@ -24,12 +29,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - name: Stop the daemon
-        with:
-          USERNAME: ${{ secrets.MAIN_USERNAME }}
-          HOST: ${{ secrets.MAIN_HOST }}
-          PASSWORD: ${{ secrets.MAIN_PWD }}
-          script: |
-            systemctl stop DataFair
+        run: systemctl stop DataFair
           
 
         
