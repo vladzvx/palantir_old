@@ -45,8 +45,7 @@ jobs:
       run: |
         pwd
         ls
-        zip -r DataFair.zip /home/runner/work/tg-data-miner/tg-data-miner/output/
-        pwd
+
     - name: Upload files
       uses: appleboy/scp-action@master
       with:
