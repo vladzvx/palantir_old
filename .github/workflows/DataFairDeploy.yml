@@ -1,5 +1,6 @@
 name: Data Fair deploy
 
+
   
 on:
   push:
@@ -24,8 +25,17 @@ jobs:
   deploy:
     runs-on: ubuntu-18.04
     steps:
-      - name: Stop the daemon
-        run: ssh ${{ secrets.MAIN_USERNAME }}@${{ secrets.MAIN_HOST }} -p 22 -pw ${{ secrets.MAIN_PWD }} systemctl stop DataFair
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.MAIN_HOST }}
+        username: ${{ secrets.MAIN_USERNAME }}
+        password: ${{ secrets.MAIN_PWD }}
+        port: ${{ secrets.MAIN_PORT }}
+        script: systemctl stop DataFair
+
+          
+          
           
 
         
