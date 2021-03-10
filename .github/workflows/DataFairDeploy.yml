@@ -45,8 +45,8 @@ jobs:
         username: ${{ secrets.MAIN_USERNAME }}
         password: ${{ secrets.MAIN_PWD }}
         port: ${{ secrets.MAIN_PORT }}
-        source: "/home/runner/work/tg-data-miner/tg-data-miner/DataFair/bin/Debug/net5.0/*.*"
-        target: "DataFair"
+        source: "./*"
+        target: "/root/DataFair/"
       
       
           
