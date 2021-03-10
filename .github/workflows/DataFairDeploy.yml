@@ -33,7 +33,8 @@ jobs:
         username: ${{ secrets.MAIN_USERNAME }}
         password: ${{ secrets.MAIN_PWD }}
         port: ${{ secrets.MAIN_PORT }}
-        script: systemctl stop DataFair
+        script: systemctl stop DataFair | 
+          systemctl start DataFair
 
           
           
