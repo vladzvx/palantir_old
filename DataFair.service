@@ -3,7 +3,7 @@ Description=DataFair
 
 [Service]
 Type=simple
-ExecStart=/root/data_fair/DataFair
+ExecStart=/root/DataFair/DataFair
 
 [Install]
 WantedBy=multi-user.target

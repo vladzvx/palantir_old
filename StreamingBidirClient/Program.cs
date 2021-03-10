@@ -60,7 +60,7 @@ namespace StreamingBidir.Client
             Id = rnd.Next();
             var httpHandler = new HttpClientHandler();
             httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-            Channel = GrpcChannel.ForAddress("http://localhost:5005", new GrpcChannelOptions { HttpHandler = httpHandler });
+            Channel = GrpcChannel.ForAddress("http://176.119.156.220:5005", new GrpcChannelOptions { HttpHandler = httpHandler });
             Client = new OrderBoard.OrderBoardClient(Channel);
 
             ExecutorTimer.Elapsed += ExecuteOrder;
