@@ -42,9 +42,9 @@ jobs:
           rm -r /root/DataFair
           mkdir DataFair
     - name: Zip files
-      run: |
-        pwd
-        ls
+      run: pwd
+    - name: ls
+      run: ls
 
     - name: Upload files
       uses: appleboy/scp-action@master
