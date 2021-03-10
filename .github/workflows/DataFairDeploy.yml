@@ -37,7 +37,9 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --output ./output
+      run: |
+        cd DataFair
+        dotnet build --output ./output
     - name: check
       run: ls
     - name: Upload files
