@@ -1,9 +1,5 @@
-name: .NET
+name: Data Fair deploy
 
-env:
-  USERNAME: ${{ secrets.MAIN_USERNAME }}
-  HOST: ${{ secrets.MAIN_HOST }}
-  PASSWORD: ${{ secrets.MAIN_PWD }}
   
 on:
   push:
@@ -29,7 +25,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - name: Stop the daemon
-        run: systemctl stop DataFair
+        run: ssh ${{ secrets.MAIN_USERNAME }}@${{ secrets.MAIN_HOST }} -p 22 -no-antispoof -pw ${{ secrets.MAIN_PWD }} systemctl stop DataFair
           
 
         
