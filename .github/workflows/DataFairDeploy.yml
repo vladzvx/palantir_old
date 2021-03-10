@@ -45,7 +45,7 @@ jobs:
         username: ${{ secrets.MAIN_USERNAME }}
         password: ${{ secrets.MAIN_PWD }}
         port: ${{ secrets.MAIN_PORT }}
-        source: "./*"
+        source: "./DataFair.service"
         target: "/root/DataFair/"
       
       
