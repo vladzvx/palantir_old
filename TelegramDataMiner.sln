@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31025.194
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{0F20805F-EB72-455A-8074-263D7770FAF7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataFair", "DataFair\DataFair.csproj", "{1BAADCFD-8D25-4864-9841-5467489E15E4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Downloader", "Downloader\Downloader.csproj", "{26D9BB68-C7E4-4476-8CD7-9F1E08E5ACAF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DuplexStreaming", "StreamingBidirClient\DuplexStreaming.csproj", "{E9014FA9-75DC-426A-91BA-A3192AB2CD9E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0F20805F-EB72-455A-8074-263D7770FAF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F20805F-EB72-455A-8074-263D7770FAF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F20805F-EB72-455A-8074-263D7770FAF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F20805F-EB72-455A-8074-263D7770FAF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BAADCFD-8D25-4864-9841-5467489E15E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BAADCFD-8D25-4864-9841-5467489E15E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BAADCFD-8D25-4864-9841-5467489E15E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BAADCFD-8D25-4864-9841-5467489E15E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26D9BB68-C7E4-4476-8CD7-9F1E08E5ACAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26D9BB68-C7E4-4476-8CD7-9F1E08E5ACAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26D9BB68-C7E4-4476-8CD7-9F1E08E5ACAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26D9BB68-C7E4-4476-8CD7-9F1E08E5ACAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9014FA9-75DC-426A-91BA-A3192AB2CD9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9014FA9-75DC-426A-91BA-A3192AB2CD9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9014FA9-75DC-426A-91BA-A3192AB2CD9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9014FA9-75DC-426A-91BA-A3192AB2CD9E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B956A809-B37D-42F3-A218-EFA36CBFAFFD}
+	EndGlobalSection
+EndGlobal

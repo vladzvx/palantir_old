@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Snapshot.proto" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.35.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+	  <Protobuf Include="Snapshot.proto" GrpcServices="Both" />
+	  <Protobuf Include="OrderBoard.proto" GrpcServices="Both" />
+  </ItemGroup>
+
+</Project>

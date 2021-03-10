@@ -1,0 +1,9 @@
+[Unit]
+Description=DataFair
+
+[Service]
+Type=simple
+ExecStart=/root/data_fair/DataFair
+
+[Install]
+WantedBy=multi-user.target
