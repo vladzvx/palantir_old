@@ -23,6 +23,10 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - name: Stop the daemon
+        env:
+          USERNAME: ${{ secrets.MAIN_USERNAME }}
+          HOST: ${{ secrets.MAIN_HOST }}
+          PASSWORD: ${{ secrets.MAIN_PWD }}
         run: systemctl stop DataFair
 
         
