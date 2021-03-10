@@ -20,7 +20,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build --output ./output
       
   deploy:
     needs: build
@@ -45,7 +45,7 @@ jobs:
         username: ${{ secrets.MAIN_USERNAME }}
         password: ${{ secrets.MAIN_PWD }}
         port: ${{ secrets.MAIN_PORT }}
-        source: "./DataFair.service"
+        source: "./output/*.dll"
         target: "/root/DataFair/"
       
       
