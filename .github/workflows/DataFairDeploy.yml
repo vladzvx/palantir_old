@@ -23,6 +23,7 @@ jobs:
       run: |
         pwd
         dotnet build --output ./output
+        ls
       
   deploy:
     needs: build
@@ -43,6 +44,7 @@ jobs:
     - name: Zip files
       run: |
         pwd
+        ls
         zip -r DataFair.zip /home/runner/work/tg-data-miner/tg-data-miner/output/
         pwd
     - name: Upload files
