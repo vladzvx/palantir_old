@@ -22,7 +22,6 @@ jobs:
           systemctl stop DataFair
           cd /root
           rm -r /root/DataFair
-          mkdir DataFair
           
   build:
     needs: stopping
@@ -39,9 +38,7 @@ jobs:
     - name: Build
       run: |
         cd DataFair
-        dotnet build --output ../output
-    - name: check
-      run: ls
+        dotnet build --output ../output/DataFair
     - name: Upload files
       uses: appleboy/scp-action@master
       with:
@@ -49,7 +46,7 @@ jobs:
         username: ${{ secrets.MAIN_USERNAME }}
         password: ${{ secrets.MAIN_PWD }}
         port: ${{ secrets.MAIN_PORT }}
-        source: "./output"
+        source: "./output/DataFair"
         target: "/root/DataFair/"
       
 
