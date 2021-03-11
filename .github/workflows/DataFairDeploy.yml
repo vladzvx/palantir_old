@@ -39,7 +39,7 @@ jobs:
     - name: Build
       run: |
         cd DataFair
-        dotnet build --output ../../output
+        dotnet build --output ../output
     - name: check
       run: ls
     - name: Upload files
