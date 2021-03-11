@@ -35,7 +35,7 @@ jobs:
     - name: Build
       run: |
         cd DataFair
-        dotnet build --output ../output
+        dotnet build --output ../output --runtime ubuntu.18.04-x64
     - name: Copy .service file to output folder
       run: cp DataFair.service output/DataFair.service
     - name: Upload files
