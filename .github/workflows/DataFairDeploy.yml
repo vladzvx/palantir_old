@@ -55,8 +55,13 @@ jobs:
         password: ${{ secrets.MAIN_PWD }}
         port: ${{ secrets.MAIN_PORT }}
         script: |
-          mv /root/DataFair/output/DataFair.sevice /etc/systemd/system/DataFair.service
-
+          mv /root/DataFair/output/DataFair.service /etc/systemd/system/DataFair.service
+          mv /root/DataFair/output/* /root/DataFair/
+          rm /root/DataFair/output/ -r
+          chmod u+x /root/DataFair/DataFair
+          systemctl daemon-reload
+          systemctl enable DataFair
+          systemctl start DataFair
       
         
         
