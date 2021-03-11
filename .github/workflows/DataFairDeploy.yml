@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
-  server prepairing:
+  server-prepairing:
     runs-on: ubuntu-18.04
     steps:
     - name: Killing an deleting old service
@@ -20,8 +20,8 @@ jobs:
           cd /root
           rm -r /root/DataFair
           
-  build and deploy:
-    needs: server prepairing
+  build-and-deploy:
+    needs: server-prepairing
     runs-on: ubuntu-18.04
 
     steps:
