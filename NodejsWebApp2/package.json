@@ -1,0 +1,22 @@
+{
+  "name": "nodejs-web-app2",
+  "version": "0.0.0",
+  "description": "NodejsWebApp2",
+  "main": "server.js",
+  "author": {
+    "name": ""
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "tsc --build --clean"
+  },
+  "devDependencies": {
+    "@types/node": "^8.0.14",
+    "typescript": "^3.2.2"
+  },
+  "dependencies": {
+    "@grpc/proto-loader": "^0.5.6",
+    "google-proto-files": "^2.4.0",
+    "grpc": "^1.24.6"
+  }
+}

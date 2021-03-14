@@ -11,7 +11,7 @@
     <OutputPath>.</OutputPath>
     <Name>DataLoader</Name>
     <RootNamespace>DataLoader</RootNamespace>
-    <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
+    <InterpreterId>MSBuild|env37|$(MSBuildProjectFullPath)</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -23,12 +23,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="DataLoader.py" />
+    <Compile Include="OrderBoard_pb2.py" />
+    <Compile Include="OrderBoard_pb2_grpc.py" />
   </ItemGroup>
   <ItemGroup>
-    <Interpreter Include="env\">
-      <Id>env</Id>
-      <Version>3.6</Version>
-      <Description>env (Python 3.6 (64-bit))</Description>
+    <Interpreter Include="env37\">
+      <Id>env37</Id>
+      <Version>3.7</Version>
+      <Description>env37 (Python 3.7 (64-bit))</Description>
       <InterpreterPath>Scripts\python.exe</InterpreterPath>
       <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
       <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>

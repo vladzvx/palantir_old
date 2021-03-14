@@ -2,36 +2,82 @@ syntax = "proto3";
 
 option csharp_namespace = "Common";
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
 package orders;
 
 service OrderBoard {
   rpc GetOrder (google.protobuf.Empty) returns (Order);
-  rpc PostOrderResult (OrderResult) returns (google.protobuf.Empty);
-  rpc StreamOrderResults (stream OrderResult) returns (google.protobuf.Empty);
-  rpc DuplexStream (stream OrderResult) returns (stream OrderReponse);
   rpc PostOrder (Order) returns (google.protobuf.Empty);
+  rpc StreamEntity (stream Entity) returns (google.protobuf.Empty);
+  rpc ChekingStream (stream Entity) returns (stream CheckResult);
+  rpc StreamMessages (stream Message) returns (google.protobuf.Empty);
 }
 
-message OrderResult {
-  int64 OrderId = 1;
-  string text = 2;
+message CheckResult{
+	bool Result=1;
 }
 
-message OrderReponse {
-  string text = 2;
+message Entity{
+	int64 Id = 1;
+	int64 AccessHash = 2;
+	string Username = 3;
+	string Link = 4;
+	string FirstName = 5;
+	string LastName = 6;
+	string Desc = 7;
+	EntityType Type = 8;
 }
+
+enum EntityType{
+	User = 0;
+	Group = 1;
+	Channel = 2;
+}
+
+message Message{
+	google.protobuf.Timestamp Timestamp = 1;
+	string Text = 2;
+	string Media = 3;
+	int64 Id = 4;
+	int64 FromId = 5;
+	int64 ForwardFromId = 6;
+	int64 ForwardFromMessageId = 7;
+	int64 ChatId = 8;
+	int64 MediagroupId = 9;
+	int64 ReplyTo = 10;
+	int64 ThreadStart = 11;
+	repeated Formating formating = 12;
+}
+
+message Formating{
+	FormatingType Type = 1;
+	int32 Length = 2;
+	int32 Offset = 3;
+	string Content = 4;
+}
+
+enum FormatingType{
+	Bold = 0;
+	Strike = 1;
+	Italic = 2;
+	Underline = 3;
+	Code = 4;
+	Pre = 5;
+	TextMention = 6;
+	TextLink = 7;
+}
+
 
 message Order {
-  int64 Id = 1;
-  int64 SourceInfo1 = 2;
-  int64 SourceInfo2 = 3;
-  OrderType Type = 4;
+	int64 OrderId = 1;
+	int64 Id = 2;
+	string Link = 3;
+	OrderType Type = 4;
 }
 
 enum OrderType{
-	Unspec = 0;
-	Empty = 1;
-	Single = 2;
-	ClientStreaming = 3;
-	DuplexStreaming = 4;
+	Empty = 0;
+	History = 1;
+	GetFullChannel = 2;
 }
