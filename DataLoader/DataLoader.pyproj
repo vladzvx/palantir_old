@@ -23,6 +23,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="DataLoader.py" />
+    <Compile Include="add_order.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="OrderBoard_pb2.py" />
     <Compile Include="OrderBoard_pb2_grpc.py" />
   </ItemGroup>

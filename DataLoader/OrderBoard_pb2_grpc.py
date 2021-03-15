@@ -25,13 +25,13 @@ class OrderBoardStub(object):
                 request_serializer=OrderBoard__pb2.Order.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 )
-        self.StreamEntity = channel.stream_unary(
-                '/orders.OrderBoard/StreamEntity',
+        self.PostEntity = channel.unary_unary(
+                '/orders.OrderBoard/PostEntity',
                 request_serializer=OrderBoard__pb2.Entity.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 )
-        self.ChekingStream = channel.stream_stream(
-                '/orders.OrderBoard/ChekingStream',
+        self.CheckEntity = channel.unary_unary(
+                '/orders.OrderBoard/CheckEntity',
                 request_serializer=OrderBoard__pb2.Entity.SerializeToString,
                 response_deserializer=OrderBoard__pb2.CheckResult.FromString,
                 )
@@ -57,13 +57,13 @@ class OrderBoardServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def StreamEntity(self, request_iterator, context):
+    def PostEntity(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def ChekingStream(self, request_iterator, context):
+    def CheckEntity(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -88,13 +88,13 @@ def add_OrderBoardServicer_to_server(servicer, server):
                     request_deserializer=OrderBoard__pb2.Order.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
-            'StreamEntity': grpc.stream_unary_rpc_method_handler(
-                    servicer.StreamEntity,
+            'PostEntity': grpc.unary_unary_rpc_method_handler(
+                    servicer.PostEntity,
                     request_deserializer=OrderBoard__pb2.Entity.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
-            'ChekingStream': grpc.stream_stream_rpc_method_handler(
-                    servicer.ChekingStream,
+            'CheckEntity': grpc.unary_unary_rpc_method_handler(
+                    servicer.CheckEntity,
                     request_deserializer=OrderBoard__pb2.Entity.FromString,
                     response_serializer=OrderBoard__pb2.CheckResult.SerializeToString,
             ),
@@ -148,7 +148,7 @@ class OrderBoard(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def StreamEntity(request_iterator,
+    def PostEntity(request,
             target,
             options=(),
             channel_credentials=None,
@@ -158,14 +158,14 @@ class OrderBoard(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.stream_unary(request_iterator, target, '/orders.OrderBoard/StreamEntity',
+        return grpc.experimental.unary_unary(request, target, '/orders.OrderBoard/PostEntity',
             OrderBoard__pb2.Entity.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def ChekingStream(request_iterator,
+    def CheckEntity(request,
             target,
             options=(),
             channel_credentials=None,
@@ -175,7 +175,7 @@ class OrderBoard(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.stream_stream(request_iterator, target, '/orders.OrderBoard/ChekingStream',
+        return grpc.experimental.unary_unary(request, target, '/orders.OrderBoard/CheckEntity',
             OrderBoard__pb2.Entity.SerializeToString,
             OrderBoard__pb2.CheckResult.FromString,
             options, channel_credentials,

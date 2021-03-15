@@ -9,8 +9,8 @@ package orders;
 service OrderBoard {
   rpc GetOrder (google.protobuf.Empty) returns (Order);
   rpc PostOrder (Order) returns (google.protobuf.Empty);
-  rpc StreamEntity (stream Entity) returns (google.protobuf.Empty);
-  rpc ChekingStream (stream Entity) returns (stream CheckResult);
+  rpc PostEntity (Entity) returns (google.protobuf.Empty);
+  rpc CheckEntity (Entity) returns (CheckResult);
   rpc StreamMessages (stream Message) returns (google.protobuf.Empty);
 }
 
@@ -31,8 +31,9 @@ message Entity{
 
 enum EntityType{
 	User = 0;
-	Group = 1;
-	Channel = 2;
+	Channel = 1;
+	Group = 2;
+	
 }
 
 message Message{
@@ -72,8 +73,10 @@ enum FormatingType{
 message Order {
 	int64 OrderId = 1;
 	int64 Id = 2;
-	string Link = 3;
-	OrderType Type = 4;
+	int64 AccessHash = 3;
+	int64 Offset = 4;
+	string Link = 5;
+	OrderType Type = 6;
 }
 
 enum OrderType{
