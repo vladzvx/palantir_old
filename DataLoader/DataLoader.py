@@ -11,6 +11,7 @@ import grpc
 import OrderBoard_pb2_grpc
 import OrderBoard_pb2
 import logging
+import os
 
 class CustomEncoder(json.JSONEncoder):
 	def default(self, o):
@@ -40,33 +41,42 @@ class TgDataGetter():
 			except:
 				loop.run_until_complete(client.sign_in(password =input("insert_password:") ))
 
-	async def _get_full_channel(self, username):
+	async def _get_full_channel_request(self, order):
+			link =order.Link;
+			if link=="":
+				link =  order.PairLink
+				if link=="":
+					return None;
 			client = self._client;
-			ie = await client.get_input_entity(username)
-			#return await client(functions.channels.GetFullChannelRequest(telethon.types.InputPeerChannel(id,access_hash)))
-			#return await client(functions.channels.GetFullChannelRequest(telethon.types.InputPeerChannel(id,access_hash)))
+			ie = await client.get_input_entity(link)
 			ipc = telethon.types.InputPeerChannel(ie.channel_id,ie.access_hash);
 			return await client(functions.channels.GetFullChannelRequest(ipc))
 
-	def get_full_channel(self,username):
+	async def _get_full_channel(self,order):
 		try:
 			client = self._client;
 			loop  = self._loop;
-			res = loop.run_until_complete(self._get_full_channel(username))
+			res = await self._get_full_channel_request(order)
+			if res is None:
+				return None
 			if len(res.chats)>1:
 				chat = res.chats[1]
 				result = OrderBoard_pb2.Entity();
 				result.Id = chat.id;
-				result.AccessHash = chat.access_hash;
 				if chat.username is not None:
-					result.Username = chat.username;
+					result.Link = chat.username;
 				result.FirstName = chat.title;
-				result.Type = OrderBoard_pb2.EntityType.Value=1;
+				result.PairLink = order.Link;
+				result.PairId = order.Id;
+				result.Type = OrderBoard_pb2.EntityType.Value=2;
 				return result
 			else:
 				return None
-		except:
+		except BaseException as e:
 			return None
+
+	def get_full_channel(self,order):
+		self._loop.run_until_complete(_get_full_channel)
 
 	def messages_iteration(messages):
 		for message in messages:
@@ -95,7 +105,6 @@ class TgDataGetter():
 					if message.fwd_from.saved_from_msg_id is not None:
 						message_for_send.ForwardFromMessageId = message.fwd_from.saved_from_msg_id
 
-				
 			if message.grouped_id is not None:
 				message_for_send.MediagroupId = message.grouped_id ;
 
@@ -105,6 +114,63 @@ class TgDataGetter():
 				message_for_send.ReplyTo = message.reply_to.reply_to_msg_id
 				if message.reply_to.reply_to_top_id is not None:
 					message_for_send.ThreadStart = message.reply_to.reply_to_top_id
+
+			if message.entities is not None:
+				for entity in message.entities:
+					format = OrderBoard_pb2.Formating();
+					if isinstance(entity,telethon.types.MessageEntityTextUrl):
+						format.Type = 7
+						format.Content = entity.url
+						if entity.length is not None:
+							format.Lenght = entity.length
+						if entity.length is not None:
+							format.Offset = entity.offset
+					elif isinstance(entity,telethon.types.MessageEntityMentionName):
+						format.Type = 6
+						format.Content = entity.user_id
+						if entity.length is not None:
+							format.Lenght = entity.length
+						if entity.length is not None:
+							format.Offset = entity.offset
+					elif isinstance(entity,telethon.types.MessageEntityBold):
+						format.Type = 0
+						if entity.length is not None:
+							format.Lenght = entity.length
+						if entity.length is not None:
+							format.Offset = entity.offset
+					elif isinstance(entity,telethon.types.MessageEntityItalic):
+						format.Type = 2
+						if entity.length is not None:
+							format.Lenght = entity.length
+						if entity.length is not None:
+							format.Offset = entity.offset
+					elif isinstance(entity,telethon.types.MessageEntityStrike):
+						format.Type = 1
+						if entity.length is not None:
+							format.Lenght = entity.length
+						if entity.length is not None:
+							format.Offset = entity.offset
+					elif isinstance(entity,telethon.types.MessageEntityUnderline):
+						format.Type = 3
+						if entity.length is not None:
+							format.Lenght = entity.length
+						if entity.length is not None:
+							format.Offset = entity.offset
+					elif isinstance(entity,telethon.types.MessageEntityCode):
+						format.Type = 4
+						if entity.length is not None:
+							format.Lenght = entity.length
+						if entity.length is not None:
+							format.Offset = entity.offset
+					elif isinstance(entity,telethon.types.MessageEntityPre):
+						format.Type = 5
+						if entity.length is not None:
+							format.Lenght = entity.length
+						if entity.length is not None:
+							format.Offset = entity.offset
+
+					message_for_send.Formating.append(format);
+
 			yield message_for_send
 
 	async def post_entity_if_need(self, from_id):
@@ -119,9 +185,8 @@ class TgDataGetter():
 				entity.Type=0;
 				if not stub.CheckEntity(entity).Result:
 					tg_entity = await client.get_entity(from_id)
-					entity.AccessHash = tg_entity.access_hash
 					if tg_entity.username is not None:
-						entity.Username = tg_entity.username
+						entity.Link = tg_entity.username
 					if tg_entity.first_name is not None:
 						entity.FirstName = tg_entity.first_name
 					if tg_entity.last_name is not None:
@@ -136,35 +201,61 @@ class TgDataGetter():
 				entity.Type=1;
 				if not stub.CheckEntity(entity).Result:
 					tg_entity = await client.get_entity(from_id)
-					entity.AccessHash = tg_entity.access_hash
 					if tg_entity.username is not None:
-						entity.Username = tg_entity.username
+						entity.Link = tg_entity.username
 					if tg_entity.title is not None:
 						entity.LastName = tg_entity.title
 					stub.PostEntity(entity)
 				chats[from_id.channel_id] = 0;
 
-	async def _get_history_by_id(self,id, access_hash,offset):
+	async def _get_history(self,order):
+		offset = order.Offset
 		client = self._client;
+		global stub;
+		global GetFullChannelCounter
+		global GetFullChannelCounterLimit
 		try:
-			entity = await client.get_entity(telethon.types.InputPeerChat(id))
-		except BaseException:
-			pass
-
+			logging.debug("Trying get chat (channel) entity by id...")
+			entity = await client.get_entity(order.Id)
+		except ValueError as e:
+			if "Could not find the input entity for" in e.args[0]:
+				logging.debug("Failed.")
+				if order.Link!="":
+					logging.debug("Trying by link...")
+					entity = await client.get_entity(order.Link)
+				elif order.PairLink!="" and GetFullChannelCounter<GetFullChannelCounterLimit:
+					logging.info("Trying learn id by get_full_channel request...")
+					temp_entity = await self._get_full_channel(order)
+					GetFullChannelCounter+=1
+					if temp_entity is not None:
+						logging.info("Full channel getted!")
+						logging.info("Trying get chat (channel) entity by id...")
+						#stub.PostEntity(temp_entity)
+						entity = await client.get_entity(order.Id)
+						if entity is not None:
+							logging.info("Ok!")
+					else:
+						return;
+				else:
+					return;
+			else:
+				logging.warn("Unexpected exception! "+e.args[0])
+				raise e;
+			
 		limit_msg=80
 		offset+=limit_msg+1;
 		need_break = False
 		last_action_time=datetime.datetime.min
-		global stub;
-		global users;
 		while(True):
 			delta_time =(datetime.datetime.utcnow()-last_action_time) 
 			if delta_time.seconds==0:
+				logging.debug("Waiting next iteration...")
 				dt = 1-delta_time.microseconds/1000000
 				time.sleep(dt)
 			last_action_time = datetime.datetime.utcnow()
-			print(last_action_time)
 
+
+			logging.debug("Requesting history... Offset: "+str(offset));
 			history = await client(GetHistoryRequest(
 				peer=entity,
 				offset_date=None, add_offset=0,hash=0,
@@ -172,57 +263,17 @@ class TgDataGetter():
 				min_id=0,
 				max_id=0,
 				limit=limit_msg))
-			
+			logging.debug("Ok!")
+			logging.debug("Streaming messages...")
 			stub.StreamMessages(TgDataGetter.messages_iteration(reversed(history.messages)))
-
+			logging.debug("Ok!")
+			logging.debug("Checking messages for reposts from new channels...")
 			for message in history.messages:
 				if message.from_id is not None:
 					await self.post_entity_if_need(message.from_id)
 				if message.fwd_from is not None:
 					await self.post_entity_if_need(message.fwd_from.from_id)
-
-			if need_break:
-				break
-			offset=offset+limit_msg
-			diff = offset - history.count
-			if diff>0:
-				offset=0;
-				limit_msg = history.count-history.messages[0].id;
-				need_break=True
-	
-	async def _get_history_by_link(self,link,offset):
-		client = self._client;
-		entity = await client.get_entity(link)
-		limit_msg=80
-		offset+=limit_msg+1;
-		need_break = False
-		last_action_time=datetime.datetime.min
-		global stub;
-		global users;
-		while(True):
-			delta_time =(datetime.datetime.utcnow()-last_action_time) 
-			if delta_time.seconds==0:
-				dt = 1-delta_time.microseconds/1000000
-				time.sleep(dt)
-			last_action_time = datetime.datetime.utcnow()
-			print(last_action_time)
-
-			history = await client(GetHistoryRequest(
-				peer=entity,
-				offset_date=None, add_offset=0,hash=0,
-				offset_id=offset,
-				min_id=0,
-				max_id=0,
-				limit=limit_msg))
-			
-			stub.StreamMessages(TgDataGetter.messages_iteration(reversed(history.messages)))
-
-			for message in history.messages:
-				if message.from_id is not None:
-					await self.post_entity_if_need(message.from_id)
-				if message.fwd_from is not None:
-					await self.post_entity_if_need(message.fwd_from.from_id)
-
+			logging.debug("Ok!")
 			if need_break:
 				break
 			offset=offset+limit_msg
@@ -232,72 +283,61 @@ class TgDataGetter():
 				limit_msg = history.count-history.messages[0].id;
 				need_break=True
 
-	def get_history_by_link(self,link,offset=1):
+	def get_history(self,order):
 		loop  = self._loop;
-		loop.run_until_complete(self._get_history_by_link(link,offset))
-
-	def get_history_by_id(self,id, access_hash,offset=1):
-		loop  = self._loop;
-		loop.run_until_complete(self._get_history_by_id(id, access_hash,offset))
+		loop.run_until_complete(self._get_history(order))
 
 		
-id_user1 = 837759702
-id_channel=1030852584
-id_channel2=1052645483
+api_hash = os.environ.get('api_hash') 
+api_id =  os.environ.get('api_id') 
+phone = os.environ.get('phone')
+password = os.environ.get('password')
+session_name = os.environ.get('session_name')
 
-id_chat = 1287530549
-channel_link1='https://t.me/ekvinokurova'
-channel_link2='https://t.me/rufuturism'
-channel_link3='https://t.me/gayasylum'
-chat_link='https://t.me/kvinokurova'
-api_hash = "573c08a50294f33f1092409df80addac";
-api_id = 1265209;
-
-#phone = "+380983952298";
-phone = "+380950270822";
-getter = TgDataGetter("sss", api_id, api_hash,phone)
+getter = TgDataGetter(session_name, api_id, api_hash,phone)
 getter.start();
-time.sleep(3);
 
 
 channel = grpc.insecure_channel("localhost:5005")
 stub = OrderBoard_pb2_grpc.OrderBoardStub(channel)
 GetFullChannelCounter = 0
+GetFullChannelCounterLimit=180
 timestamp = datetime.datetime.utcnow();
 users = {}
 chats = {}
 
-
+logging.basicConfig(level=logging.DEBUG,filename='app.log')
 
 while True:
-	delta_time =(datetime.datetime.utcnow()-timestamp) 
-	if delta_time.days>=24:
-		GetFullChannelCounter=0
-		timestamp=datetime.datetime.utcnow()
-
-	order  = stub.GetOrder(OrderBoard_pb2.google_dot_protobuf_dot_empty__pb2.Empty())
-
-	if order.Type==1:
-		if order.Link=="":
-			getter.get_history_by_id(order.Id,order.AccessHash,order.Offset)
-		else:
-			getter.get_history_by_link(order.Link,order.Offset)
-	elif order.Type==2:
-		try:
-			if GetFullChannelCounter<180:
+	try:
+		delta_time =(datetime.datetime.utcnow()-timestamp) 
+		if delta_time.days>=24:
+			GetFullChannelCounter=0
+			timestamp=datetime.datetime.utcnow()
+			logging.debug("Reset daily limits.")
+		logging.debug("Getting order...")
+		order  = stub.GetOrder(OrderBoard_pb2.google_dot_protobuf_dot_empty__pb2.Empty())
+		logging.debug("Ok! Order.Id: {0}; Order.Type: {1}; Order.Link: {2}; Order.PairId: {3}; Order.PairLink: {4};".format(order.Id,
+																														 order.Type,
+																														 order.Link,
+																														 order.PairId,
+																														 order.PairLink))
+		if order.Type==1:
+				logging.debug("History reading...")
+				getter.get_history(order)
+		elif order.Type==2:
+			if GetFullChannelCounter<GetFullChannelCounterLimit:
 				GetFullChannelCounter+=1
-				fch = getter.get_full_channel(order.Link)
+				fch = getter.get_full_channel(order)
 				if fch is not None:
 					stub.PostEntity(fch)
 			else:
 				stub.PostOrder(order);
-		except BaseException as e:
-			pass
-	elif order.Type==0:
-		q=0;
-	#except:
-	#	pass
-	
+		elif order.Type==0:
+			q=0;
+	except BaseException as e:
+		logging.error(e.args[0])
+
 	time.sleep(1)
 
 

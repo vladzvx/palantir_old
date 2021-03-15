@@ -14,9 +14,9 @@ namespace DataFair
 {
     public class Program
     {
-        private static Regex reg = new Regex(@"^http://.+:(\d+)");
         public static void Main(string[] args)
         {
+            string v =  Environment.GetEnvironmentVariable("ConnectionString");
             CreateHostBuilder(args).Build().Run();
         }
         public static IHostBuilder CreateHostBuilder(string[] args) =>

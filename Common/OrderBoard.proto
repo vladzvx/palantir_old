@@ -20,9 +20,9 @@ message CheckResult{
 
 message Entity{
 	int64 Id = 1;
-	int64 AccessHash = 2;
-	string Username = 3;
-	string Link = 4;
+	int64 PairId = 2;
+	string Link = 3;
+	string PairLink = 4;
 	string FirstName = 5;
 	string LastName = 6;
 	string Desc = 7;
@@ -48,7 +48,7 @@ message Message{
 	int64 MediagroupId = 9;
 	int64 ReplyTo = 10;
 	int64 ThreadStart = 11;
-	repeated Formating formating = 12;
+	repeated Formating Formating = 12;
 }
 
 message Formating{
@@ -73,10 +73,11 @@ enum FormatingType{
 message Order {
 	int64 OrderId = 1;
 	int64 Id = 2;
-	int64 AccessHash = 3;
+	int64 PairId = 3;
 	int64 Offset = 4;
 	string Link = 5;
-	OrderType Type = 6;
+	string PairLink = 6;
+	OrderType Type = 7;
 }
 
 enum OrderType{

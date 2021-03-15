@@ -47,7 +47,7 @@ namespace DataFair
 
         public override Task<Empty> PostEntity(Entity entity, ServerCallContext context)
         {
-            logger.Debug("New entity/ Id: {0}; username: {1}; name: {2}; type: {3};", entity.Id, entity.Username,entity.LastName,entity.Type.ToString());
+            logger.Debug("New entity/ Id: {0}; username: {1}; name: {2}; type: {3};", entity.Id, entity.Link,entity.LastName,entity.Type.ToString());
             switch (entity.Type)
             {
                 case EntityType.User:
@@ -62,6 +62,19 @@ namespace DataFair
                     }
                 case EntityType.Group:
                     {
+                        Storage.Entities.Enqueue(entity);
+                        if (entity.Link == string.Empty && entity.PairLink != string.Empty)
+                        {
+                            Storage.Orders.Enqueue(new Order()
+                            {
+                                Id = entity.Id,
+                                Link = entity.Link,
+                                PairId = entity.PairId,
+                                PairLink = entity.PairLink,
+                                Type = OrderType.History
+                            });
+                        }
+
                         break;
                     }
             }

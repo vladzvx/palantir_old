@@ -17,6 +17,7 @@
     "DataFair": {
       "commandName": "Project",
       "environmentVariables": {
+        "ConnectionString": "123455dds",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": "true",
