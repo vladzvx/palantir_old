@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\252\002\006Common',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x10OrderBoard.proto\x12\x06orders\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x1d\n\x0b\x43heckResult\x12\x0e\n\x06Result\x18\x01 \x01(\x08\"\x99\x01\n\x06\x45ntity\x12\n\n\x02Id\x18\x01 \x01(\x03\x12\x0e\n\x06PairId\x18\x02 \x01(\x03\x12\x0c\n\x04Link\x18\x03 \x01(\t\x12\x10\n\x08PairLink\x18\x04 \x01(\t\x12\x11\n\tFirstName\x18\x05 \x01(\t\x12\x10\n\x08LastName\x18\x06 \x01(\t\x12\x0c\n\x04\x44\x65sc\x18\x07 \x01(\t\x12 \n\x04Type\x18\x08 \x01(\x0e\x32\x12.orders.EntityType\"\x98\x02\n\x07Message\x12-\n\tTimestamp\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0c\n\x04Text\x18\x02 \x01(\t\x12\r\n\x05Media\x18\x03 \x01(\t\x12\n\n\x02Id\x18\x04 \x01(\x03\x12\x0e\n\x06\x46romId\x18\x05 \x01(\x03\x12\x15\n\rForwardFromId\x18\x06 \x01(\x03\x12\x1c\n\x14\x46orwardFromMessageId\x18\x07 \x01(\x03\x12\x0e\n\x06\x43hatId\x18\x08 \x01(\x03\x12\x14\n\x0cMediagroupId\x18\t \x01(\x03\x12\x0f\n\x07ReplyTo\x18\n \x01(\x03\x12\x13\n\x0bThreadStart\x18\x0b \x01(\x03\x12$\n\tformating\x18\x0c \x03(\x0b\x32\x11.orders.Formating\"a\n\tFormating\x12#\n\x04Type\x18\x01 \x01(\x0e\x32\x15.orders.FormatingType\x12\x0e\n\x06Length\x18\x02 \x01(\x05\x12\x0e\n\x06Offset\x18\x03 \x01(\x05\x12\x0f\n\x07\x43ontent\x18\x04 \x01(\t\"\x85\x01\n\x05Order\x12\x0f\n\x07OrderId\x18\x01 \x01(\x03\x12\n\n\x02Id\x18\x02 \x01(\x03\x12\x0e\n\x06PairId\x18\x03 \x01(\x03\x12\x0e\n\x06Offset\x18\x04 \x01(\x03\x12\x0c\n\x04Link\x18\x05 \x01(\t\x12\x10\n\x08PairLink\x18\x06 \x01(\t\x12\x1f\n\x04Type\x18\x07 \x01(\x0e\x32\x11.orders.OrderType*.\n\nEntityType\x12\x08\n\x04User\x10\x00\x12\x0b\n\x07\x43hannel\x10\x01\x12\t\n\x05Group\x10\x02*r\n\rFormatingType\x12\x08\n\x04\x42old\x10\x00\x12\n\n\x06Strike\x10\x01\x12\n\n\x06Italic\x10\x02\x12\r\n\tUnderline\x10\x03\x12\x08\n\x04\x43ode\x10\x04\x12\x07\n\x03Pre\x10\x05\x12\x0f\n\x0bTextMention\x10\x06\x12\x0c\n\x08TextLink\x10\x07*7\n\tOrderType\x12\t\n\x05\x45mpty\x10\x00\x12\x0b\n\x07History\x10\x01\x12\x12\n\x0eGetFullChannel\x10\x02\x32\x9a\x02\n\nOrderBoard\x12\x31\n\x08GetOrder\x12\x16.google.protobuf.Empty\x1a\r.orders.Order\x12\x32\n\tPostOrder\x12\r.orders.Order\x1a\x16.google.protobuf.Empty\x12\x34\n\nPostEntity\x12\x0e.orders.Entity\x1a\x16.google.protobuf.Empty\x12\x32\n\x0b\x43heckEntity\x12\x0e.orders.Entity\x1a\x13.orders.CheckResult\x12;\n\x0eStreamMessages\x12\x0f.orders.Message\x1a\x16.google.protobuf.Empty(\x01\x42\t\xaa\x02\x06\x43ommonb\x06proto3'
+  serialized_pb=b'\n\x10OrderBoard.proto\x12\x06orders\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x1d\n\x0b\x43heckResult\x12\x0e\n\x06Result\x18\x01 \x01(\x08\"\x99\x01\n\x06\x45ntity\x12\n\n\x02Id\x18\x01 \x01(\x03\x12\x0e\n\x06PairId\x18\x02 \x01(\x03\x12\x0c\n\x04Link\x18\x03 \x01(\t\x12\x10\n\x08PairLink\x18\x04 \x01(\t\x12\x11\n\tFirstName\x18\x05 \x01(\t\x12\x10\n\x08LastName\x18\x06 \x01(\t\x12\x0c\n\x04\x44\x65sc\x18\x07 \x01(\t\x12 \n\x04Type\x18\x08 \x01(\x0e\x32\x12.orders.EntityType\"\xb2\x02\n\x07Message\x12-\n\tTimestamp\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0c\n\x04Text\x18\x02 \x01(\t\x12\r\n\x05Media\x18\x03 \x01(\t\x12\n\n\x02Id\x18\x04 \x01(\x03\x12\x0e\n\x06\x46romId\x18\x05 \x01(\x03\x12\x15\n\rForwardFromId\x18\x06 \x01(\x03\x12\x1c\n\x14\x46orwardFromMessageId\x18\x07 \x01(\x03\x12\x0e\n\x06\x43hatId\x18\x08 \x01(\x03\x12\x14\n\x0cMediagroupId\x18\t \x01(\x03\x12\x0f\n\x07ReplyTo\x18\n \x01(\x03\x12\x13\n\x0bThreadStart\x18\x0b \x01(\x03\x12\x18\n\x10\x46romExistingUser\x18\x0c \x01(\x08\x12$\n\tFormating\x18\r \x03(\x0b\x32\x11.orders.Formating\"a\n\tFormating\x12#\n\x04Type\x18\x01 \x01(\x0e\x32\x15.orders.FormatingType\x12\x0e\n\x06Length\x18\x02 \x01(\x05\x12\x0e\n\x06Offset\x18\x03 \x01(\x05\x12\x0f\n\x07\x43ontent\x18\x04 \x01(\t\"\x85\x01\n\x05Order\x12\x0f\n\x07OrderId\x18\x01 \x01(\x03\x12\n\n\x02Id\x18\x02 \x01(\x03\x12\x0e\n\x06PairId\x18\x03 \x01(\x03\x12\x0e\n\x06Offset\x18\x04 \x01(\x03\x12\x0c\n\x04Link\x18\x05 \x01(\t\x12\x10\n\x08PairLink\x18\x06 \x01(\t\x12\x1f\n\x04Type\x18\x07 \x01(\x0e\x32\x11.orders.OrderType*.\n\nEntityType\x12\x08\n\x04User\x10\x00\x12\x0b\n\x07\x43hannel\x10\x01\x12\t\n\x05Group\x10\x02*r\n\rFormatingType\x12\x08\n\x04\x42old\x10\x00\x12\n\n\x06Strike\x10\x01\x12\n\n\x06Italic\x10\x02\x12\r\n\tUnderline\x10\x03\x12\x08\n\x04\x43ode\x10\x04\x12\x07\n\x03Pre\x10\x05\x12\x0f\n\x0bTextMention\x10\x06\x12\x0c\n\x08TextLink\x10\x07*7\n\tOrderType\x12\t\n\x05\x45mpty\x10\x00\x12\x0b\n\x07History\x10\x01\x12\x12\n\x0eGetFullChannel\x10\x02\x32\x9a\x02\n\nOrderBoard\x12\x31\n\x08GetOrder\x12\x16.google.protobuf.Empty\x1a\r.orders.Order\x12\x32\n\tPostOrder\x12\r.orders.Order\x1a\x16.google.protobuf.Empty\x12\x34\n\nPostEntity\x12\x0e.orders.Entity\x1a\x16.google.protobuf.Empty\x12\x32\n\x0b\x43heckEntity\x12\x0e.orders.Entity\x1a\x13.orders.CheckResult\x12;\n\x0eStreamMessages\x12\x0f.orders.Message\x1a\x16.google.protobuf.Empty(\x01\x42\t\xaa\x02\x06\x43ommonb\x06proto3'
   ,
   dependencies=[google_dot_protobuf_dot_empty__pb2.DESCRIPTOR,google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,])
 
@@ -51,8 +51,8 @@ _ENTITYTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=795,
-  serialized_end=841,
+  serialized_start=821,
+  serialized_end=867,
 )
 _sym_db.RegisterEnumDescriptor(_ENTITYTYPE)
 
@@ -107,8 +107,8 @@ _FORMATINGTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=843,
-  serialized_end=957,
+  serialized_start=869,
+  serialized_end=983,
 )
 _sym_db.RegisterEnumDescriptor(_FORMATINGTYPE)
 
@@ -138,8 +138,8 @@ _ORDERTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=959,
-  serialized_end=1014,
+  serialized_start=985,
+  serialized_end=1040,
 )
 _sym_db.RegisterEnumDescriptor(_ORDERTYPE)
 
@@ -360,8 +360,15 @@ _MESSAGE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='formating', full_name='orders.Message.formating', index=11,
-      number=12, type=11, cpp_type=10, label=3,
+      name='FromExistingUser', full_name='orders.Message.FromExistingUser', index=11,
+      number=12, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='Formating', full_name='orders.Message.Formating', index=12,
+      number=13, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -379,7 +386,7 @@ _MESSAGE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=278,
-  serialized_end=558,
+  serialized_end=584,
 )
 
 
@@ -431,8 +438,8 @@ _FORMATING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=560,
-  serialized_end=657,
+  serialized_start=586,
+  serialized_end=683,
 )
 
 
@@ -505,13 +512,13 @@ _ORDER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=660,
-  serialized_end=793,
+  serialized_start=686,
+  serialized_end=819,
 )
 
 _ENTITY.fields_by_name['Type'].enum_type = _ENTITYTYPE
 _MESSAGE.fields_by_name['Timestamp'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
-_MESSAGE.fields_by_name['formating'].message_type = _FORMATING
+_MESSAGE.fields_by_name['Formating'].message_type = _FORMATING
 _FORMATING.fields_by_name['Type'].enum_type = _FORMATINGTYPE
 _ORDER.fields_by_name['Type'].enum_type = _ORDERTYPE
 DESCRIPTOR.message_types_by_name['CheckResult'] = _CHECKRESULT
@@ -569,8 +576,8 @@ _ORDERBOARD = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=1017,
-  serialized_end=1299,
+  serialized_start=1043,
+  serialized_end=1325,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetOrder',

@@ -30,6 +30,7 @@ namespace DataFair
 
     public static class Storage
     {
+        public static DBWorker worker = new DBWorker("");
         public static ConcurrentQueue<Message> Messages = new ConcurrentQueue<Message>();
         public static ConcurrentQueue<Entity> Entities = new ConcurrentQueue<Entity>();
         public static ConcurrentQueue<Order> Orders = new ConcurrentQueue<Order>();
@@ -52,7 +53,7 @@ namespace DataFair
             {
                 case EntityType.User:
                     {
-                        Storage.Users.TryAdd(entity.Id, DateTime.UtcNow);
+                        Storage.worker.PutUser(entity);
                         break;
                     }
                 case EntityType.Channel:
@@ -85,8 +86,9 @@ namespace DataFair
         {
             while (await requestStream.MoveNext())
             {
+                Storage.worker.PutMessage(requestStream.Current);
                 Message message = requestStream.Current;
-                Storage.Messages.Enqueue(message);
+                //Storage.Messages.Enqueue(message);
                 logger.Debug("Message. DateTime: {0}; FromId: {1}; Text: {2}; Media: {3};", message.Timestamp,message.FromId, message.Text, message.Media);
             }
             return new Empty();

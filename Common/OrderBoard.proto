@@ -48,7 +48,8 @@ message Message{
 	int64 MediagroupId = 9;
 	int64 ReplyTo = 10;
 	int64 ThreadStart = 11;
-	repeated Formating Formating = 12;
+	bool FromExistingUser = 12;
+	repeated Formating Formating = 13;
 }
 
 message Formating{

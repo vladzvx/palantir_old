@@ -122,50 +122,50 @@ class TgDataGetter():
 						format.Type = 7
 						format.Content = entity.url
 						if entity.length is not None:
-							format.Lenght = entity.length
+							format.Length = entity.length
 						if entity.length is not None:
 							format.Offset = entity.offset
 					elif isinstance(entity,telethon.types.MessageEntityMentionName):
 						format.Type = 6
 						format.Content = entity.user_id
 						if entity.length is not None:
-							format.Lenght = entity.length
+							format.Length = entity.length
 						if entity.length is not None:
 							format.Offset = entity.offset
 					elif isinstance(entity,telethon.types.MessageEntityBold):
 						format.Type = 0
 						if entity.length is not None:
-							format.Lenght = entity.length
+							format.Length = entity.length
 						if entity.length is not None:
 							format.Offset = entity.offset
 					elif isinstance(entity,telethon.types.MessageEntityItalic):
 						format.Type = 2
 						if entity.length is not None:
-							format.Lenght = entity.length
+							format.Length = entity.length
 						if entity.length is not None:
 							format.Offset = entity.offset
 					elif isinstance(entity,telethon.types.MessageEntityStrike):
 						format.Type = 1
 						if entity.length is not None:
-							format.Lenght = entity.length
+							format.Length = entity.length
 						if entity.length is not None:
 							format.Offset = entity.offset
 					elif isinstance(entity,telethon.types.MessageEntityUnderline):
 						format.Type = 3
 						if entity.length is not None:
-							format.Lenght = entity.length
+							format.Length = entity.length
 						if entity.length is not None:
 							format.Offset = entity.offset
 					elif isinstance(entity,telethon.types.MessageEntityCode):
 						format.Type = 4
 						if entity.length is not None:
-							format.Lenght = entity.length
+							format.Length = entity.length
 						if entity.length is not None:
 							format.Offset = entity.offset
 					elif isinstance(entity,telethon.types.MessageEntityPre):
 						format.Type = 5
 						if entity.length is not None:
-							format.Lenght = entity.length
+							format.Length = entity.length
 						if entity.length is not None:
 							format.Offset = entity.offset
 
@@ -193,6 +193,7 @@ class TgDataGetter():
 						entity.LastName = tg_entity.last_name
 					stub.PostEntity(entity)
 				users[from_id.user_id] = 0;
+				return True;
 
 		elif isinstance(from_id, telethon.tl.types.PeerChannel):
 			if chats.get(from_id.channel_id) is None:
@@ -207,6 +208,7 @@ class TgDataGetter():
 						entity.LastName = tg_entity.title
 					stub.PostEntity(entity)
 				chats[from_id.channel_id] = 0;
+		return False;
 
 	async def _get_history(self,order):
 		offset = order.Offset
@@ -288,15 +290,18 @@ class TgDataGetter():
 		loop.run_until_complete(self._get_history(order))
 
 		
-api_hash = os.environ.get('api_hash') 
-api_id =  os.environ.get('api_id') 
-phone = os.environ.get('phone')
-password = os.environ.get('password')
-session_name = os.environ.get('session_name')
+#api_hash = os.environ.get('api_hash') 
+#api_id =  os.environ.get('api_id') 
+#phone = os.environ.get('phone')
+#password = os.environ.get('password')
+#session_name = os.environ.get('session_name')
+
+
 
 getter = TgDataGetter(session_name, api_id, api_hash,phone)
 getter.start();
 
+time.sleep(3)
 
 channel = grpc.insecure_channel("localhost:5005")
 stub = OrderBoard_pb2_grpc.OrderBoardStub(channel)
