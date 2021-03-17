@@ -30,7 +30,7 @@ namespace DataFair
 
     public static class Storage
     {
-        public static DBWorker worker = new DBWorker("");
+        internal static DBWorker worker = new DBWorker("");
         public static ConcurrentQueue<Message> Messages = new ConcurrentQueue<Message>();
         public static ConcurrentQueue<Entity> Entities = new ConcurrentQueue<Entity>();
         public static ConcurrentQueue<Order> Orders = new ConcurrentQueue<Order>();
@@ -41,44 +41,15 @@ namespace DataFair
     {
         private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
         private static Order EmptyOrder = new Order() { Type = OrderType.Empty };
-        public override Task<CheckResult> CheckEntity(Entity entity, ServerCallContext context)
+        public async override Task<CheckResult> CheckEntity(Entity entity, ServerCallContext context)
         {
-            return Task.FromResult(new CheckResult() {Result = Storage.Users.ContainsKey(entity.Id)|| Storage.Chats.ContainsKey(entity.Id) });
+            return new CheckResult() { Result = await Storage.worker.CheckEntity(entity) };
         }
 
         public override Task<Empty> PostEntity(Entity entity, ServerCallContext context)
         {
             logger.Debug("New entity/ Id: {0}; username: {1}; name: {2}; type: {3};", entity.Id, entity.Link,entity.LastName,entity.Type.ToString());
-            switch (entity.Type)
-            {
-                case EntityType.User:
-                    {
-                        Storage.worker.PutUser(entity);
-                        break;
-                    }
-                case EntityType.Channel:
-                    {
-                        Storage.Entities.Enqueue(entity);
-                        break;
-                    }
-                case EntityType.Group:
-                    {
-                        Storage.Entities.Enqueue(entity);
-                        if (entity.Link == string.Empty && entity.PairLink != string.Empty)
-                        {
-                            Storage.Orders.Enqueue(new Order()
-                            {
-                                Id = entity.Id,
-                                Link = entity.Link,
-                                PairId = entity.PairId,
-                                PairLink = entity.PairLink,
-                                Type = OrderType.History
-                            });
-                        }
-
-                        break;
-                    }
-            }
+            Storage.worker.PutEntity(entity);
             return Task.FromResult(new Empty());
         }
 
@@ -88,7 +59,6 @@ namespace DataFair
             {
                 Storage.worker.PutMessage(requestStream.Current);
                 Message message = requestStream.Current;
-                //Storage.Messages.Enqueue(message);
                 logger.Debug("Message. DateTime: {0}; FromId: {1}; Text: {2}; Media: {3};", message.Timestamp,message.FromId, message.Text, message.Media);
             }
             return new Empty();
@@ -97,7 +67,6 @@ namespace DataFair
         {
             if (Storage.Orders.TryDequeue(out Order order))
             {
-                
                 return Task.FromResult(order);
             }
             else
