@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DataFair
 {
-    internal class DBWorker
+    public class DBWorker
     {
         private readonly ConcurrentQueue<Message> messages = new ConcurrentQueue<Message>();
         private readonly ConcurrentQueue<Entity> entities = new ConcurrentQueue<Entity>();

@@ -3,5 +3,3 @@ syntax = "proto3";
 option csharp_namespace = "Common";
 import "google/protobuf/empty.proto";
 package snapshot;
-
-

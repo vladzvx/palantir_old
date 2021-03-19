@@ -18,6 +18,10 @@ message CheckResult{
 	bool Result=1;
 }
 
+message ChatInfo{
+
+}
+
 message Entity{
 	int64 Id = 1;
 	int64 PairId = 2;

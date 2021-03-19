@@ -10,33 +10,28 @@ using System.Collections.Concurrent;
 
 namespace DataFair
 {
-    class ChachedEntityInfo
+    struct CachedEntityInfo
     {
-        public ChachedEntityInfo(long Id, long AccessHash, long Offset, string Username)
+        public CachedEntityInfo(long Offset)
         {
-            this.Id = Id;
-            this.AccessHash = AccessHash;
             this.Offset = Offset;
-            this.Username = Username;
+            LastTimeMessage = DateTime.UtcNow;
         }
-
-        public string Username;
-        public long AccessHash;
-        public long Id;
         public long Offset;
-        public DateTime LastUpdate= DateTime.UtcNow;
+        public DateTime LastTimeMessage;
     }
 
 
-    public static class Storage
+    internal static class Storage
     {
-        internal static DBWorker worker = new DBWorker("");
+        internal static DBWorker worker = new DBWorker(Environment.GetEnvironmentVariable("ConnectionString"));
         public static ConcurrentQueue<Message> Messages = new ConcurrentQueue<Message>();
         public static ConcurrentQueue<Entity> Entities = new ConcurrentQueue<Entity>();
         public static ConcurrentQueue<Order> Orders = new ConcurrentQueue<Order>();
         public static ConcurrentDictionary<long, DateTime> Users = new ConcurrentDictionary<long, DateTime>();
-        public static ConcurrentDictionary<long, DateTime> Chats = new ConcurrentDictionary<long, DateTime>();
+        public static ConcurrentDictionary<long, CachedEntityInfo> Chats = new ConcurrentDictionary<long, CachedEntityInfo>();
     }
+
     public class OrderBoardService : OrderBoard.OrderBoardBase
     {
         private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
@@ -59,6 +54,10 @@ namespace DataFair
             {
                 Storage.worker.PutMessage(requestStream.Current);
                 Message message = requestStream.Current;
+                var cachedEntityInfo = new CachedEntityInfo(message.Id);
+                Storage.Chats.AddOrUpdate(message.ChatId, cachedEntityInfo, (key, old) => cachedEntityInfo);
+
+
                 logger.Debug("Message. DateTime: {0}; FromId: {1}; Text: {2}; Media: {3};", message.Timestamp,message.FromId, message.Text, message.Media);
             }
             return new Empty();
@@ -82,12 +81,5 @@ namespace DataFair
             Storage.Orders.Enqueue(order);
             return Task.FromResult(new Empty());
         }
-
-        //public override Task<Empty> PostOrderResult(OrderResult result, ServerCallContext context)
-        //{
-        //    logger.Info(result.Text);
-        //    return Task.FromResult(new Empty());
-        //}
-
     }
 }

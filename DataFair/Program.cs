@@ -18,7 +18,6 @@ namespace DataFair
     {
         public static void Main(string[] args)
         {
-            string v =  Environment.GetEnvironmentVariable("ConnectionString");
             CreateHostBuilder(args).Build().Run();
         }
         public static IHostBuilder CreateHostBuilder(string[] args) =>

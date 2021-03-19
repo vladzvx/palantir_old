@@ -296,6 +296,10 @@ class TgDataGetter():
 #password = os.environ.get('password')
 #session_name = os.environ.get('session_name')
 
+api_hash = '573c08a50294f33f1092409df80addac'
+api_id = 1265209
+phone = '+380983952298'
+session_name ="test_session"
 
 
 getter = TgDataGetter(session_name, api_id, api_hash,phone)
