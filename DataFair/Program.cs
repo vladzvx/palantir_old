@@ -18,6 +18,10 @@ namespace DataFair
     {
         public static void Main(string[] args)
         {
+            if (Storage.Chats.Count!=0)
+            {
+                int g = 0;
+            }
             CreateHostBuilder(args).Build().Run();
         }
         public static IHostBuilder CreateHostBuilder(string[] args) =>

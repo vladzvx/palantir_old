@@ -305,7 +305,7 @@ class TgDataGetter():
 api_hash = '573c08a50294f33f1092409df80addac'
 api_id = 1265209
 phone = '+380983952298'
-session_name ="test_session"
+session_name =phone+"_"
 
 
 getter = TgDataGetter(session_name, api_id, api_hash,phone)

@@ -27,7 +27,7 @@ namespace DataFair
 
     internal static class Storage
     {
-        internal static Timer timer = new Timer(5000);
+        internal static Timer timer = new Timer(20000);
         internal static DBWorker worker = new DBWorker(Environment.GetEnvironmentVariable("ConnectionString"));
         public static ConcurrentQueue<Message> Messages = new ConcurrentQueue<Message>();
         public static ConcurrentQueue<Entity> Entities = new ConcurrentQueue<Entity>();
