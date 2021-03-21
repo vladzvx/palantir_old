@@ -12,6 +12,8 @@ import OrderBoard_pb2_grpc
 import OrderBoard_pb2
 import logging
 import os
+from alchemysession import AlchemySessionContainer
+
 
 class CustomEncoder(json.JSONEncoder):
 	def default(self, o):
@@ -26,7 +28,9 @@ class TgDataGetter():
 
 	def __init__(self,session_name, api_id,api_hash,phone):
 		self._phone=phone;
-		self._client = TelegramClient(session_name, api_id, api_hash)
+		container = AlchemySessionContainer('postgresql://postgres:qw12cv90@176.119.156.220/sessions')
+		session = container.new_session(phone)
+		self._client = TelegramClient(session, api_id, api_hash)
 		self._loop = asyncio.get_event_loop()
 
 	def start(self):
@@ -76,7 +80,7 @@ class TgDataGetter():
 			return None
 
 	def get_full_channel(self,order):
-		self._loop.run_until_complete(_get_full_channel)
+		return self._loop.run_until_complete(self._get_full_channel(order))
 
 	def messages_iteration(messages):
 		for message in messages:
@@ -283,6 +287,8 @@ class TgDataGetter():
 			if diff>0:
 				offset=0;
 				limit_msg = history.count-history.messages[0].id;
+				if limit_msg<0:
+					limit_msg=0;
 				need_break=True
 
 	def get_history(self,order):

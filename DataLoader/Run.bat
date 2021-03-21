@@ -1,0 +1,1 @@
+start env37/Scripts/python.exe DataLoader — копия.py

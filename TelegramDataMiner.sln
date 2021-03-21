@@ -11,7 +11,7 @@ Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "DataLoader", "DataLoader\Da
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataFairTests", "DataFairTests\DataFairTests.csproj", "{3C7B1ED6-D49A-452D-AE3D-D0C2CB4D2037}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrdersCreator", "OrdersCreator\OrdersCreator.csproj", "{DE6AF22E-4CDD-40B8-A9CB-7B8077B5089C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrdersCreator", "OrdersCreator\OrdersCreator.csproj", "{DE6AF22E-4CDD-40B8-A9CB-7B8077B5089C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

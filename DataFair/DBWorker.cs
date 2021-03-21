@@ -12,12 +12,16 @@ namespace DataFair
         private readonly ConcurrentQueue<Message> messages = new ConcurrentQueue<Message>();
         private readonly ConcurrentQueue<Entity> entities = new ConcurrentQueue<Entity>();
 
+        private readonly NpgsqlConnection StreamReadConnection;
         private readonly NpgsqlConnection ReadConnention;
         private readonly NpgsqlConnection WriteConnention;
         private readonly NpgsqlCommand CheckUser;
         private readonly NpgsqlCommand CheckChat;
+        private readonly NpgsqlCommand GetChatsForUpdate;
+        private readonly NpgsqlCommand SetChatChecked;
 
         private readonly object ReadLocker = new object();
+        private readonly object StreamReadLocker = new object();
         private readonly object WriteLocker = new object();
         private readonly string ConnectionString;
         private readonly Thread MessagesWritingThread;
@@ -31,6 +35,8 @@ namespace DataFair
             ReadConnention.Open();
             WriteConnention = new NpgsqlConnection(ConnectionString);
             WriteConnention.Open();
+            StreamReadConnection = new NpgsqlConnection(ConnectionString);
+            StreamReadConnection.Open();
             MessagesWritingThread = new Thread(new ParameterizedThreadStart(MessagesWriter));
             MessagesWritingThread.Start(CancellationTokenSource.Token);
             UsersWritingThread = new Thread(new ParameterizedThreadStart(UsersWriter));
@@ -46,8 +52,25 @@ namespace DataFair
             CheckChat.CommandText = "check_chat";
             CheckChat.Parameters.Add(new NpgsqlParameter("chat_id", NpgsqlTypes.NpgsqlDbType.Bigint));
 
+            GetChatsForUpdate = StreamReadConnection.CreateCommand();
+            GetChatsForUpdate.CommandType = System.Data.CommandType.StoredProcedure;
+            GetChatsForUpdate.CommandText = "get_unupdated_chats";
+            GetChatsForUpdate.Parameters.Add(new NpgsqlParameter("dt", NpgsqlTypes.NpgsqlDbType.Timestamp));
+
+            SetChatChecked = WriteConnention.CreateCommand();
+            SetChatChecked.CommandType = System.Data.CommandType.StoredProcedure;
+            SetChatChecked.CommandText = "set_chat_checked";
+            SetChatChecked.Parameters.Add(new NpgsqlParameter("_chat_id", NpgsqlTypes.NpgsqlDbType.Bigint));
         }
 
+        public void SetChatUpdated(long id)
+        {
+            lock (WriteLocker)
+            {
+                SetChatChecked.Parameters["_chat_id"].Value = id;
+                SetChatChecked.ExecuteNonQuery();
+            }
+        }
         public void Stop()
         {
             ReadConnention.Dispose();
@@ -84,7 +107,7 @@ namespace DataFair
         private static void WriteSingleEntity(NpgsqlCommand command, Entity entity)
         {
             command.Parameters["_chat_id"].Value = entity.Id;
-            command.Parameters["_username"].Value = entity.Link;
+            command.Parameters["_username"].Value = entity.Link.Equals(string.Empty)? DBNull.Value: entity.Link;
             command.Parameters["_title"].Value = entity.FirstName;
             command.Parameters["pair_chat_id"].Value = entity.PairId!=0?entity.PairId:DBNull.Value;
             command.Parameters["_is_group"].Value = entity.Type==EntityType.Group;
@@ -243,6 +266,38 @@ namespace DataFair
             messages.Enqueue(message);
         }
 
+        public void GetUnudatedChats(DateTime BoundDateTime)
+        {
+            GetChatsForUpdate.Parameters["dt"].Value = BoundDateTime;
+            NpgsqlDataReader reader = GetChatsForUpdate.ExecuteReader();
+            while (reader.Read())
+            {
+                try
+                {
+                    long ChatId = reader.GetInt64(0);
+                    long PairId = reader.IsDBNull(1) ? 0 : reader.GetInt64(1);
+                    long Offset = reader.GetInt64(2);
+                    DateTime LastUpdate = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3);
+                    bool PairChecked = reader.IsDBNull(4) ? true : reader.GetBoolean(4);
+                    string Username = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
+                    string PairUsername = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
+
+                    Order order = new Order() { Id = ChatId, Link = Username, Offset = Offset, PairId = PairId, PairLink = PairUsername };
+                    if (!PairChecked)
+                    {
+                        order.Type = OrderType.GetFullChannel;
+                        Storage.Orders.Enqueue(order);
+                    }
+                    else
+                    {
+                        order.Type = OrderType.History;
+                        Storage.Orders.Enqueue(order);
+                    }
+                }
+                catch (InvalidCastException) { }
+            }
+            reader.Close();
+        }
         public async Task<bool> CheckEntity(Entity entity)
         {
             lock (ReadLocker)

@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 using Common;
 using Google.Protobuf.WellKnownTypes;
 using System.Collections.Concurrent;
+using System.Timers;
+using System.Threading;
+using Timer = System.Timers.Timer;
 
 namespace DataFair
 {
@@ -24,12 +27,30 @@ namespace DataFair
 
     internal static class Storage
     {
+        internal static Timer timer = new Timer(5000);
         internal static DBWorker worker = new DBWorker(Environment.GetEnvironmentVariable("ConnectionString"));
         public static ConcurrentQueue<Message> Messages = new ConcurrentQueue<Message>();
         public static ConcurrentQueue<Entity> Entities = new ConcurrentQueue<Entity>();
         public static ConcurrentQueue<Order> Orders = new ConcurrentQueue<Order>();
         public static ConcurrentDictionary<long, DateTime> Users = new ConcurrentDictionary<long, DateTime>();
         public static ConcurrentDictionary<long, CachedEntityInfo> Chats = new ConcurrentDictionary<long, CachedEntityInfo>();
+        private static object sync = new object();
+        static Storage()
+        {
+            timer.Elapsed += action;
+            timer.AutoReset = true;
+            timer.Start();
+        }
+
+        private static void action(object sender, ElapsedEventArgs args)
+        {
+            if (Monitor.TryEnter(sync))
+            {
+                worker.GetUnudatedChats(DateTime.UtcNow.AddHours(-24));
+                Monitor.Exit(sync);
+            }
+            
+        }
     }
 
     public class OrderBoardService : OrderBoard.OrderBoardBase
@@ -66,6 +87,8 @@ namespace DataFair
         {
             if (Storage.Orders.TryDequeue(out Order order))
             {
+                if (order.Type == OrderType.History)
+                    Storage.worker.SetChatUpdated(order.Id);
                 return Task.FromResult(order);
             }
             else
