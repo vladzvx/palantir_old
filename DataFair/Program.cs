@@ -42,10 +42,10 @@ namespace DataFair
                         //    https.ServerCertificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(
                         //        "mysert.pfx","pwwwwd");
                         //});
-                        //serverOptions.Listen(IPAddress.Any, 5004, o =>
-                        //{
-                        //    o.Protocols = HttpProtocols.Http1;
-                        //});
+                        serverOptions.Listen(IPAddress.Any, 5004, o =>
+                        {
+                            o.Protocols = HttpProtocols.Http1;
+                        });
                     });
 
 
