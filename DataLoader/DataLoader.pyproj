@@ -11,7 +11,8 @@
     <OutputPath>.</OutputPath>
     <Name>DataLoader</Name>
     <RootNamespace>DataLoader</RootNamespace>
-    <InterpreterId>MSBuild|env37|$(MSBuildProjectFullPath)</InterpreterId>
+    <InterpreterId>
+    </InterpreterId>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <Environment>
@@ -31,22 +32,8 @@
     <Compile Include="add_order.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="first_auth.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="OrderBoard_pb2.py" />
     <Compile Include="OrderBoard_pb2_grpc.py" />
-  </ItemGroup>
-  <ItemGroup>
-    <Interpreter Include="env37\">
-      <Id>env37</Id>
-      <Version>3.7</Version>
-      <Description>env37 (Python 3.7 (64-bit))</Description>
-      <InterpreterPath>Scripts\python.exe</InterpreterPath>
-      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
-      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
-      <Architecture>X64</Architecture>
-    </Interpreter>
   </ItemGroup>
   <ItemGroup>
     <Content Include="requirements.txt" />

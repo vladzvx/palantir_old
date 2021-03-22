@@ -18,10 +18,10 @@ namespace DataFair
     {
         public static void Main(string[] args)
         {
-            if (Storage.Chats.Count!=0)
-            {
-                int g = 0;
-            }
+            //if (Storage.Chats.Count!=0)
+            //{
+            //    int g = 0;
+            //}
             CreateHostBuilder(args).Build().Run();
         }
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -32,12 +32,16 @@ namespace DataFair
                     var url = cfg.GetSection("Kestrel:EndpointDefaults:Url");
                     if (url.Exists())
                     {
-                        //Math math = reg.Match()
-                        //
                         webBuilder.ConfigureKestrel(serverOptions =>
                         {
                             serverOptions.Listen(IPAddress.Any, 5005, o => {
                                 o.Protocols = HttpProtocols.Http2;
+                            });
+                        });
+                        webBuilder.ConfigureKestrel(serverOptions =>
+                        {
+                            serverOptions.Listen(IPAddress.Any, 80, o => {
+                                o.Protocols = HttpProtocols.Http1;
                             });
                         });
                     }

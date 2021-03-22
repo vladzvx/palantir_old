@@ -3,7 +3,6 @@ create database sessions;
 
 drop database if exists test_db;
 
-
 create table public.chats (
     id bigint,
     adding_time timestamp default CURRENT_TIMESTAMP,
