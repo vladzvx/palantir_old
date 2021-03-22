@@ -2,9 +2,7 @@ name: Data Fair docker deploy
 
 on:
   push:
-    # Publish `master` as Docker `latest` image.
-    branches:
-      - master
+    branches: [ main ]
       
 env:
   IMAGE_NAME: test-image
