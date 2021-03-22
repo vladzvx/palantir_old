@@ -85,17 +85,18 @@ namespace DataFair
         }
         public override Task<Order> GetOrder(Empty empty, ServerCallContext context)
         {
-            if (Storage.Orders.TryDequeue(out Order order))
-            {
-                if (order.Type == OrderType.History)
-                    Storage.worker.SetChatUpdated(order.Id);
-                return Task.FromResult(order);
-            }
-            else
-            {
-                logger.Debug("No orders! Sending empty.");
-                return Task.FromResult(EmptyOrder);
-            }
+            return Task.FromResult(EmptyOrder);
+            //if (Storage.Orders.TryDequeue(out Order order))
+            //{
+            //    if (order.Type == OrderType.History)
+            //        Storage.worker.SetChatUpdated(order.Id);
+            //    return Task.FromResult(order);
+            //}
+            //else
+            //{
+            //   // logger.Debug("No orders! Sending empty.");
+            //    return Task.FromResult(EmptyOrder);
+            //}
         }
 
         public override Task<Empty> PostOrder(Order order, ServerCallContext context)
