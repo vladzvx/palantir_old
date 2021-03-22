@@ -1,0 +1,20 @@
+name: Data Fair docker deploy
+
+on:
+  push:
+    # Publish `master` as Docker `latest` image.
+    branches:
+      - master
+      
+env:
+  IMAGE_NAME: test-image
+      
+jobs:
+  test:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run
+        run: |
+          docker build . --file Dockerfile
+          
