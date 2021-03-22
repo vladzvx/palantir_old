@@ -36,14 +36,12 @@ namespace DataFair
                         serverOptions.Listen(IPAddress.Any, 5005, o => {
                             o.Protocols = HttpProtocols.Http2;
                         });
-                    });
-                    webBuilder.ConfigureKestrel(serverOptions =>
-                    {
                         serverOptions.Listen(IPAddress.Any, 5004, o =>
                         {
                             o.Protocols = HttpProtocols.Http1;
                         });
                     });
+
 
 
                     webBuilder.UseStartup<Startup>();
