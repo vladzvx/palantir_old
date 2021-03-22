@@ -35,13 +35,13 @@ namespace DataFair
                     {
                         serverOptions.Listen(IPAddress.Any, 5005, o => {
                             o.Protocols = HttpProtocols.Http2;
-                            o.UseHttps();
+                           // o.UseHttps();
                         });
-                        serverOptions.ConfigureHttpsDefaults(https=> 
-                        {
-                            https.ServerCertificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(
-                                "mysert.pfx","pwwwwd");
-                        });
+                        //serverOptions.ConfigureHttpsDefaults(https=> 
+                        //{
+                        //    https.ServerCertificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(
+                        //        "mysert.pfx","pwwwwd");
+                        //});
                         //serverOptions.Listen(IPAddress.Any, 5004, o =>
                         //{
                         //    o.Protocols = HttpProtocols.Http1;
