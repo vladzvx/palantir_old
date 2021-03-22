@@ -30,21 +30,21 @@ namespace DataFair
                 {
                     var cfg = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
                     var url = cfg.GetSection("Kestrel:EndpointDefaults:Url");
-                    if (url.Exists())
+
+                    webBuilder.ConfigureKestrel(serverOptions =>
                     {
-                        webBuilder.ConfigureKestrel(serverOptions =>
-                        {
-                            serverOptions.Listen(IPAddress.Any, 5005, o => {
-                                o.Protocols = HttpProtocols.Http2;
-                            });
+                        serverOptions.Listen(IPAddress.Any, 5005, o => {
+                            o.Protocols = HttpProtocols.Http2;
                         });
-                        webBuilder.ConfigureKestrel(serverOptions =>
+                    });
+                    webBuilder.ConfigureKestrel(serverOptions =>
+                    {
+                        serverOptions.Listen(IPAddress.Any, 5004, o =>
                         {
-                            serverOptions.Listen(IPAddress.Any, 80, o => {
-                                o.Protocols = HttpProtocols.Http1;
-                            });
+                            o.Protocols = HttpProtocols.Http1;
                         });
-                    }
+                    });
+
 
                     webBuilder.UseStartup<Startup>();
                 });

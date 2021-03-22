@@ -2,6 +2,7 @@
 using Grpc.Net.Client;
 using System;
 using System.Net.Http;
+using System.Threading;
 
 namespace TestClient
 {
@@ -11,14 +12,15 @@ namespace TestClient
         private static OrderBoard.OrderBoardClient Client;
         static void Main(string[] args)
         {
-            AppContext.SetSwitch(
-    "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            //AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            Thread.Sleep(2000);
             var httpHandler = new HttpClientHandler();
             httpHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
 
-            Channel = GrpcChannel.ForAddress("http://176.119.156.220:5005", new GrpcChannelOptions { HttpHandler = httpHandler });
+            //Channel = GrpcChannel.ForAddress("http://176.119.156.220:5005", new GrpcChannelOptions { HttpHandler = httpHandler });
+            Channel = GrpcChannel.ForAddress("http://localhost:5005", new GrpcChannelOptions { HttpHandler = httpHandler });
             Client = new OrderBoard.OrderBoardClient(Channel);
             var result = Client.GetOrder(new Google.Protobuf.WellKnownTypes.Empty());
         }
