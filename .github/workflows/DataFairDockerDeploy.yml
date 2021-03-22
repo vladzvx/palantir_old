@@ -17,10 +17,5 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_LOGIN }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }
           
-      - name: Run
-        run: |
-          pwd
-          ls
-          docker build . --file Dockerfile
           
           
