@@ -16,5 +16,5 @@ jobs:
         run: |
           pwd
           ls
-          docker build . --file ../Dockerfile
+          docker build . --file Dockerfile
           
