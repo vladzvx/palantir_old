@@ -33,3 +33,16 @@ jobs:
           push: true
           tags: vladzvx/tg-data-miner:data-fair
           
+      - name: deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.MAIN_HOST }}
+          username: ${{ secrets.MAIN_USERNAME }}
+          password: ${{ secrets.MAIN_PWD }}
+          port: ${{ secrets.MAIN_PORT }}
+          script: |
+            docker stop data_fair || true && docker rm data_fair || true
+            docker login -u ${{ secrets.DOCKER_HUB_LOGIN }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
+            docker pull vladzvx/tg-data-miner:data-fair
+            docker run --name data_fair -d -p 5002:80 vladzvx/tg-data-miner:data-fair
+          
