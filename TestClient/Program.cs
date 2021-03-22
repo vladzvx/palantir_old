@@ -15,7 +15,6 @@ namespace TestClient
     "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
             var httpHandler = new HttpClientHandler();
-            // Return `true` to allow certificates that are untrusted/invalid
             httpHandler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
 
