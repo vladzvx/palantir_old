@@ -17,15 +17,27 @@ namespace DataFair.Services
     {
         public async override Task GetConfiguration(Empty req, IServerStreamWriter<ConfigurationContainer> serverStream, ServerCallContext context)
         {
-            ConfigurationContainer cont = new ConfigurationContainer() { Session = new Common.SessionSettings() { SQLDialect = "ssss" } };
-            await serverStream.WriteAsync(cont);
-            try
+            int qq = 0;
+            SessionSettings session;
+            User user;
+            Collector collector;
+            if (Storage.Sessions.TryPeek(out session)&& 
+                Storage.Users.TryTake(out user) && 
+                Storage.Collectors.TryPeek(out collector))
             {
-                await Task.Delay(-1, context.CancellationToken);
-            }
-            catch (TaskCanceledException)
-            {
-
+                ConfigurationContainer cont = new ConfigurationContainer()
+                {
+                    Session = session, CollectorParams=collector,UserParams=user
+                };
+                await serverStream.WriteAsync(cont);
+                try
+                {
+                    await Task.Delay(-1, context.CancellationToken);
+                }
+                catch (TaskCanceledException)
+                {
+                    Storage.Users.Add(user);
+                }
             }
         }
     }

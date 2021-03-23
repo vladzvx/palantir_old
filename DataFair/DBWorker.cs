@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using Common;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace DataFair
 {
@@ -19,6 +20,7 @@ namespace DataFair
         private readonly NpgsqlCommand CheckChat;
         private readonly NpgsqlCommand GetChatsForUpdate;
         private readonly NpgsqlCommand SetChatChecked;
+
 
         private readonly object ReadLocker = new object();
         private readonly object StreamReadLocker = new object();
@@ -39,7 +41,7 @@ namespace DataFair
             StreamReadConnection.Open();
             MessagesWritingThread = new Thread(new ParameterizedThreadStart(MessagesWriter));
             MessagesWritingThread.Start(CancellationTokenSource.Token);
-            UsersWritingThread = new Thread(new ParameterizedThreadStart(UsersWriter));
+            UsersWritingThread = new Thread(new ParameterizedThreadStart(EntitiesWriter));
             UsersWritingThread.Start(CancellationTokenSource.Token);
 
             CheckUser = ReadConnention.CreateCommand();
@@ -56,28 +58,14 @@ namespace DataFair
             GetChatsForUpdate.CommandType = System.Data.CommandType.StoredProcedure;
             GetChatsForUpdate.CommandText = "get_unupdated_chats";
             GetChatsForUpdate.Parameters.Add(new NpgsqlParameter("dt", NpgsqlTypes.NpgsqlDbType.Timestamp));
-
-            SetChatChecked = WriteConnention.CreateCommand();
-            SetChatChecked.CommandType = System.Data.CommandType.StoredProcedure;
-            SetChatChecked.CommandText = "set_chat_checked";
-            SetChatChecked.Parameters.Add(new NpgsqlParameter("_chat_id", NpgsqlTypes.NpgsqlDbType.Bigint));
         }
 
-        public void SetChatUpdated(long id)
-        {
-            lock (WriteLocker)
-            {
-                SetChatChecked.Parameters["_chat_id"].Value = id;
-                SetChatChecked.ExecuteNonQuery();
-            }
-        }
         public void Stop()
         {
             ReadConnention.Dispose();
             WriteConnention.Dispose();
             CancellationTokenSource.Cancel();
         }
-
         private static void WriteSingleMessage(NpgsqlCommand command, Message message)
         {
             command.Parameters["_message_timestamp"].Value = message.Timestamp.ToDateTime();
@@ -94,7 +82,6 @@ namespace DataFair
             command.Parameters["_formatting"].Value = DBNull.Value;// message.Formating;
             command.ExecuteNonQuery();
         }
-
         private static void WriteSingleUser(NpgsqlCommand command, Entity entity)
         {
             command.Parameters["_user_id"].Value = entity.Id;
@@ -103,7 +90,6 @@ namespace DataFair
             command.Parameters["sender_last_name"].Value = entity.LastName;
             command.ExecuteNonQuery();
         }
-
         private static void WriteSingleEntity(NpgsqlCommand command, Entity entity)
         {
             command.Parameters["_chat_id"].Value = entity.Id;
@@ -114,7 +100,6 @@ namespace DataFair
             command.Parameters["_is_channel"].Value = entity.Type==EntityType.Channel;
             command.ExecuteNonQuery();
         }
-
         private void MessagesWriter(object cancellationToken)
         {
             NpgsqlConnection Connention = new NpgsqlConnection(ConnectionString);
@@ -175,8 +160,7 @@ namespace DataFair
             Connention.Close();
             Connention.Dispose();
         }
-
-        private void UsersWriter(object cancellationToken)
+        private void EntitiesWriter(object cancellationToken)
         {
             NpgsqlConnection Connention = new NpgsqlConnection(ConnectionString);
             Connention.Open();
@@ -249,8 +233,6 @@ namespace DataFair
             Connention.Close();
             Connention.Dispose();
         }
-
-
         public void PutEntity(Entity entity)
         {
             entities.Enqueue(entity);
@@ -259,7 +241,6 @@ namespace DataFair
         {
             messages.Enqueue(message);
         }
-
         public void GetUnupdatedChats(DateTime BoundDateTime)
         {
             GetChatsForUpdate.Parameters["dt"].Value = BoundDateTime;

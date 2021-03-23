@@ -40,7 +40,7 @@ class TgDataGetter():
 		client = self._client;
 		loop.run_until_complete(client.connect())
 		if not loop.run_until_complete(client.is_user_authorized()):
-			loop.run_until_complete(client.sign_in(phone))
+			loop.run_until_complete(client.sign_in(self._phone))
 			code=input("insert_code:")
 			try:
 				loop.run_until_complete(client.sign_in(code=code))
@@ -298,7 +298,7 @@ class TgDataGetter():
 		loop.run_until_complete(self._get_history(order))
 
 
-
+time.sleep(2);
 grpc_host = "localhost:5005"# os.environ.get('grpc_host') 
 
 channel = grpc.insecure_channel(grpc_host)
@@ -306,55 +306,60 @@ config_stub = Configurator_pb2_grpc.ConfiguratorStub(channel);
 
 
 emp = OrderBoard_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
-config = config_stub.GetConfiguration(emp);
+for cfg in config_stub.GetConfiguration(emp):
+	config = cfg
+
+	connection_string = "{0}://{1}:{2}@{3}/{4}".format(config.Session.SQLDialect,
+																  config.Session.SessionStorageUser,
+																  config.Session.SessionStoragePassword,
+																  config.Session.SessionStorageHost,
+																  config.Session.SessionStorageDB)
+	getter = TgDataGetter(config.UserParams.SessionName, config.CollectorParams.ApiId, 
+						  config.CollectorParams.ApiHash,
+						  config.UserParams.Phone,connection_string)
+	getter.start();
 
 
-#getter = TgDataGetter(session_name, api_id, api_hash,phone,connection_string)
-#getter.start();
 
+	stub = OrderBoard_pb2_grpc.OrderBoardStub(channel)
+	GetFullChannelCounter = config.UserParams.GetFullChannelCounter
+	GetFullChannelCounterLimit=180
+	timestamp = datetime.datetime.utcnow();
+	users = {}
+	chats = {}
 
+	logging.basicConfig(level=logging.DEBUG,filename='app.log')
 
+	while True:
+		try:
+			delta_time =(datetime.datetime.utcnow()-timestamp) 
+			if delta_time.days>=24:
+				GetFullChannelCounter=0
+				timestamp=datetime.datetime.utcnow()
+				logging.debug("Reset daily limits.")
+			logging.debug("Getting order...")
+			order  = stub.GetOrder(OrderBoard_pb2.google_dot_protobuf_dot_empty__pb2.Empty())
+			logging.debug("Ok! Order.Id: {0}; Order.Type: {1}; Order.Link: {2}; Order.PairId: {3}; Order.PairLink: {4};".format(order.Id,
+																															 order.Type,
+																															 order.Link,
+																															 order.PairId,
+																															 order.PairLink))
+			if order.Type==1:
+					logging.debug("History reading...")
+					getter.get_history(order)
+			elif order.Type==2:
+				if GetFullChannelCounter<GetFullChannelCounterLimit:
+					GetFullChannelCounter+=1
+					fch = getter.get_full_channel(order)
+					if fch is not None:
+						stub.PostEntity(fch)
+				else:
+					stub.PostOrder(order);
+			elif order.Type==0:
+				q=0;
+		except BaseException as e:
+			logging.error(e.args[0])
 
-
-stub = OrderBoard_pb2_grpc.OrderBoardStub(channel)
-GetFullChannelCounter = 0
-GetFullChannelCounterLimit=180
-timestamp = datetime.datetime.utcnow();
-users = {}
-chats = {}
-
-logging.basicConfig(level=logging.DEBUG,filename='app.log')
-
-while True:
-	try:
-		delta_time =(datetime.datetime.utcnow()-timestamp) 
-		if delta_time.days>=24:
-			GetFullChannelCounter=0
-			timestamp=datetime.datetime.utcnow()
-			logging.debug("Reset daily limits.")
-		logging.debug("Getting order...")
-		order  = stub.GetOrder(OrderBoard_pb2.google_dot_protobuf_dot_empty__pb2.Empty())
-		logging.debug("Ok! Order.Id: {0}; Order.Type: {1}; Order.Link: {2}; Order.PairId: {3}; Order.PairLink: {4};".format(order.Id,
-																														 order.Type,
-																														 order.Link,
-																														 order.PairId,
-																														 order.PairLink))
-		if order.Type==1:
-				logging.debug("History reading...")
-				getter.get_history(order)
-		elif order.Type==2:
-			if GetFullChannelCounter<GetFullChannelCounterLimit:
-				GetFullChannelCounter+=1
-				fch = getter.get_full_channel(order)
-				if fch is not None:
-					stub.PostEntity(fch)
-			else:
-				stub.PostOrder(order);
-		elif order.Type==0:
-			q=0;
-	except BaseException as e:
-		logging.error(e.args[0])
-
-	time.sleep(1)
+		time.sleep(1)
 
 

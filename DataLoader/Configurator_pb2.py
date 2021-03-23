@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\252\002\006Common',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x12\x43onfigurator.proto\x12\x08snapshot\x1a\x1bgoogle/protobuf/empty.proto\"\x9b\x01\n\x16\x43onfigurationContainer\x12/\n\x0cSessionStore\x18\x01 \x01(\x0b\x32\x19.snapshot.SessionSettings\x12,\n\x0f\x43ollectorParams\x18\x02 \x01(\x0b\x32\x13.snapshot.Collector\x12\"\n\nUserParams\x18\x03 \x01(\x0b\x32\x0e.snapshot.User\"\x97\x01\n\x0fSessionSettings\x12\x12\n\nSQLDialect\x18\x01 \x01(\t\x12\x1a\n\x12SessionStorageUser\x18\x02 \x01(\t\x12\x1e\n\x16SessionStoragePassword\x18\x03 \x01(\t\x12\x1a\n\x12SessionStorageHost\x18\x04 \x01(\t\x12\x18\n\x10SessionStorageDB\x18\x05 \x01(\t\"+\n\tCollector\x12\r\n\x05\x41piId\x18\x01 \x01(\x03\x12\x0f\n\x07\x41piHash\x18\x02 \x01(\t\"I\n\x04User\x12\r\n\x05Phone\x18\x01 \x01(\t\x12\x13\n\x0bSessionName\x18\x02 \x01(\t\x12\x1d\n\x15GetFullChannelCounter\x18\x03 \x01(\x05\x32^\n\x0c\x43onfigurator\x12N\n\x10GetConfiguration\x12\x16.google.protobuf.Empty\x1a .snapshot.ConfigurationContainer0\x01\x42\t\xaa\x02\x06\x43ommonb\x06proto3'
+  serialized_pb=b'\n\x12\x43onfigurator.proto\x12\x08snapshot\x1a\x1bgoogle/protobuf/empty.proto\"\x96\x01\n\x16\x43onfigurationContainer\x12*\n\x07Session\x18\x01 \x01(\x0b\x32\x19.snapshot.SessionSettings\x12,\n\x0f\x43ollectorParams\x18\x02 \x01(\x0b\x32\x13.snapshot.Collector\x12\"\n\nUserParams\x18\x03 \x01(\x0b\x32\x0e.snapshot.User\"\x97\x01\n\x0fSessionSettings\x12\x12\n\nSQLDialect\x18\x01 \x01(\t\x12\x1a\n\x12SessionStorageUser\x18\x02 \x01(\t\x12\x1e\n\x16SessionStoragePassword\x18\x03 \x01(\t\x12\x1a\n\x12SessionStorageHost\x18\x04 \x01(\t\x12\x18\n\x10SessionStorageDB\x18\x05 \x01(\t\"+\n\tCollector\x12\r\n\x05\x41piId\x18\x01 \x01(\x03\x12\x0f\n\x07\x41piHash\x18\x02 \x01(\t\"I\n\x04User\x12\r\n\x05Phone\x18\x01 \x01(\t\x12\x13\n\x0bSessionName\x18\x02 \x01(\t\x12\x1d\n\x15GetFullChannelCounter\x18\x03 \x01(\x05\x32^\n\x0c\x43onfigurator\x12N\n\x10GetConfiguration\x12\x16.google.protobuf.Empty\x1a .snapshot.ConfigurationContainer0\x01\x42\t\xaa\x02\x06\x43ommonb\x06proto3'
   ,
   dependencies=[google_dot_protobuf_dot_empty__pb2.DESCRIPTOR,])
 
@@ -36,7 +36,7 @@ _CONFIGURATIONCONTAINER = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='SessionStore', full_name='snapshot.ConfigurationContainer.SessionStore', index=0,
+      name='Session', full_name='snapshot.ConfigurationContainer.Session', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -69,7 +69,7 @@ _CONFIGURATIONCONTAINER = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=62,
-  serialized_end=217,
+  serialized_end=212,
 )
 
 
@@ -128,8 +128,8 @@ _SESSIONSETTINGS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=220,
-  serialized_end=371,
+  serialized_start=215,
+  serialized_end=366,
 )
 
 
@@ -167,8 +167,8 @@ _COLLECTOR = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=373,
-  serialized_end=416,
+  serialized_start=368,
+  serialized_end=411,
 )
 
 
@@ -213,11 +213,11 @@ _USER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=418,
-  serialized_end=491,
+  serialized_start=413,
+  serialized_end=486,
 )
 
-_CONFIGURATIONCONTAINER.fields_by_name['SessionStore'].message_type = _SESSIONSETTINGS
+_CONFIGURATIONCONTAINER.fields_by_name['Session'].message_type = _SESSIONSETTINGS
 _CONFIGURATIONCONTAINER.fields_by_name['CollectorParams'].message_type = _COLLECTOR
 _CONFIGURATIONCONTAINER.fields_by_name['UserParams'].message_type = _USER
 DESCRIPTOR.message_types_by_name['ConfigurationContainer'] = _CONFIGURATIONCONTAINER
@@ -264,8 +264,8 @@ _CONFIGURATOR = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=493,
-  serialized_end=587,
+  serialized_start=488,
+  serialized_end=582,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetConfiguration',

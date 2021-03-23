@@ -1,3 +1,4 @@
+using Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
@@ -18,10 +19,10 @@ namespace DataFair
     {
         public static void Main(string[] args)
         {
-            //if (Storage.Chats.Count!=0)
-            //{
-            //    int g = 0;
-            //}
+            if (Storage.Chats.Count != 0)
+            {
+                int g = 0;
+            }
             CreateHostBuilder(args).Build().Run();
         }
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -43,7 +44,7 @@ namespace DataFair
                         //        "mysert.pfx","pwwwwd");
                         //});
                         
-                        serverOptions.Listen(IPAddress.Any, 80, o =>
+                        serverOptions.Listen(IPAddress.Any, 5002, o =>
                         {
                             o.Protocols = HttpProtocols.Http1;
                         });

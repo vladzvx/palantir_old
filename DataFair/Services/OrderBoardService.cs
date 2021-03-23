@@ -11,47 +11,8 @@ using System.Timers;
 using System.Threading;
 using Timer = System.Timers.Timer;
 
-namespace DataFair
+namespace DataFair.Services
 {
-    struct CachedEntityInfo
-    {
-        public CachedEntityInfo(long Offset)
-        {
-            this.Offset = Offset;
-            LastTimeMessage = DateTime.UtcNow;
-        }
-        public long Offset;
-        public DateTime LastTimeMessage;
-    }
-
-    internal static class Storage
-    {
-        internal static Timer timer = new Timer(20000);
-        internal static DBWorker worker = new DBWorker(Environment.GetEnvironmentVariable("ConnectionString"));
-
-
-        public static ConcurrentQueue<Order> Orders = new ConcurrentQueue<Order>();
-
-        public static ConcurrentDictionary<long, CachedEntityInfo> Chats = new ConcurrentDictionary<long, CachedEntityInfo>();
-
-        private static object sync = new object();
-        static Storage()
-        {
-            timer.Elapsed += action;
-            timer.AutoReset = true;
-            timer.Start();
-        }
-
-        private static void action(object sender, ElapsedEventArgs args)
-        {
-            if (Monitor.TryEnter(sync))
-            {
-                worker.GetUnupdatedChats(DateTime.UtcNow.AddHours(-24));
-                Monitor.Exit(sync);
-            }
-        }
-    }
-
     public class OrderBoardService : OrderBoard.OrderBoardBase
     {
         private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
