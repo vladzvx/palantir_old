@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+option csharp_namespace = "Common";
+import "google/protobuf/empty.proto";
+package snapshot;
+
+service Configurator {
+	rpc GetConfiguration (google.protobuf.Empty) returns (stream ConfigurationContainer);
+}
+
+message ConfigurationContainer{
+	SessionSettings Session = 1;
+	Collector CollectorParams = 2;
+	User UserParams = 3;
+}
+
+message SessionSettings{
+	string SQLDialect = 1;
+	string SessionStorageUser = 2;
+	string SessionStoragePassword = 3;
+	string SessionStorageHost = 4;
+	string SessionStorageDB = 5;
+}
+
+message Collector{
+	int64 ApiId = 1;
+	string ApiHash = 2;
+}
+
+message User{
+	string Phone = 1;
+	string SessionName = 2;
+	int32 GetFullChannelCounter = 3;
+}

@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-	  <Protobuf Include="Snapshot.proto" GrpcServices="Both" />
+	  <Protobuf Include="Configurator.proto" GrpcServices="Both" />
 	  <Protobuf Include="OrderBoard.proto" GrpcServices="Both" />
   </ItemGroup>
 

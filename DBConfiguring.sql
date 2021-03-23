@@ -3,6 +3,31 @@ create database sessions;
 
 drop database if exists test_db;
 
+create table public.collectors(
+    id serial,
+    adding_time timestamp default CURRENT_TIMESTAMP,
+    api_id bigint,
+    api_hash text,
+    primary key (id)
+);
+
+create table public.collectors_user_info(
+    phone text,
+    adding_time timestamp default CURRENT_TIMESTAMP,
+    session_name text,
+    full_channels_req_counter int default 0,
+    primary key (phone)
+);
+
+create table public.session_storage_settings(
+    host text,
+    dialect text,
+    db_name text,
+    db_user text,
+    pwd text
+);
+
+
 create table public.chats (
     id bigint,
     adding_time timestamp default CURRENT_TIMESTAMP,

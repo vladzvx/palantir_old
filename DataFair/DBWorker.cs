@@ -170,9 +170,6 @@ namespace DataFair
                 {
                     //logger.Error(ex, "Error while DB writing to DB");
                 }
-
-
-
             }
 
             Connention.Close();
@@ -247,9 +244,6 @@ namespace DataFair
                 {
                     //logger.Error(ex, "Error while DB writing to DB");
                 }
-
-
-
             }
 
             Connention.Close();
@@ -266,7 +260,7 @@ namespace DataFair
             messages.Enqueue(message);
         }
 
-        public void GetUnudatedChats(DateTime BoundDateTime)
+        public void GetUnupdatedChats(DateTime BoundDateTime)
         {
             GetChatsForUpdate.Parameters["dt"].Value = BoundDateTime;
             NpgsqlDataReader reader = GetChatsForUpdate.ExecuteReader();

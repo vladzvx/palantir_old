@@ -9,7 +9,9 @@ import time
 import json
 import grpc
 import OrderBoard_pb2_grpc
+import Configurator_pb2_grpc
 import OrderBoard_pb2
+import Configurator_pb2
 import logging
 import os
 from alchemysession import AlchemySessionContainer
@@ -26,9 +28,9 @@ class CustomEncoder(json.JSONEncoder):
 
 class TgDataGetter():
 
-	def __init__(self,session_name, api_id,api_hash,phone):
+	def __init__(self,session_name, api_id,api_hash,phone,connection_string):
 		self._phone=phone;
-		container = AlchemySessionContainer('postgresql://postgres:qw12cv90@176.119.156.220/sessions')
+		container = AlchemySessionContainer(connection_string)
 		session = container.new_session(phone)
 		self._client = TelegramClient(session, api_id, api_hash)
 		self._loop = asyncio.get_event_loop()
@@ -295,25 +297,25 @@ class TgDataGetter():
 		loop  = self._loop;
 		loop.run_until_complete(self._get_history(order))
 
-		
-#api_hash = os.environ.get('api_hash') 
-#api_id =  os.environ.get('api_id') 
-#phone = os.environ.get('phone')
-#password = os.environ.get('password')
-#session_name = os.environ.get('session_name')
-
-api_hash = '573c08a50294f33f1092409df80addac'
-api_id = 1265209
-phone = '+380983952298'
-session_name =phone+"_"
 
 
-getter = TgDataGetter(session_name, api_id, api_hash,phone)
-getter.start();
+grpc_host = "localhost:5005"# os.environ.get('grpc_host') 
 
-time.sleep(3)
+channel = grpc.insecure_channel(grpc_host)
+config_stub = Configurator_pb2_grpc.ConfiguratorStub(channel);
 
-channel = grpc.insecure_channel("localhost:5005")
+
+emp = OrderBoard_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
+config = config_stub.GetConfiguration(emp);
+
+
+#getter = TgDataGetter(session_name, api_id, api_hash,phone,connection_string)
+#getter.start();
+
+
+
+
+
 stub = OrderBoard_pb2_grpc.OrderBoardStub(channel)
 GetFullChannelCounter = 0
 GetFullChannelCounterLimit=180

@@ -24,16 +24,16 @@ namespace DataFair
         public DateTime LastTimeMessage;
     }
 
-
     internal static class Storage
     {
         internal static Timer timer = new Timer(20000);
         internal static DBWorker worker = new DBWorker(Environment.GetEnvironmentVariable("ConnectionString"));
-        public static ConcurrentQueue<Message> Messages = new ConcurrentQueue<Message>();
-        public static ConcurrentQueue<Entity> Entities = new ConcurrentQueue<Entity>();
+
+
         public static ConcurrentQueue<Order> Orders = new ConcurrentQueue<Order>();
-        public static ConcurrentDictionary<long, DateTime> Users = new ConcurrentDictionary<long, DateTime>();
+
         public static ConcurrentDictionary<long, CachedEntityInfo> Chats = new ConcurrentDictionary<long, CachedEntityInfo>();
+
         private static object sync = new object();
         static Storage()
         {
@@ -46,10 +46,9 @@ namespace DataFair
         {
             if (Monitor.TryEnter(sync))
             {
-                worker.GetUnudatedChats(DateTime.UtcNow.AddHours(-24));
+                worker.GetUnupdatedChats(DateTime.UtcNow.AddHours(-24));
                 Monitor.Exit(sync);
             }
-            
         }
     }
 
@@ -77,8 +76,6 @@ namespace DataFair
                 Message message = requestStream.Current;
                 var cachedEntityInfo = new CachedEntityInfo(message.Id);
                 Storage.Chats.AddOrUpdate(message.ChatId, cachedEntityInfo, (key, old) => cachedEntityInfo);
-
-
                 logger.Debug("Message. DateTime: {0}; FromId: {1}; Text: {2}; Media: {3};", message.Timestamp,message.FromId, message.Text, message.Media);
             }
             return new Empty();
