@@ -43,7 +43,7 @@ namespace DataFair
                         //        "mysert.pfx","pwwwwd");
                         //});
                         
-                        serverOptions.Listen(IPAddress.Any, 5004, o =>
+                        serverOptions.Listen(IPAddress.Any, 80, o =>
                         {
                             o.Protocols = HttpProtocols.Http1;
                         });

@@ -18,7 +18,7 @@ namespace TestClient
             Thread.Sleep(2000);
             var httpHandler = new HttpClientHandler();
             httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-            Channel = GrpcChannel.ForAddress("http://176.119.156.220:5005",new GrpcChannelOptions() {HttpHandler= httpHandler,Credentials=ChannelCredentials.Insecure });
+            Channel = GrpcChannel.ForAddress("http://176.119.156.220:5015",new GrpcChannelOptions() {HttpHandler= httpHandler,Credentials=ChannelCredentials.Insecure });
             //Channel = GrpcChannel.ForAddress("https://localhost:5005");
             Client = new OrderBoard.OrderBoardClient(Channel);
             var result = Client.GetOrder(new Google.Protobuf.WellKnownTypes.Empty());
