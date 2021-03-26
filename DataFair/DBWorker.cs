@@ -8,6 +8,7 @@ using System.Collections.Generic;
 
 namespace DataFair
 {
+   
     public class DBWorker
     {
         private readonly ConcurrentQueue<Message> messages = new ConcurrentQueue<Message>();
@@ -123,6 +124,7 @@ namespace DataFair
             CancellationToken Token = (CancellationToken)cancellationToken;
             while (!Token.IsCancellationRequested)
             {
+                ConcurrentQueue<Message> TempForFailedTrasaction = new ConcurrentQueue<Message>();
                 try
                 {
                     while (!messages.IsEmpty)
@@ -132,20 +134,34 @@ namespace DataFair
                             try
                             {
                                 int count = 0;
-                                for (int i = 0; i < 10000 && !messages.IsEmpty; i++)
+                                for (int i = 0; i < 25000 && !messages.IsEmpty; i++)
                                 {
                                     if (messages.TryDequeue(out Message message))
                                     {
+                                        TempForFailedTrasaction.Enqueue(message);
+                                        command.Transaction = transaction;
                                         WriteSingleMessage(command, message);
                                         count++;
                                     }
                                 }
                                 transaction.Commit();
+                                TempForFailedTrasaction = new ConcurrentQueue<Message>();
                             }
                             catch (Exception ex)
                             {
                                 transaction.Rollback();
-                                throw ex;
+                                command.Transaction = null;
+                                while (TempForFailedTrasaction.TryDequeue(out Message message))
+                                {
+                                    try
+                                    {
+                                        WriteSingleMessage(command, message);
+                                    }
+                                    catch (Exception exe)
+                                    {
+
+                                    }
+                                }
                             }
                         }
                     }

@@ -3,6 +3,7 @@ create database sessions;
 
 drop database if exists test_db;
 
+
 create table public.collectors(
     id serial,
     adding_time timestamp default CURRENT_TIMESTAMP,
@@ -72,7 +73,7 @@ create table public.messages(
     text text default null,
     media jsonb,
     formatting jsonb,
-    primary key (id,chat_id,message_timestamp,message_db_id),
+    primary key (message_db_id, message_timestamp),
     foreign key (chat_id) references chats (id)
 )  PARTITION BY RANGE (message_timestamp);
 

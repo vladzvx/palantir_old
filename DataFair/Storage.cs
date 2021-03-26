@@ -28,7 +28,7 @@ namespace DataFair
         public static ConcurrentQueue<Order> Orders = new ConcurrentQueue<Order>();
         public static ConcurrentBag<SessionSettings> Sessions = new ConcurrentBag<SessionSettings>();
         public static ConcurrentBag<Common.Collector> Collectors = new ConcurrentBag<Collector>();
-        public static ConcurrentBag<Common.User> Users = new ConcurrentBag<User>();
+        public static ConcurrentBag<Common.UserInfo> Users = new ConcurrentBag<UserInfo>();
 
         public static ConcurrentDictionary<long, CachedEntityInfo> Chats = new ConcurrentDictionary<long, CachedEntityInfo>();
 
@@ -45,7 +45,7 @@ namespace DataFair
                 {
                     Collectors.Add(collector);
                 }
-                foreach (User user in db.Users.ToList())
+                foreach (UserInfo user in db.UsersInfo.ToList())
                 {
                     Users.Add(user);
                 }

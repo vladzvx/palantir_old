@@ -319,8 +319,6 @@ for cfg in config_stub.GetConfiguration(emp):
 						  config.UserParams.Phone,connection_string)
 	getter.start();
 
-
-
 	stub = OrderBoard_pb2_grpc.OrderBoardStub(channel)
 	GetFullChannelCounter = config.UserParams.GetFullChannelCounter
 	GetFullChannelCounterLimit=180

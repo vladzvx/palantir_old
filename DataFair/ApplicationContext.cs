@@ -10,14 +10,14 @@ namespace DataFair
 {
     public class ApplicationContext : DbContext
     {
+        public DbSet<Common.UserInfo> UsersInfo { get; set; }
         public DbSet<Common.SessionSettings> Sessions { get; set; }
         public DbSet<Common.Collector> Collectors { get; set; }
-        public DbSet<Common.User> Users { get; set; }
 
         #region Required
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Common.User>().HasKey(c=>c.Phone);
+            modelBuilder.Entity<Common.UserInfo>().HasKey(c=>c.Phone);
             modelBuilder.Entity<Common.Collector>().HasKey(c => c.ApiId);
             modelBuilder.Entity<Common.SessionSettings>().HasKey(c => c.SessionStorageHost);
         }

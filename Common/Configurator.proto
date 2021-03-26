@@ -11,7 +11,7 @@ service Configurator {
 message ConfigurationContainer{
 	SessionSettings Session = 1;
 	Collector CollectorParams = 2;
-	User UserParams = 3;
+	UserInfo UserParams = 3;
 }
 
 message SessionSettings{
@@ -27,7 +27,7 @@ message Collector{
 	string ApiHash = 2;
 }
 
-message User{
+message UserInfo{
 	string Phone = 1;
 	string SessionName = 2;
 	int32 GetFullChannelCounter = 3;

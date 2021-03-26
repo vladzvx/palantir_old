@@ -19,7 +19,7 @@ namespace DataFair.Services
         {
             int qq = 0;
             SessionSettings session;
-            User user;
+            UserInfo user;
             Collector collector;
             if (Storage.Sessions.TryPeek(out session)&& 
                 Storage.Users.TryTake(out user) && 
