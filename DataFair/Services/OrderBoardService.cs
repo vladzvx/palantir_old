@@ -57,6 +57,7 @@ namespace DataFair.Services
             catch (Exception ex )
             {
                 logger.Error("Error while getting order!",ex);
+                return Task.FromResult(EmptyOrder);
             }
 
         }
