@@ -14,7 +14,7 @@ namespace DataFair.Controllers
     {
         [HttpPost()]
         [EnableCors()]
-        public string CheckerAnswer(Order order)
+        public string CheckerAnswer()
         {
             return "Ok!";
         }
