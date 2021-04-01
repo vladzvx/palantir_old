@@ -8,7 +8,6 @@ using System.Collections.Generic;
 
 namespace DataFair
 {
-   
     public class DBWorker
     {
         private readonly ConcurrentQueue<Message> messages = new ConcurrentQueue<Message>();
@@ -20,12 +19,9 @@ namespace DataFair
         private readonly NpgsqlCommand CheckUser;
         private readonly NpgsqlCommand CheckChat;
         private readonly NpgsqlCommand GetChatsForUpdate;
-        private readonly NpgsqlCommand SetChatChecked;
 
 
         private readonly object ReadLocker = new object();
-        private readonly object StreamReadLocker = new object();
-        private readonly object WriteLocker = new object();
         private readonly string ConnectionString;
         private readonly Thread MessagesWritingThread;
         private readonly Thread UsersWritingThread;
@@ -59,13 +55,6 @@ namespace DataFair
             GetChatsForUpdate.CommandType = System.Data.CommandType.StoredProcedure;
             GetChatsForUpdate.CommandText = "get_unupdated_chats";
             GetChatsForUpdate.Parameters.Add(new NpgsqlParameter("dt", NpgsqlTypes.NpgsqlDbType.Timestamp));
-        }
-
-        public void Stop()
-        {
-            ReadConnention.Dispose();
-            WriteConnention.Dispose();
-            CancellationTokenSource.Cancel();
         }
         private static void WriteSingleMessage(NpgsqlCommand command, Message message)
         {
@@ -105,21 +94,21 @@ namespace DataFair
         {
             NpgsqlConnection Connention = new NpgsqlConnection(ConnectionString);
             Connention.Open();
-            NpgsqlCommand command = Connention.CreateCommand();
-            command.CommandType = System.Data.CommandType.StoredProcedure;
-            command.CommandText = "add_message";
-            command.Parameters.Add(new NpgsqlParameter("_message_timestamp", NpgsqlTypes.NpgsqlDbType.Timestamp));
-            command.Parameters.Add(new NpgsqlParameter("_message_id", NpgsqlTypes.NpgsqlDbType.Bigint));
-            command.Parameters.Add(new NpgsqlParameter("_chat_id", NpgsqlTypes.NpgsqlDbType.Bigint));
-            command.Parameters.Add(new NpgsqlParameter("_user_id", NpgsqlTypes.NpgsqlDbType.Bigint));
-            command.Parameters.Add(new NpgsqlParameter("_reply_to", NpgsqlTypes.NpgsqlDbType.Bigint));
-            command.Parameters.Add(new NpgsqlParameter("_thread_start", NpgsqlTypes.NpgsqlDbType.Bigint));
-            command.Parameters.Add(new NpgsqlParameter("_media_group_id", NpgsqlTypes.NpgsqlDbType.Bigint));
-            command.Parameters.Add(new NpgsqlParameter("_forward_from_id", NpgsqlTypes.NpgsqlDbType.Bigint));
-            command.Parameters.Add(new NpgsqlParameter("_forward_from_message_id", NpgsqlTypes.NpgsqlDbType.Bigint));
-            command.Parameters.Add(new NpgsqlParameter("_text", NpgsqlTypes.NpgsqlDbType.Text));
-            command.Parameters.Add(new NpgsqlParameter("_media", NpgsqlTypes.NpgsqlDbType.Jsonb));
-            command.Parameters.Add(new NpgsqlParameter("_formatting", NpgsqlTypes.NpgsqlDbType.Jsonb));
+            NpgsqlCommand AddMessageCommand = Connention.CreateCommand();
+            AddMessageCommand.CommandType = System.Data.CommandType.StoredProcedure;
+            AddMessageCommand.CommandText = "add_message";
+            AddMessageCommand.Parameters.Add(new NpgsqlParameter("_message_timestamp", NpgsqlTypes.NpgsqlDbType.Timestamp));
+            AddMessageCommand.Parameters.Add(new NpgsqlParameter("_message_id", NpgsqlTypes.NpgsqlDbType.Bigint));
+            AddMessageCommand.Parameters.Add(new NpgsqlParameter("_chat_id", NpgsqlTypes.NpgsqlDbType.Bigint));
+            AddMessageCommand.Parameters.Add(new NpgsqlParameter("_user_id", NpgsqlTypes.NpgsqlDbType.Bigint));
+            AddMessageCommand.Parameters.Add(new NpgsqlParameter("_reply_to", NpgsqlTypes.NpgsqlDbType.Bigint));
+            AddMessageCommand.Parameters.Add(new NpgsqlParameter("_thread_start", NpgsqlTypes.NpgsqlDbType.Bigint));
+            AddMessageCommand.Parameters.Add(new NpgsqlParameter("_media_group_id", NpgsqlTypes.NpgsqlDbType.Bigint));
+            AddMessageCommand.Parameters.Add(new NpgsqlParameter("_forward_from_id", NpgsqlTypes.NpgsqlDbType.Bigint));
+            AddMessageCommand.Parameters.Add(new NpgsqlParameter("_forward_from_message_id", NpgsqlTypes.NpgsqlDbType.Bigint));
+            AddMessageCommand.Parameters.Add(new NpgsqlParameter("_text", NpgsqlTypes.NpgsqlDbType.Text));
+            AddMessageCommand.Parameters.Add(new NpgsqlParameter("_media", NpgsqlTypes.NpgsqlDbType.Jsonb));
+            AddMessageCommand.Parameters.Add(new NpgsqlParameter("_formatting", NpgsqlTypes.NpgsqlDbType.Jsonb));
 
             CancellationToken Token = (CancellationToken)cancellationToken;
             while (!Token.IsCancellationRequested)
@@ -139,8 +128,8 @@ namespace DataFair
                                     if (messages.TryDequeue(out Message message))
                                     {
                                         TempForFailedTrasaction.Enqueue(message);
-                                        command.Transaction = transaction;
-                                        WriteSingleMessage(command, message);
+                                        AddMessageCommand.Transaction = transaction;
+                                        WriteSingleMessage(AddMessageCommand, message);
                                         count++;
                                     }
                                 }
@@ -150,12 +139,12 @@ namespace DataFair
                             catch (Exception ex)
                             {
                                 transaction.Rollback();
-                                command.Transaction = null;
+                                AddMessageCommand.Transaction = null;
                                 while (TempForFailedTrasaction.TryDequeue(out Message message))
                                 {
                                     try
                                     {
-                                        WriteSingleMessage(command, message);
+                                        WriteSingleMessage(AddMessageCommand, message);
                                     }
                                     catch (Exception exe)
                                     {
@@ -180,23 +169,23 @@ namespace DataFair
         {
             NpgsqlConnection Connention = new NpgsqlConnection(ConnectionString);
             Connention.Open();
-            NpgsqlCommand command1 = Connention.CreateCommand();
-            command1.CommandType = System.Data.CommandType.StoredProcedure;
-            command1.CommandText = "add_user"; ;
-            command1.Parameters.Add(new NpgsqlParameter("_user_id", NpgsqlTypes.NpgsqlDbType.Bigint));
-            command1.Parameters.Add(new NpgsqlParameter("sender_username", NpgsqlTypes.NpgsqlDbType.Text));
-            command1.Parameters.Add(new NpgsqlParameter("sender_first_name", NpgsqlTypes.NpgsqlDbType.Text));
-            command1.Parameters.Add(new NpgsqlParameter("sender_last_name", NpgsqlTypes.NpgsqlDbType.Text));
+            NpgsqlCommand AddUserCommand = Connention.CreateCommand();
+            AddUserCommand.CommandType = System.Data.CommandType.StoredProcedure;
+            AddUserCommand.CommandText = "add_user"; ;
+            AddUserCommand.Parameters.Add(new NpgsqlParameter("_user_id", NpgsqlTypes.NpgsqlDbType.Bigint));
+            AddUserCommand.Parameters.Add(new NpgsqlParameter("sender_username", NpgsqlTypes.NpgsqlDbType.Text));
+            AddUserCommand.Parameters.Add(new NpgsqlParameter("sender_first_name", NpgsqlTypes.NpgsqlDbType.Text));
+            AddUserCommand.Parameters.Add(new NpgsqlParameter("sender_last_name", NpgsqlTypes.NpgsqlDbType.Text));
 
-            NpgsqlCommand command2 = Connention.CreateCommand();
-            command2.CommandType = System.Data.CommandType.StoredProcedure;
-            command2.CommandText = "add_chat"; ;
-            command2.Parameters.Add(new NpgsqlParameter("_chat_id", NpgsqlTypes.NpgsqlDbType.Bigint));
-            command2.Parameters.Add(new NpgsqlParameter("_title", NpgsqlTypes.NpgsqlDbType.Text));
-            command2.Parameters.Add(new NpgsqlParameter("_username", NpgsqlTypes.NpgsqlDbType.Text));
-            command2.Parameters.Add(new NpgsqlParameter("pair_chat_id", NpgsqlTypes.NpgsqlDbType.Bigint));
-            command2.Parameters.Add(new NpgsqlParameter("_is_group", NpgsqlTypes.NpgsqlDbType.Boolean));
-            command2.Parameters.Add(new NpgsqlParameter("_is_channel", NpgsqlTypes.NpgsqlDbType.Boolean));
+            NpgsqlCommand AddChatCommand = Connention.CreateCommand();
+            AddChatCommand.CommandType = System.Data.CommandType.StoredProcedure;
+            AddChatCommand.CommandText = "add_chat"; ;
+            AddChatCommand.Parameters.Add(new NpgsqlParameter("_chat_id", NpgsqlTypes.NpgsqlDbType.Bigint));
+            AddChatCommand.Parameters.Add(new NpgsqlParameter("_title", NpgsqlTypes.NpgsqlDbType.Text));
+            AddChatCommand.Parameters.Add(new NpgsqlParameter("_username", NpgsqlTypes.NpgsqlDbType.Text));
+            AddChatCommand.Parameters.Add(new NpgsqlParameter("pair_chat_id", NpgsqlTypes.NpgsqlDbType.Bigint));
+            AddChatCommand.Parameters.Add(new NpgsqlParameter("_is_group", NpgsqlTypes.NpgsqlDbType.Boolean));
+            AddChatCommand.Parameters.Add(new NpgsqlParameter("_is_channel", NpgsqlTypes.NpgsqlDbType.Boolean));
 
             CancellationToken Token = (CancellationToken)cancellationToken;
             while (!Token.IsCancellationRequested)
@@ -217,11 +206,11 @@ namespace DataFair
                                         switch (entity.Type)
                                         {
                                             case EntityType.User:
-                                                WriteSingleUser(command1, entity);
+                                                WriteSingleUser(AddUserCommand, entity);
                                                 break;
                                             case EntityType.Group:
                                             case EntityType.Channel:
-                                                WriteSingleEntity(command2, entity);
+                                                WriteSingleEntity(AddChatCommand, entity);
                                                 break;
 
                                         }
@@ -257,7 +246,7 @@ namespace DataFair
         {
             messages.Enqueue(message);
         }
-        public void GetUnupdatedChats(DateTime BoundDateTime)
+        public void CreateTasksByUnupdatedChats(DateTime BoundDateTime)
         {
             GetChatsForUpdate.Parameters["dt"].Value = BoundDateTime;
             NpgsqlDataReader reader = GetChatsForUpdate.ExecuteReader();
@@ -307,7 +296,6 @@ namespace DataFair
                                         return reader.GetBoolean(0);
                                     }
                                     catch (InvalidCastException) { }
-
                                 }
                                 reader.Close();
                             }
@@ -336,6 +324,23 @@ namespace DataFair
             }
             
             return false;
+        }
+        public void Stop()
+        {
+            ReadConnention.Dispose();
+            WriteConnention.Dispose();
+            CancellationTokenSource.Cancel();
+        }
+
+        public int GetMessagesNumberInQueue()
+        {
+            return messages.Count;
+        }
+
+        public int GetEntitiesNumberInQueue()
+        {
+
+
         }
     }
 }

@@ -34,9 +34,9 @@ namespace DataFair.Services
             while (await requestStream.MoveNext())
             {
                 Storage.worker.PutMessage(requestStream.Current);
-                Message message = requestStream.Current;
-                var cachedEntityInfo = new CachedEntityInfo(message.Id);
-                Storage.Chats.AddOrUpdate(message.ChatId, cachedEntityInfo, (key, old) => cachedEntityInfo);
+                //Message message = requestStream.Current;
+               // var cachedEntityInfo = new CachedEntityInfo(message.Id);
+                //Storage.Chats.AddOrUpdate(message.ChatId, cachedEntityInfo, (key, old) => cachedEntityInfo);
                 logger.Debug("Message. DateTime: {0}; FromId: {1}; Text: {2}; Media: {3};", message.Timestamp,message.FromId, message.Text, message.Media);
             }
             return new Empty();
@@ -58,6 +58,15 @@ namespace DataFair.Services
             logger.Debug(string.Format("New order received!  Id: {0}; Field: {1};", order.Id,order.Link));
             Storage.Orders.Enqueue(order);
             return Task.FromResult(new Empty());
+        }
+
+        public override Task<StateReport> GetState(Empty request, ServerCallContext context)
+        {
+            return Task.FromResult(new StateReport() 
+            { 
+                Entities = Storage.worker.GetEntitiesNumberInQueue(), 
+                Messages = Storage.worker.GetMessagesNumberInQueue() 
+            });
         }
     }
 }

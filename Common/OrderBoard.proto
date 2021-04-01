@@ -12,6 +12,13 @@ service OrderBoard {
   rpc PostEntity (Entity) returns (google.protobuf.Empty);
   rpc CheckEntity (Entity) returns (CheckResult);
   rpc StreamMessages (stream Message) returns (google.protobuf.Empty);
+  rpc GetState(google.protobuf.Empty) returns (StateReport);
+}
+
+message StateReport{
+	int32 Messages =1;
+	int32 Entities =2;
+
 }
 
 message CheckResult{

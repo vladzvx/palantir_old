@@ -8,17 +8,6 @@ using System.Timers;
 
 namespace DataFair
 {
-    struct CachedEntityInfo
-    {
-        public CachedEntityInfo(long Offset)
-        {
-            this.Offset = Offset;
-            LastTimeMessage = DateTime.UtcNow;
-        }
-        public long Offset;
-        public DateTime LastTimeMessage;
-    }
-
     internal static class Storage
     {
         internal static Timer timer = new Timer(20000);
@@ -29,8 +18,6 @@ namespace DataFair
         public static ConcurrentBag<SessionSettings> Sessions = new ConcurrentBag<SessionSettings>();
         public static ConcurrentBag<Common.Collector> Collectors = new ConcurrentBag<Collector>();
         public static ConcurrentBag<Common.UserInfo> Users = new ConcurrentBag<UserInfo>();
-
-        public static ConcurrentDictionary<long, CachedEntityInfo> Chats = new ConcurrentDictionary<long, CachedEntityInfo>();
 
         private static object sync = new object();
         static Storage()
@@ -60,7 +47,7 @@ namespace DataFair
         {
             if (System.Threading.Monitor.TryEnter(sync))
             {
-                worker.GetUnupdatedChats(DateTime.UtcNow.AddHours(-24));
+                worker.CreateTasksByUnupdatedChats(DateTime.UtcNow.AddHours(-24));
                 System.Threading.Monitor.Exit(sync);
             }
         }
