@@ -43,14 +43,22 @@ namespace DataFair.Services
         }
         public override Task<Order> GetOrder(Empty empty, ServerCallContext context)
         {
-            if (Storage.Orders.TryDequeue(out Order order))
+            try
             {
-                return Task.FromResult(order);
+                if (Storage.Orders.TryDequeue(out Order order))
+                {
+                    return Task.FromResult(order);
+                }
+                else
+                {
+                    return Task.FromResult(EmptyOrder);
+                }
             }
-            else
+            catch (Exception ex )
             {
-                return Task.FromResult(EmptyOrder);
+                logger.Error("Error while getting order!",ex);
             }
+
         }
 
         public override Task<Empty> PostOrder(Order order, ServerCallContext context)
