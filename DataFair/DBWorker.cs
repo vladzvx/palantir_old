@@ -339,8 +339,7 @@ namespace DataFair
 
         public int GetEntitiesNumberInQueue()
         {
-
-
+            return entities.Count;
         }
     }
 }

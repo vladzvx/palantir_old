@@ -34,7 +34,7 @@ namespace DataFair.Services
             while (await requestStream.MoveNext())
             {
                 Storage.worker.PutMessage(requestStream.Current);
-                //Message message = requestStream.Current;
+                Message message = requestStream.Current;
                // var cachedEntityInfo = new CachedEntityInfo(message.Id);
                 //Storage.Chats.AddOrUpdate(message.ChatId, cachedEntityInfo, (key, old) => cachedEntityInfo);
                 logger.Debug("Message. DateTime: {0}; FromId: {1}; Text: {2}; Media: {3};", message.Timestamp,message.FromId, message.Text, message.Media);
