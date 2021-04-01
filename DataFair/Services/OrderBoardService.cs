@@ -57,6 +57,7 @@ namespace DataFair.Services
             catch (Exception ex )
             {
                 logger.Error("Error while getting order!",ex);
+                logger.Info(Environment.GetEnvironmentVariable("ConnactionString"));
                 return Task.FromResult(EmptyOrder);
             }
 

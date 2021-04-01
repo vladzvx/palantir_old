@@ -54,10 +54,10 @@ namespace TestClient
             //Thread.Sleep(2000);
             var httpHandler = new HttpClientHandler();
             httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-            Channel = GrpcChannel.ForAddress("http://176.119.156.220:5015",new GrpcChannelOptions() {HttpHandler= httpHandler,Credentials=ChannelCredentials.Insecure });
+           // Channel = GrpcChannel.ForAddress("http://176.119.156.220:5015",new GrpcChannelOptions() {HttpHandler= httpHandler,Credentials=ChannelCredentials.Insecure });
             Channel = GrpcChannel.ForAddress("http://45.132.17.172:5005", new GrpcChannelOptions() { HttpHandler = httpHandler, Credentials = ChannelCredentials.Insecure });
             Client = new OrderBoard.OrderBoardClient(Channel);
-            var result = Client.GetOrder(new Google.Protobuf.WellKnownTypes.Empty());
+            var result = Client.GetState(new Google.Protobuf.WellKnownTypes.Empty());
         }
     }
 }
