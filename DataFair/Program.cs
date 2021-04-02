@@ -15,11 +15,15 @@ using System.Threading.Tasks;
 
 namespace DataFair
 {
+    internal static class Const
+    {
+        public static string cnnstr = Environment.GetEnvironmentVariable("ConnectionString");
+    }
     public class Program
     {
         public static void Main(string[] args)
         {
-            bool t = Storage.Orders.Count == 0;
+            Const.cnnstr.Equals("11");
             CreateHostBuilder(args).Build().Run();
         }
         public static IHostBuilder CreateHostBuilder(string[] args) =>

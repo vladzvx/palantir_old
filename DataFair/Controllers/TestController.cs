@@ -16,7 +16,7 @@ namespace DataFair.Controllers
         [EnableCors()]
         public string CheckerAnswer()
         {
-            return "Ok!";
+            return Const.cnnstr;
         }
     }
 }
