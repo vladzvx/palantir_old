@@ -4,10 +4,10 @@ WORKDIR /app
 EXPOSE 5555
 
 
-COPY /FlaskWebProject1/requirements.txt requirements.txt
+COPY /DataLoader/requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
-COPY /FlaskWebProject1/ .
+COPY /DataLoader/ .
 RUN ls
 
 
-CMD ["python3", "./app.py"]
+CMD ["python3", "./DataLoader.py"]
