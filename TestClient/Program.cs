@@ -45,11 +45,29 @@ namespace TestClient
 
         }
 
+
+        public static object getCPUCounter()
+        {
+            PerformanceCounter cpuCounter = new PerformanceCounter();
+            cpuCounter.CategoryName = "Processor";
+            cpuCounter.CounterName = "% Processor Time";
+            cpuCounter.InstanceName = "_Total";
+
+            // will always start at 0
+            dynamic firstValue = cpuCounter.NextValue();
+            System.Threading.Thread.Sleep(1000);
+            // now matches task manager reading
+            dynamic secondValue = cpuCounter.NextValue();
+
+            return secondValue;
+
+        }
+
         private static GrpcChannel Channel;
         private static OrderBoard.OrderBoardClient Client;
         static void Main(string[] args)
         {
-
+            var q = getCPUCounter();
             //SendLog("http://176.119.156.220:5020/Send",new LogContainer() {message="ssss" });
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             //AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);

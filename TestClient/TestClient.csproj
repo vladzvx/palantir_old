@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\SystemMonitoring\SystemMonitoring.csproj" />
   </ItemGroup>
 
 </Project>

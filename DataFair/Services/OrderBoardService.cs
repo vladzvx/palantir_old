@@ -60,7 +60,6 @@ namespace DataFair.Services
             {
                 return Task.FromResult(EmptyOrder);
             }
-
         }
 
         public override Task<Empty> PostOrder(Order order, ServerCallContext context)
