@@ -17,7 +17,7 @@ namespace DataFair.Controllers
         [EnableCors()]
         public string CheckerAnswer()
         {
-            return File.ReadAllText("settings.txt");
+            return File.Exists("settings.txt").ToString();
         }
     }
 }
