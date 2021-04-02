@@ -6,6 +6,8 @@ EXPOSE 5555
 
 COPY /FlaskWebProject1/requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
-COPY . .
+COPY /FlaskWebProject1/ .
+ls
+
 
 CMD ["python3", "./app.py"]
