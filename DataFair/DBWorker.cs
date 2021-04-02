@@ -32,7 +32,7 @@ namespace DataFair
         {
             try
             {
-                if (connectionString == null) connectionString = File.ReadAllText(Const.SettingsFilename);
+                if (connectionString == null) connectionString = File.ReadAllText(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), Const.SettingsFilename));
             }
             catch (FileNotFoundException)
             {
