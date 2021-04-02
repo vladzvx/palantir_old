@@ -1,12 +1,8 @@
-alchemysession
 google
 greenlet
-grpc
-grpc_tools
 grpcio
 grpcio_tools
 importlib_metadata
-pkg_resources
 protobuf
 psycopg2
 pyaes
@@ -16,6 +12,6 @@ setuptools
 six
 SQLAlchemy
 telethon
-telethon_session_sqlalchemy
 typing_extensions
 zipp
+telethon-session-sqlalchemy
