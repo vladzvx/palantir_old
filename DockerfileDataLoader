@@ -4,7 +4,8 @@ WORKDIR /app
 EXPOSE 5555
 
 
-COPY /DataLoader/requirements.txt requirements.txt
+COPY ./DataLoader/requirements.txt requirements.txt
+RUN ls
 RUN pip3 install -r requirements.txt
 COPY /DataLoader/ .
 RUN ls
