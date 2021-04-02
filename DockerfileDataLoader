@@ -7,3 +7,4 @@ EXPOSE 5555
 COPY /FlaskWebProject1/requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 COPY . .
+RUN ls
