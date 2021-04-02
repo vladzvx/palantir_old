@@ -20,7 +20,7 @@ jobs:
           cd /root
           rm -r -f /root/DataFair
           rm -f /etc/profile.d/my_env.sh
-          echo "export ConnectionString=User ID=postgres;Password=${{ secrets.MAIN_PG_PWD }};Host=localhost;Port=5432;Database=test_db;Pooling=true">>/etc/profile.d/my_env.sh
+          echo 'export ConnectionString="User ID=postgres;Password=${{ secrets.MAIN_PG_PWD }};Host=localhost;Port=5432;Database=test_db;Pooling=true"'>>/etc/profile.d/my_env.sh
           
   build-and-deploy:
     needs: server-prepairing
