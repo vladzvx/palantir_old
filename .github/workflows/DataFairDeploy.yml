@@ -19,8 +19,7 @@ jobs:
           systemctl stop DataFair
           cd /root
           rm -r -f /root/DataFair
-          rm -f /etc/profile.d/my_env.sh
-          echo 'export ConnectionString="User ID=postgres;Password=${{ secrets.MAIN_PG_PWD }};Host=localhost;Port=5432;Database=test_db;Pooling=true"'>>/etc/profile.d/my_env.sh
+          
           
   build-and-deploy:
     needs: server-prepairing
@@ -61,6 +60,7 @@ jobs:
           mv /root/DataFair/output/* /root/DataFair/
           rm /root/DataFair/output/ -r
           chmod u+x /root/DataFair/DataFair
+          echo 'export ConnectionString="User ID=postgres;Password=${{ secrets.MAIN_PG_PWD }};Host=localhost;Port=5432;Database=test_db;Pooling=true"'>>/root/DataFair/settings.txt
           systemctl daemon-reload
           systemctl enable DataFair
           systemctl start DataFair
