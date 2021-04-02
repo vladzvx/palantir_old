@@ -23,7 +23,7 @@ namespace DataFair
     {
         public static void Main(string[] args)
         {
-            Const.cnnstr.Equals("11");
+            bool r = Const.cnnstr != null;
             CreateHostBuilder(args).Build().Run();
         }
         public static IHostBuilder CreateHostBuilder(string[] args) =>
