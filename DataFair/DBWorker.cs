@@ -5,6 +5,7 @@ using System.Threading;
 using Common;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.IO;
 
 namespace DataFair
 {
@@ -27,8 +28,16 @@ namespace DataFair
         private readonly Thread UsersWritingThread;
         private readonly CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
 
-        public DBWorker(string connectionString)
+        public DBWorker(string connectionString=null)
         {
+            try
+            {
+                if (connectionString == null) connectionString = File.ReadAllText("settings.txt");
+            }
+            catch (FileNotFoundException)
+            {
+                throw new FileNotFoundException("No settings.txt file in dir " + Directory.GetCurrentDirectory());
+            }
             this.ConnectionString = connectionString;
             ReadConnention = new NpgsqlConnection(ConnectionString);
             ReadConnention.Open();
