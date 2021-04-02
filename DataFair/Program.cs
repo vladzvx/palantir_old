@@ -15,10 +15,10 @@ using System.Threading.Tasks;
 
 namespace DataFair
 {
-    internal static class Const
+    internal static class Constants
     {
         internal static readonly string SettingsFilename = "settings.txt";
-        public static string cnnstr = Environment.GetEnvironmentVariable("ConnectionString");
+        internal static readonly string ConnectionString = File.ReadAllText(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), Constants.SettingsFilename));
     }
     public class Program
     {

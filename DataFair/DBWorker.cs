@@ -28,16 +28,8 @@ namespace DataFair
         private readonly Thread UsersWritingThread;
         private readonly CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
 
-        public DBWorker(string connectionString=null)
+        public DBWorker(string connectionString)
         {
-            try
-            {
-                if (connectionString == null) connectionString = File.ReadAllText(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), Const.SettingsFilename));
-            }
-            catch (FileNotFoundException)
-            {
-                throw new FileNotFoundException("No settings.txt file in dir " + Directory.GetCurrentDirectory());
-            }
             this.ConnectionString = connectionString;
             ReadConnention = new NpgsqlConnection(ConnectionString);
             ReadConnention.Open();
