@@ -1,23 +1,11 @@
-#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+FROM python:3.8-slim-buster
 
-FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
 WORKDIR /app
-EXPOSE 80
-EXPOSE 5005
+EXPOSE 5555
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
-WORKDIR /src
-COPY ["DataFair/DataFair.csproj", "DataFair/"]
-COPY ["Common/Common.csproj", "Common/"]
-RUN dotnet restore "DataFair/DataFair.csproj"
+
+COPY /FlaskWebProject1/requirements.txt requirements.txt
+RUN pip3 install -r requirements.txt
 COPY . .
-WORKDIR "/src/DataFair"
-RUN dotnet build "DataFair.csproj" -c Release -o /app/build
 
-FROM build AS publish
-RUN dotnet publish "DataFair.csproj" -c Release -o /app/publish
-
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "DataFair.dll"]
+CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
