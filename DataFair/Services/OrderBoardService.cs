@@ -96,7 +96,7 @@ namespace DataFair.Services
                 Messages = Storage.worker.GetMessagesNumberInQueue(),
                 Collectors = Storage.Collectors.Count,
                 Users = Storage.Users.Count,
-                Sessions = Storage.Sessions.Count,
+                SessionsStorages = Storage.SessionStorages.Count,
                 Orders = Storage.Orders.Count,
                 MemoryUsed = Memory,
                 FreeDisk = Disk

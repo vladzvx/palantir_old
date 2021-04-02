@@ -19,7 +19,7 @@ message StateReport{
 	int32 Messages = 1;
 	int32 Entities = 2;
 	int32 Orders = 3;
-	int32 Sessions = 4;
+	int32 SessionsStorages = 4;
 	int32 Collectors = 5;
 	int32 Users = 6;
 	double CPU = 7;

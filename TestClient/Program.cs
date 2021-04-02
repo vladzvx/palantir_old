@@ -50,14 +50,6 @@ namespace TestClient
         static void Main(string[] args)
         {
 
-
-            long res = 0;
-            foreach (Process proc in Process.GetProcesses())
-            {
-                res += proc.WorkingSet64;
-            }
-            res = res / 1024 / 1024;
-
             //SendLog("http://176.119.156.220:5020/Send",new LogContainer() {message="ssss" });
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             //AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);

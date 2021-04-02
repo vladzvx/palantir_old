@@ -21,7 +21,7 @@ namespace DataFair.Services
             SessionSettings session;
             UserInfo user;
             Collector collector;
-            if (Storage.Sessions.TryPeek(out session)&& 
+            if (Storage.SessionStorages.TryPeek(out session)&& 
                 Storage.Users.TryTake(out user) && 
                 Storage.Collectors.TryPeek(out collector))
             {

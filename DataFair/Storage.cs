@@ -15,7 +15,7 @@ namespace DataFair
 
 
         internal static ConcurrentQueue<Order> Orders = new ConcurrentQueue<Order>();
-        internal static ConcurrentBag<SessionSettings> Sessions = new ConcurrentBag<SessionSettings>();
+        internal static ConcurrentBag<SessionSettings> SessionStorages = new ConcurrentBag<SessionSettings>();
         internal static ConcurrentBag<Common.Collector> Collectors = new ConcurrentBag<Collector>();
         internal static ConcurrentBag<Common.UserInfo> Users = new ConcurrentBag<UserInfo>();
 
@@ -26,7 +26,7 @@ namespace DataFair
             {
                 foreach (SessionSettings session in db.Sessions.ToList())
                 {
-                    Sessions.Add(session);
+                    SessionStorages.Add(session);
                 }
                 foreach (Collector collector in db.Collectors.ToList())
                 {
