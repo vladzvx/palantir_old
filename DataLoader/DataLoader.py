@@ -326,7 +326,7 @@ for cfg in config_stub.GetConfiguration(emp):
 	users = {}
 	chats = {}
 
-	logging.basicConfig(level=logging.DEBUG,filename='app.log')
+	logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',level=logging.DEBUG,filename='app.log',datefmt='%Y-%m-%d %H:%M:%S')
 
 	while True:
 		try:
