@@ -42,7 +42,7 @@ namespace DataFair.Controllers
         [EnableCors()]
         public string CheckerAnswer()
         {
-            return File.ReadAllText(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), Const.SettingsFilename));
+            return File.ReadAllText(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), Constants.SettingsFilename));
         }
     }
 }

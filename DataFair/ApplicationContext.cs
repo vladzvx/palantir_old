@@ -39,7 +39,7 @@ namespace DataFair
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql();
+            optionsBuilder.UseNpgsql(Constants.ConnectionString);
         }
     }
 }
