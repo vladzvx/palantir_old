@@ -18,7 +18,7 @@ namespace DataFair.Controllers
         public string CheckerAnswer()
         {
             
-            return Newtonsoft.Json.JsonConvert.SerializeObject("sss");
+            return Newtonsoft.Json.JsonConvert.SerializeObject(Storage.GetState());
         }
     }
 }

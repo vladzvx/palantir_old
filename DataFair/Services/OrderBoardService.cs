@@ -71,35 +71,8 @@ namespace DataFair.Services
 
         public override Task<StateReport> GetState(Empty request, ServerCallContext context)
         {
-            long Memory = 0;
-            long Disk = 0;
-            foreach (Process proc in Process.GetProcesses())
-            {
-                Memory += proc.WorkingSet64;
-            }
-            Memory = Memory / 1024 / 1024;
-
-            DriveInfo[] allDrives = DriveInfo.GetDrives();
-
-            foreach (DriveInfo d in allDrives)
-            {
-                if (d.IsReady == true)
-                {
-                    Disk+= d.TotalFreeSpace;
-                }
-            }
-            Disk = Disk / 1024 / 1024 / 1024;
-            return Task.FromResult(new StateReport() 
-            { 
-                Entities = Storage.worker.GetEntitiesNumberInQueue(), 
-                Messages = Storage.worker.GetMessagesNumberInQueue(),
-                Collectors = Storage.Collectors.Count,
-                Users = Storage.Users.Count,
-                SessionsStorages = Storage.SessionStorages.Count,
-                Orders = Storage.Orders.Count,
-                MemoryUsed = Memory,
-                FreeDisk = Disk
-            });
+            return Task.FromResult(Storage.GetState());
         }
+
     }
 }
