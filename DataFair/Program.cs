@@ -19,6 +19,7 @@ namespace DataFair
     {
         public static void Main(string[] args)
         {
+            bool t = Storage.Orders.Count == 0;
             CreateHostBuilder(args).Build().Run();
         }
         public static IHostBuilder CreateHostBuilder(string[] args) =>

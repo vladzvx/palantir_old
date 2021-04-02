@@ -22,7 +22,7 @@ namespace DataFair
 
 
         private readonly object ReadLocker = new object();
-        private readonly string ConnectionString;
+        internal readonly string ConnectionString;
         private readonly Thread MessagesWritingThread;
         private readonly Thread UsersWritingThread;
         private readonly CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
