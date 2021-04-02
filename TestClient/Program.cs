@@ -2,6 +2,7 @@
 using Grpc.Core;
 using Grpc.Net.Client;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -48,6 +49,15 @@ namespace TestClient
         private static OrderBoard.OrderBoardClient Client;
         static void Main(string[] args)
         {
+
+
+            long res = 0;
+            foreach (Process proc in Process.GetProcesses())
+            {
+                res += proc.WorkingSet64;
+            }
+            res = res / 1024 / 1024;
+
             //SendLog("http://176.119.156.220:5020/Send",new LogContainer() {message="ssss" });
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             //AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
@@ -57,7 +67,7 @@ namespace TestClient
            // Channel = GrpcChannel.ForAddress("http://176.119.156.220:5015",new GrpcChannelOptions() {HttpHandler= httpHandler,Credentials=ChannelCredentials.Insecure });
             Channel = GrpcChannel.ForAddress("http://45.132.17.172:5005", new GrpcChannelOptions() { HttpHandler = httpHandler, Credentials = ChannelCredentials.Insecure });
             Client = new OrderBoard.OrderBoardClient(Channel);
-            var result = Client.GetOrder(new Google.Protobuf.WellKnownTypes.Empty());
+            var result = Client.GetState(new Google.Protobuf.WellKnownTypes.Empty());
         }
     }
 }

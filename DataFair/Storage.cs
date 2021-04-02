@@ -14,10 +14,10 @@ namespace DataFair
         internal static DBWorker worker = new DBWorker(Constants.ConnectionString);
 
 
-        public static ConcurrentQueue<Order> Orders = new ConcurrentQueue<Order>();
-        public static ConcurrentBag<SessionSettings> Sessions = new ConcurrentBag<SessionSettings>();
-        public static ConcurrentBag<Common.Collector> Collectors = new ConcurrentBag<Collector>();
-        public static ConcurrentBag<Common.UserInfo> Users = new ConcurrentBag<UserInfo>();
+        internal static ConcurrentQueue<Order> Orders = new ConcurrentQueue<Order>();
+        internal static ConcurrentBag<SessionSettings> Sessions = new ConcurrentBag<SessionSettings>();
+        internal static ConcurrentBag<Common.Collector> Collectors = new ConcurrentBag<Collector>();
+        internal static ConcurrentBag<Common.UserInfo> Users = new ConcurrentBag<UserInfo>();
 
         private static object sync = new object();
         static Storage()

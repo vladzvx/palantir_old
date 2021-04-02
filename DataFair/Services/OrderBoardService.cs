@@ -10,6 +10,8 @@ using System.Collections.Concurrent;
 using System.Timers;
 using System.Threading;
 using Timer = System.Timers.Timer;
+using System.Diagnostics;
+using System.IO;
 
 namespace DataFair.Services
 {
@@ -56,8 +58,6 @@ namespace DataFair.Services
             }
             catch (Exception ex )
             {
-                logger.Error("Error while getting order!",ex);
-                logger.Info(Environment.GetEnvironmentVariable("ConnactionString"));
                 return Task.FromResult(EmptyOrder);
             }
 
@@ -72,10 +72,34 @@ namespace DataFair.Services
 
         public override Task<StateReport> GetState(Empty request, ServerCallContext context)
         {
+            long Memory = 0;
+            long Disk = 0;
+            foreach (Process proc in Process.GetProcesses())
+            {
+                Memory += proc.WorkingSet64;
+            }
+            Memory = Memory / 1024 / 1024;
+
+            DriveInfo[] allDrives = DriveInfo.GetDrives();
+
+            foreach (DriveInfo d in allDrives)
+            {
+                if (d.IsReady == true)
+                {
+                    Disk+= d.TotalFreeSpace;
+                }
+            }
+            Disk = Disk / 1024 / 1024 / 1024;
             return Task.FromResult(new StateReport() 
             { 
                 Entities = Storage.worker.GetEntitiesNumberInQueue(), 
-                Messages = Storage.worker.GetMessagesNumberInQueue() 
+                Messages = Storage.worker.GetMessagesNumberInQueue(),
+                Collectors = Storage.Collectors.Count,
+                Users = Storage.Users.Count,
+                Sessions = Storage.Sessions.Count,
+                Orders = Storage.Orders.Count,
+                MemoryUsed = Memory,
+                FreeDisk = Disk
             });
         }
     }

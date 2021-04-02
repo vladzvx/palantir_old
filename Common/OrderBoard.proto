@@ -16,9 +16,15 @@ service OrderBoard {
 }
 
 message StateReport{
-	int32 Messages =1;
-	int32 Entities =2;
-
+	int32 Messages = 1;
+	int32 Entities = 2;
+	int32 Orders = 3;
+	int32 Sessions = 4;
+	int32 Collectors = 5;
+	int32 Users = 6;
+	double CPU = 7;
+	int64 FreeDisk = 8;
+	int64 MemoryUsed = 9;
 }
 
 message CheckResult{
