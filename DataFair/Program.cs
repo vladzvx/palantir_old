@@ -17,13 +17,13 @@ namespace DataFair
 {
     internal static class Const
     {
+        internal static readonly string SettingsFilename = "settings.txt";
         public static string cnnstr = Environment.GetEnvironmentVariable("ConnectionString");
     }
     public class Program
     {
         public static void Main(string[] args)
         {
-            bool r = Const.cnnstr != null;
             CreateHostBuilder(args).Build().Run();
         }
         public static IHostBuilder CreateHostBuilder(string[] args) =>

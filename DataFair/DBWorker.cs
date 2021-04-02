@@ -32,7 +32,7 @@ namespace DataFair
         {
             try
             {
-                if (connectionString == null) connectionString = File.ReadAllText("settings.txt");
+                if (connectionString == null) connectionString = File.ReadAllText(Const.SettingsFilename);
             }
             catch (FileNotFoundException)
             {

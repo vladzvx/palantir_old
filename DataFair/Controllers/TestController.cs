@@ -17,7 +17,32 @@ namespace DataFair.Controllers
         [EnableCors()]
         public string CheckerAnswer()
         {
-            return File.Exists("settings.txt").ToString();
+            return File.Exists("/root/DataFair/settings.txt").ToString();
+        }
+    }
+
+    [ApiController]
+    [Route("[controller]")]
+    public class PathController
+    {
+        [HttpPost()]
+        [EnableCors()]
+        public string CheckerAnswer()
+        {
+            return Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+        }
+    }
+
+
+    [ApiController]
+    [Route("[controller]")]
+    public class SettingsTestController
+    {
+        [HttpPost()]
+        [EnableCors()]
+        public string CheckerAnswer()
+        {
+            return File.ReadAllText(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), Const.SettingsFilename));
         }
     }
 }
