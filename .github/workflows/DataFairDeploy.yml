@@ -61,6 +61,7 @@ jobs:
           rm /root/DataFair/output/ -r
           chmod u+x /root/DataFair/DataFair
           export ConnectionString="User ID=postgres;Password=${{ secrets.MAIN_PG_PWD }};Host=localhost;Port=5432;Database=test_db;Pooling=true"
+          env
           systemctl daemon-reload
           systemctl enable DataFair
           systemctl start DataFair
