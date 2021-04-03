@@ -124,7 +124,7 @@ namespace DataFair
                             try
                             {
                                 int count = 0;
-                                for (int i = 0; i < 100 && !messages.IsEmpty; i++)
+                                for (int i = 0; i < 10000 && !messages.IsEmpty; i++)
                                 {
                                     if (messages.TryDequeue(out Message message))
                                     {
