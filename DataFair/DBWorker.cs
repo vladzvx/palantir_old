@@ -70,7 +70,7 @@ namespace DataFair
             command.Parameters["_forward_from_message_id"].Value = message.ForwardFromMessageId != 0 ? message.ForwardFromMessageId : DBNull.Value;
             command.Parameters["_text"].Value = message.Text;
             command.Parameters["_media"].Value = message.Media;
-            command.Parameters["_formatting"].Value = message.Formating;
+            command.Parameters["_formatting"].Value = message.Formating.Count==0?DBNull.Value:Newtonsoft.Json.JsonConvert.SerializeObject(message.Formating);
             command.ExecuteNonQuery();
         }
         private static void WriteSingleUser(NpgsqlCommand command, Entity entity)
@@ -124,7 +124,7 @@ namespace DataFair
                             try
                             {
                                 int count = 0;
-                                for (int i = 0; i < 25000 && !messages.IsEmpty; i++)
+                                for (int i = 0; i < 100 && !messages.IsEmpty; i++)
                                 {
                                     if (messages.TryDequeue(out Message message))
                                     {
@@ -281,48 +281,53 @@ namespace DataFair
         }
         public async Task<bool> CheckEntity(Entity entity)
         {
-            lock (ReadLocker)
+            try
             {
-                switch (entity.Type)
+                lock (ReadLocker)
                 {
-                    case EntityType.User:
-                        {
-                            CheckUser.Parameters["user_id"].Value = entity.Id;
-                            using (NpgsqlDataReader reader = CheckUser.ExecuteReader())
+                    switch (entity.Type)
+                    {
+                        case EntityType.User:
                             {
-                                while (reader.Read())
+                                CheckUser.Parameters["user_id"].Value = entity.Id;
+                                using (NpgsqlDataReader reader = CheckUser.ExecuteReader())
                                 {
-                                    try
+                                    while (reader.Read())
                                     {
-                                        return reader.GetBoolean(0);
+                                        try
+                                        {
+                                            return reader.GetBoolean(0);
+                                        }
+                                        catch (InvalidCastException) { }
                                     }
-                                    catch (InvalidCastException) { }
+                                    reader.Close();
                                 }
-                                reader.Close();
+                                break;
                             }
-                            break;
-                        }
-                    default:
-                        {
-                            CheckChat.Parameters["chat_id"].Value = entity.Id;
-                            using (NpgsqlDataReader reader = CheckChat.ExecuteReader())
+                        default:
                             {
-                                while (reader.Read())
+                                CheckChat.Parameters["chat_id"].Value = entity.Id;
+                                using (NpgsqlDataReader reader = CheckChat.ExecuteReader())
                                 {
-                                    try
+                                    while (reader.Read())
                                     {
-                                        return reader.GetBoolean(0);
+                                        try
+                                        {
+                                            return reader.GetBoolean(0);
+                                        }
+                                        catch (InvalidCastException) { }
+
                                     }
-                                    catch (InvalidCastException) { }
-
+                                    reader.Close();
                                 }
-                                reader.Close();
+                                break;
                             }
-                            break;
-                        }
 
+                    }
                 }
             }
+            catch { }
+
             
             return false;
         }
