@@ -262,7 +262,7 @@ namespace DataFair
                     bool PairChecked = reader.IsDBNull(4) ? true : reader.GetBoolean(4);
                     string Username = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
                     string PairUsername = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
-
+                    
                     Order order = new Order() { Id = ChatId, Link = Username, Offset = Offset, PairId = PairId, PairLink = PairUsername };
                     if (!PairChecked)
                     {
@@ -274,6 +274,7 @@ namespace DataFair
                         order.Type = OrderType.History;
                         Storage.Orders.Enqueue(order);
                     }
+                    if (Storage.Orders.Count > 100) break;
                 }
                 catch (InvalidCastException) { }
             }

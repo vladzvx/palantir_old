@@ -2,6 +2,7 @@ create database test_db;
 create database sessions;
 
 drop database if exists test_db;
+select count(message_db_id) from messages;
 
 create table public.chats (
     id bigint,
