@@ -17,7 +17,7 @@
     "DataFair": {
       "commandName": "Project",
       "environmentVariables": {
-        "ConnectionString": "User ID=postgres;Password=QW12cv9001Qw_;Host=45.132.17.172;Port=5432;Database=test_db;Pooling=true",
+        "ConnectionString": "User ID=postgres;Password=qw12cv90;Host=localhost;Port=5432;Database=test_db;Pooling=true",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": "true",

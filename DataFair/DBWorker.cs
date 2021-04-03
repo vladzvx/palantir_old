@@ -69,8 +69,8 @@ namespace DataFair
             command.Parameters["_forward_from_id"].Value = message.ForwardFromId != 0 ? message.ForwardFromId : DBNull.Value;
             command.Parameters["_forward_from_message_id"].Value = message.ForwardFromMessageId != 0 ? message.ForwardFromMessageId : DBNull.Value;
             command.Parameters["_text"].Value = message.Text;
-            command.Parameters["_media"].Value = DBNull.Value;// essage.Media;
-            command.Parameters["_formatting"].Value = DBNull.Value;// message.Formating;
+            command.Parameters["_media"].Value = message.Media;
+            command.Parameters["_formatting"].Value = message.Formating;
             command.ExecuteNonQuery();
         }
         private static void WriteSingleUser(NpgsqlCommand command, Entity entity)
@@ -108,8 +108,8 @@ namespace DataFair
             AddMessageCommand.Parameters.Add(new NpgsqlParameter("_forward_from_id", NpgsqlTypes.NpgsqlDbType.Bigint));
             AddMessageCommand.Parameters.Add(new NpgsqlParameter("_forward_from_message_id", NpgsqlTypes.NpgsqlDbType.Bigint));
             AddMessageCommand.Parameters.Add(new NpgsqlParameter("_text", NpgsqlTypes.NpgsqlDbType.Text));
-            AddMessageCommand.Parameters.Add(new NpgsqlParameter("_media", NpgsqlTypes.NpgsqlDbType.Jsonb));
-            AddMessageCommand.Parameters.Add(new NpgsqlParameter("_formatting", NpgsqlTypes.NpgsqlDbType.Jsonb));
+            AddMessageCommand.Parameters.Add(new NpgsqlParameter("_media", NpgsqlTypes.NpgsqlDbType.Text));
+            AddMessageCommand.Parameters.Add(new NpgsqlParameter("_formatting", NpgsqlTypes.NpgsqlDbType.Text));
 
             CancellationToken Token = (CancellationToken)cancellationToken;
             while (!Token.IsCancellationRequested)

@@ -299,7 +299,7 @@ class TgDataGetter():
 
 
 time.sleep(2);
-grpc_host = os.environ.get('grpc_host') 
+grpc_host = "45.132.17.172:5005"#os.environ.get('grpc_host') 
 
 channel = grpc.insecure_channel(grpc_host)
 config_stub = Configurator_pb2_grpc.ConfiguratorStub(channel);

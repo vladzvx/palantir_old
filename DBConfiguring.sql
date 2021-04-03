@@ -3,32 +3,6 @@ create database sessions;
 
 drop database if exists test_db;
 
-
-create table public.collectors(
-    id serial,
-    adding_time timestamp default CURRENT_TIMESTAMP,
-    api_id bigint,
-    api_hash text,
-    primary key (id)
-);
-
-create table public.collectors_user_info(
-    phone text,
-    adding_time timestamp default CURRENT_TIMESTAMP,
-    session_name text,
-    full_channels_req_counter int default 0,
-    primary key (phone)
-);
-
-create table public.session_storage_settings(
-    host text,
-    dialect text,
-    db_name text,
-    db_user text,
-    pwd text
-);
-
-
 create table public.chats (
     id bigint,
     adding_time timestamp default CURRENT_TIMESTAMP,
@@ -73,9 +47,12 @@ create table public.messages(
     text text default null,
     media jsonb,
     formatting jsonb,
+    media_costyl text,
+    formatting_costyl text,
     primary key (message_db_id, message_timestamp),
     foreign key (chat_id) references chats (id)
 )  PARTITION BY RANGE (message_timestamp);
+
 
 CREATE TABLE messages_2014_m01 PARTITION OF messages FOR VALUES FROM ('2014-01-01') TO ('2014-02-01');
 CREATE TABLE messages_2014_m02 PARTITION OF messages FOR VALUES FROM ('2014-02-01') TO ('2014-03-01');
@@ -273,7 +250,7 @@ CREATE TABLE messages_2029_m12 PARTITION OF messages FOR VALUES FROM ('2029-12-0
 
 CREATE OR REPLACE FUNCTION add_message(_message_timestamp timestamp,_message_id bigint, _chat_id bigint, _user_id bigint,
     _reply_to bigint,_thread_start bigint,_media_group_id bigint,_forward_from_id BIGINT,_forward_from_message_id bigint,
-     _text text, _media jsonb, _formatting jsonb) RETURNS void as
+     _text text, _media text, _formatting text) RETURNS void as
 $$
     begin
             insert into public.messages (message_timestamp,
@@ -286,8 +263,8 @@ $$
                                          forward_from_id,
                                          forward_from_message_id,
                                          text,
-                                         media,
-                                         formatting) values (_message_timestamp,
+                                         media_costyl,
+                                         formatting_costyl) values (_message_timestamp,
                                                              _message_id,
                                                              _chat_id,
                                                              _user_id,
