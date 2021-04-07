@@ -54,6 +54,9 @@ class TgDataGetter():
 				if link=="":
 					return None;
 			client = self._client;
+			global ResolveUsernameRequestBan;
+			if ResolveUsernameRequestBan:
+				return None;
 			ie = await client.get_input_entity(link)
 			ipc = telethon.types.InputPeerChannel(ie.channel_id,ie.access_hash);
 			return await client(functions.channels.GetFullChannelRequest(ipc))
@@ -79,6 +82,7 @@ class TgDataGetter():
 			else:
 				return None
 		except BaseException as e:
+			raise e;
 			return None
 
 	def get_full_channel(self,order):
@@ -299,7 +303,7 @@ class TgDataGetter():
 
 
 time.sleep(2);
-grpc_host = "localhost:5005";#os.environ.get('grpc_host') 
+grpc_host = os.environ.get('grpc_host') 
 
 channel = grpc.insecure_channel(grpc_host)
 config_stub = Configurator_pb2_grpc.ConfiguratorStub(channel);
@@ -325,13 +329,21 @@ for cfg in config_stub.GetConfiguration(emp):
 	timestamp = datetime.datetime.utcnow();
 	users = {}
 	chats = {}
+	ResolveUsernameRequestBan = False;
+	ResolveUsernameRequestTime = datetime.datetime.utcnow();
 
 	logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',level=logging.DEBUG,filename='app.log',datefmt='%Y-%m-%d %H:%M:%S')
-
+	
 	while True:
 		try:
+
+			if 	ResolveUsernameRequestBan:
+				delta_timeRes =(datetime.datetime.utcnow()-ResolveUsernameRequestTime) 
+				if delta_timeRes.seconds>=10000:
+					ResolveUsernameRequestBan=False;
+					
 			delta_time =(datetime.datetime.utcnow()-timestamp) 
-			if delta_time.days>=24:
+			if delta_time.seconds>=86400:
 				GetFullChannelCounter=0
 				timestamp=datetime.datetime.utcnow()
 				logging.debug("Reset daily limits.")
@@ -351,12 +363,16 @@ for cfg in config_stub.GetConfiguration(emp):
 					fch = getter.get_full_channel(order)
 					if fch is not None:
 						stub.PostEntity(fch)
-				else:
-					stub.PostOrder(order);
+				#else:
+					#stub.PostOrder(order);
 			elif order.Type==0:
 				q=0;
 		except telethon.errors.ChannelPrivateError:
 			pass;
+		except telethon.errors.FloodWaitError as e:
+			if "ResolveUsernameRequest" in e.args[0]:
+				ResolveUsernameRequestBan = True;
+				ResolveUsernameRequestTime = datetime.datetime.utcnow();
 		except BaseException as e:
 			logging.error(e.args[0])
 

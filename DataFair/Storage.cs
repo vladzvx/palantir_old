@@ -49,7 +49,7 @@ namespace DataFair
         {
             if (System.Threading.Monitor.TryEnter(sync))
             {
-                worker.CreateTasksByUnupdatedChats(DateTime.UtcNow.AddHours(-2));
+                worker.CreateTasksByUnupdatedChats(DateTime.Now.AddHours(1));
                 System.Threading.Monitor.Exit(sync);
             }
         }
