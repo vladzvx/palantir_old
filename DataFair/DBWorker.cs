@@ -11,6 +11,7 @@ namespace DataFair
 {
     public class DBWorker
     {
+        private bool kostyl_stop = false;
         private readonly ConcurrentQueue<Message> messages = new ConcurrentQueue<Message>();
         private readonly ConcurrentQueue<Entity> entities = new ConcurrentQueue<Entity>();
 
@@ -249,6 +250,7 @@ namespace DataFair
         }
         public void CreateTasksByUnupdatedChats(DateTime BoundDateTime)
         {
+            if (kostyl_stop) return;
             GetChatsForUpdate.Parameters["dt"].Value = BoundDateTime;
             NpgsqlDataReader reader = GetChatsForUpdate.ExecuteReader();
             while (reader.Read())
@@ -273,8 +275,9 @@ namespace DataFair
                     {
                         order.Type = OrderType.History;
                         Storage.Orders.Enqueue(order);
+                        //kostyl_stop = true;
                     }
-                    if (Storage.Orders.Count > 100) break;
+                    //if (Storage.Orders.Count > 100) break;
                 }
                 catch (InvalidCastException) { }
             }

@@ -133,7 +133,7 @@ class TgDataGetter():
 							format.Offset = entity.offset
 					elif isinstance(entity,telethon.types.MessageEntityMentionName):
 						format.Type = 6
-						format.Content = entity.user_id
+						format.Content = str(entity.user_id)
 						if entity.length is not None:
 							format.Length = entity.length
 						if entity.length is not None:
@@ -299,7 +299,7 @@ class TgDataGetter():
 
 
 time.sleep(2);
-grpc_host = "45.132.17.172:5005";#os.environ.get('grpc_host') 
+grpc_host = "localhost:5005";#os.environ.get('grpc_host') 
 
 channel = grpc.insecure_channel(grpc_host)
 config_stub = Configurator_pb2_grpc.ConfiguratorStub(channel);
@@ -355,6 +355,8 @@ for cfg in config_stub.GetConfiguration(emp):
 					stub.PostOrder(order);
 			elif order.Type==0:
 				q=0;
+		except telethon.errors.ChannelPrivateError:
+			pass;
 		except BaseException as e:
 			logging.error(e.args[0])
 
