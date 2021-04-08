@@ -226,6 +226,7 @@ class TgDataGetter():
 		global stub;
 		global GetFullChannelCounter
 		global GetFullChannelCounterLimit
+		global ResolveUsernameRequestBan
 		try:
 			logging.debug("Trying get chat (channel) entity by id...")
 			entity = await client.get_entity(order.Id)
@@ -234,6 +235,8 @@ class TgDataGetter():
 				logging.debug("Failed.")
 				if order.Link!="":
 					logging.debug("Trying by link...")
+					if ResolveUsernameRequestBan:
+						return;
 					entity = await client.get_entity(order.Link)
 				elif order.PairLink!="" and GetFullChannelCounter<GetFullChannelCounterLimit:
 					logging.info("Trying learn id by get_full_channel request...")
@@ -243,6 +246,8 @@ class TgDataGetter():
 						logging.info("Full channel getted!")
 						logging.info("Trying get chat (channel) entity by id...")
 						#stub.PostEntity(temp_entity)
+						if ResolveUsernameRequestBan:
+							return;
 						entity = await client.get_entity(order.Id)
 						if entity is not None:
 							logging.info("Ok!")

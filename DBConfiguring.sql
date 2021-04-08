@@ -380,3 +380,7 @@ CREATE TRIGGER on_insert_to_users before INSERT on public.users FOR EACH ROW exe
 CREATE TRIGGER on_insert_to_chats before INSERT on public.chats FOR EACH ROW execute PROCEDURE chats_protect();
 
 insert into chats (id,username,is_channel) values (1264079104, 'ssleg', true);
+
+
+create index messages_user_id_index on messages (user_id);
+create index messages_chat_id_index on messages (chat_id);

@@ -12,7 +12,7 @@ namespace DataFair
 {
     internal static class Storage
     {
-        internal static Timer timer = new Timer(20000);
+        internal static Timer timer = new Timer(60000);
         internal static DBWorker worker = new DBWorker(Constants.ConnectionString);
 
 
@@ -20,31 +20,51 @@ namespace DataFair
         internal static ConcurrentBag<SessionSettings> SessionStorages = new ConcurrentBag<SessionSettings>();
         internal static ConcurrentBag<Common.Collector> Collectors = new ConcurrentBag<Collector>();
         internal static ConcurrentBag<Common.UserInfo> Users = new ConcurrentBag<UserInfo>();
+        internal static ConcurrentDictionary<string,Common.UserInfo> AllUsers = new ConcurrentDictionary<string,UserInfo>();
+        internal static ConcurrentDictionary<string,Common.SessionSettings> AllSessions = new ConcurrentDictionary<string, SessionSettings>();
+        internal static ConcurrentDictionary<string,Common.Collector> AllCollectors = new ConcurrentDictionary<string, Collector>();
 
         private static object sync = new object();
         static Storage()
+        {
+            LoadCollectorsInfoFromDB(null,null);
+            action(null,null);
+            timer.Elapsed += action;
+            timer.Elapsed += LoadCollectorsInfoFromDB;
+            timer.AutoReset = true;
+            timer.Start();
+        }
+
+        private static void LoadCollectorsInfoFromDB(object sender, ElapsedEventArgs args)
         {
             using (ApplicationContext db = new ApplicationContext())
             {
                 foreach (SessionSettings session in db.Sessions.ToList())
                 {
-                    SessionStorages.Add(session);
+                    if (!AllSessions.ContainsKey(session.SessionStorageHost))
+                    {
+                        AllSessions.TryAdd(session.SessionStorageHost, session);
+                        SessionStorages.Add(session);
+                    }
                 }
                 foreach (Collector collector in db.Collectors.ToList())
                 {
-                    Collectors.Add(collector);
+                    if (!AllCollectors.ContainsKey(collector.ApiHash))
+                    {
+                        AllCollectors.TryAdd(collector.ApiHash, collector);
+                        Collectors.Add(collector);
+                    }
                 }
                 foreach (UserInfo user in db.UsersInfo.ToList())
                 {
-                    Users.Add(user);
+                    if (!AllUsers.ContainsKey(user.Phone))
+                    {
+                        AllUsers.TryAdd(user.Phone, user);
+                        Users.Add(user);
+                    }
                 }
             }
-
-            timer.Elapsed += action;
-            timer.AutoReset = true;
-            timer.Start();
         }
-
         private static void action(object sender, ElapsedEventArgs args)
         {
             if (System.Threading.Monitor.TryEnter(sync))

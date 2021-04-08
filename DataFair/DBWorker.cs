@@ -6,6 +6,7 @@ using Common;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace DataFair
 {
@@ -268,13 +269,19 @@ namespace DataFair
                     Order order = new Order() { Id = ChatId, Link = Username, Offset = Offset, PairId = PairId, PairLink = PairUsername };
                     if (!PairChecked)
                     {
-                        order.Type = OrderType.GetFullChannel;
-                        Storage.Orders.Enqueue(order);
+                        if (!Storage.Orders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.GetFullChannel; }))
+                        {
+                            order.Type = OrderType.GetFullChannel;
+                            Storage.Orders.Enqueue(order);
+                        }
                     }
                     else
                     {
-                        order.Type = OrderType.History;
-                        Storage.Orders.Enqueue(order);
+                        if (!Storage.Orders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.History; }))
+                        {
+                            order.Type = OrderType.History;
+                            Storage.Orders.Enqueue(order);
+                        }
                         //kostyl_stop = true;
                     }
                     //if (Storage.Orders.Count > 100) break;
