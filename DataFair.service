@@ -2,6 +2,7 @@
 Description=DataFair
 
 [Service]
+OOMScoreAdjust=-1000
 Type=simple
 ExecStart=/root/DataFair/DataFair
 
