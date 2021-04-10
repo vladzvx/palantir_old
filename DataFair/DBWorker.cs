@@ -7,11 +7,13 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using NLog;
 
 namespace DataFair
 {
     public class DBWorker
     {
+        private Logger logger = NLog.LogManager.GetCurrentClassLogger();
         private bool kostyl_stop = false;
         private readonly ConcurrentQueue<Message> messages = new ConcurrentQueue<Message>();
         private readonly ConcurrentQueue<Entity> entities = new ConcurrentQueue<Entity>();
@@ -116,7 +118,7 @@ namespace DataFair
             CancellationToken Token = (CancellationToken)cancellationToken;
             while (!Token.IsCancellationRequested)
             {
-                ConcurrentQueue<Message> TempForFailedTrasaction = new ConcurrentQueue<Message>();
+                //ConcurrentQueue<Message> TempForFailedTrasaction = new ConcurrentQueue<Message>();
                 try
                 {
                     while (!messages.IsEmpty)
@@ -126,34 +128,35 @@ namespace DataFair
                             try
                             {
                                 int count = 0;
-                                for (int i = 0; i < 10000 && !messages.IsEmpty; i++)
+                                for (int i = 0; i < 25000 && !messages.IsEmpty; i++)
                                 {
                                     if (messages.TryDequeue(out Message message))
                                     {
-                                        TempForFailedTrasaction.Enqueue(message);
+                                        //TempForFailedTrasaction.Enqueue(message);
                                         AddMessageCommand.Transaction = transaction;
                                         WriteSingleMessage(AddMessageCommand, message);
                                         count++;
                                     }
                                 }
                                 transaction.Commit();
-                                TempForFailedTrasaction = new ConcurrentQueue<Message>();
+                                //TempForFailedTrasaction = new ConcurrentQueue<Message>();
                             }
                             catch (Exception ex)
                             {
                                 transaction.Rollback();
-                                AddMessageCommand.Transaction = null;
-                                while (TempForFailedTrasaction.TryDequeue(out Message message))
-                                {
-                                    try
-                                    {
-                                        WriteSingleMessage(AddMessageCommand, message);
-                                    }
-                                    catch (Exception exe)
-                                    {
+                                logger.Error(ex, "Error while writing entities!");
+                                //AddMessageCommand.Transaction = null;
+                                //while (TempForFailedTrasaction.TryDequeue(out Message message))
+                                //{
+                                //    try
+                                //    {
+                                //        WriteSingleMessage(AddMessageCommand, message);
+                                //    }
+                                //    catch (Exception exe)
+                                //    {
 
-                                    }
-                                }
+                                //    }
+                                //}
                             }
                         }
                     }
@@ -226,7 +229,7 @@ namespace DataFair
                             catch (Exception ex)
                             {
                                 transaction.Rollback();
-                                throw ex;
+                                logger.Error(ex,"Error while writing entities!");
                             }
                         }
                     }
@@ -234,7 +237,7 @@ namespace DataFair
                 }
                 catch (Exception ex)
                 {
-                    //logger.Error(ex, "Error while DB writing to DB");
+                    //
                 }
             }
 

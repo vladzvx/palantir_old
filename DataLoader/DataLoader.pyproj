@@ -11,7 +11,8 @@
     <OutputPath>.</OutputPath>
     <Name>DataLoader</Name>
     <RootNamespace>DataLoader</RootNamespace>
-    <InterpreterId>MSBuild|python_interpretator|$(MSBuildProjectFullPath)</InterpreterId>
+    <InterpreterId>
+    </InterpreterId>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <Environment>
@@ -27,29 +28,10 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="add_session.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="DataLoader.py" />
-    <Compile Include="add_order.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="OrderBoard_pb2.py" />
-    <Compile Include="OrderBoard_pb2_grpc.py" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="requirements.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Interpreter Include="python_interpretator\">
-      <Id>python_interpretator</Id>
-      <Version>3.7</Version>
-      <Description>python_interpretator (Python 3.7 (64-bit))</Description>
-      <InterpreterPath>Scripts\python.exe</InterpreterPath>
-      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
-      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
-      <Architecture>X64</Architecture>
-    </Interpreter>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
