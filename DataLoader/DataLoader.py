@@ -215,7 +215,7 @@ class TgDataGetter():
 					if tg_entity.username is not None:
 						entity.Link = tg_entity.username
 					if tg_entity.title is not None:
-						entity.LastName = tg_entity.title
+						entity.FirstName = tg_entity.title
 					stub.PostEntity(entity)
 				chats[from_id.channel_id] = 0;
 		return False;
