@@ -234,6 +234,10 @@ class TgDataGetter():
 			if "Could not find the input entity for" in e.args[0]:
 				logging.debug("Failed.")
 				if order.Link!="":
+					if order.RedirectCounter<5:
+						order.RedirectCounter+=1;
+						stub.PostOrder(order);
+						return;
 					logging.debug("Trying by link...")
 					if ResolveUsernameRequestBan:
 						return;
@@ -308,7 +312,7 @@ class TgDataGetter():
 
 
 time.sleep(2);
-grpc_host = os.environ.get('grpc_host') 
+grpc_host ="localhost:5005"# os.environ.get('grpc_host') 
 
 channel = grpc.insecure_channel(grpc_host)
 config_stub = Configurator_pb2_grpc.ConfiguratorStub(channel);

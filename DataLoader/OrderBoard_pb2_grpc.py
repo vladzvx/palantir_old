@@ -40,6 +40,11 @@ class OrderBoardStub(object):
                 request_serializer=OrderBoard__pb2.Message.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 )
+        self.GetState = channel.unary_unary(
+                '/orders.OrderBoard/GetState',
+                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                response_deserializer=OrderBoard__pb2.StateReport.FromString,
+                )
 
 
 class OrderBoardServicer(object):
@@ -75,6 +80,12 @@ class OrderBoardServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetState(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_OrderBoardServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -102,6 +113,11 @@ def add_OrderBoardServicer_to_server(servicer, server):
                     servicer.StreamMessages,
                     request_deserializer=OrderBoard__pb2.Message.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            ),
+            'GetState': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetState,
+                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                    response_serializer=OrderBoard__pb2.StateReport.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -195,5 +211,22 @@ class OrderBoard(object):
         return grpc.experimental.stream_unary(request_iterator, target, '/orders.OrderBoard/StreamMessages',
             OrderBoard__pb2.Message.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetState(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/orders.OrderBoard/GetState',
+            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            OrderBoard__pb2.StateReport.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -92,6 +92,7 @@ message Order {
 	string Link = 5;
 	string PairLink = 6;
 	OrderType Type = 7;
+	int32 RedirectCounter = 8;
 }
 
 enum OrderType{

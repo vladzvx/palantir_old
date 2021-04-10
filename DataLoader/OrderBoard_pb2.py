@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\252\002\006Common',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x10OrderBoard.proto\x12\x06orders\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x1d\n\x0b\x43heckResult\x12\x0e\n\x06Result\x18\x01 \x01(\x08\"\x99\x01\n\x06\x45ntity\x12\n\n\x02Id\x18\x01 \x01(\x03\x12\x0e\n\x06PairId\x18\x02 \x01(\x03\x12\x0c\n\x04Link\x18\x03 \x01(\t\x12\x10\n\x08PairLink\x18\x04 \x01(\t\x12\x11\n\tFirstName\x18\x05 \x01(\t\x12\x10\n\x08LastName\x18\x06 \x01(\t\x12\x0c\n\x04\x44\x65sc\x18\x07 \x01(\t\x12 \n\x04Type\x18\x08 \x01(\x0e\x32\x12.orders.EntityType\"\xb2\x02\n\x07Message\x12-\n\tTimestamp\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0c\n\x04Text\x18\x02 \x01(\t\x12\r\n\x05Media\x18\x03 \x01(\t\x12\n\n\x02Id\x18\x04 \x01(\x03\x12\x0e\n\x06\x46romId\x18\x05 \x01(\x03\x12\x15\n\rForwardFromId\x18\x06 \x01(\x03\x12\x1c\n\x14\x46orwardFromMessageId\x18\x07 \x01(\x03\x12\x0e\n\x06\x43hatId\x18\x08 \x01(\x03\x12\x14\n\x0cMediagroupId\x18\t \x01(\x03\x12\x0f\n\x07ReplyTo\x18\n \x01(\x03\x12\x13\n\x0bThreadStart\x18\x0b \x01(\x03\x12\x18\n\x10\x46romExistingUser\x18\x0c \x01(\x08\x12$\n\tFormating\x18\r \x03(\x0b\x32\x11.orders.Formating\"a\n\tFormating\x12#\n\x04Type\x18\x01 \x01(\x0e\x32\x15.orders.FormatingType\x12\x0e\n\x06Length\x18\x02 \x01(\x05\x12\x0e\n\x06Offset\x18\x03 \x01(\x05\x12\x0f\n\x07\x43ontent\x18\x04 \x01(\t\"\x85\x01\n\x05Order\x12\x0f\n\x07OrderId\x18\x01 \x01(\x03\x12\n\n\x02Id\x18\x02 \x01(\x03\x12\x0e\n\x06PairId\x18\x03 \x01(\x03\x12\x0e\n\x06Offset\x18\x04 \x01(\x03\x12\x0c\n\x04Link\x18\x05 \x01(\t\x12\x10\n\x08PairLink\x18\x06 \x01(\t\x12\x1f\n\x04Type\x18\x07 \x01(\x0e\x32\x11.orders.OrderType*.\n\nEntityType\x12\x08\n\x04User\x10\x00\x12\x0b\n\x07\x43hannel\x10\x01\x12\t\n\x05Group\x10\x02*r\n\rFormatingType\x12\x08\n\x04\x42old\x10\x00\x12\n\n\x06Strike\x10\x01\x12\n\n\x06Italic\x10\x02\x12\r\n\tUnderline\x10\x03\x12\x08\n\x04\x43ode\x10\x04\x12\x07\n\x03Pre\x10\x05\x12\x0f\n\x0bTextMention\x10\x06\x12\x0c\n\x08TextLink\x10\x07*7\n\tOrderType\x12\t\n\x05\x45mpty\x10\x00\x12\x0b\n\x07History\x10\x01\x12\x12\n\x0eGetFullChannel\x10\x02\x32\x9a\x02\n\nOrderBoard\x12\x31\n\x08GetOrder\x12\x16.google.protobuf.Empty\x1a\r.orders.Order\x12\x32\n\tPostOrder\x12\r.orders.Order\x1a\x16.google.protobuf.Empty\x12\x34\n\nPostEntity\x12\x0e.orders.Entity\x1a\x16.google.protobuf.Empty\x12\x32\n\x0b\x43heckEntity\x12\x0e.orders.Entity\x1a\x13.orders.CheckResult\x12;\n\x0eStreamMessages\x12\x0f.orders.Message\x1a\x16.google.protobuf.Empty(\x01\x42\t\xaa\x02\x06\x43ommonb\x06proto3'
+  serialized_pb=b'\n\x10OrderBoard.proto\x12\x06orders\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xb1\x01\n\x0bStateReport\x12\x10\n\x08Messages\x18\x01 \x01(\x05\x12\x10\n\x08\x45ntities\x18\x02 \x01(\x05\x12\x0e\n\x06Orders\x18\x03 \x01(\x05\x12\x18\n\x10SessionsStorages\x18\x04 \x01(\x05\x12\x12\n\nCollectors\x18\x05 \x01(\x05\x12\r\n\x05Users\x18\x06 \x01(\x05\x12\x0b\n\x03\x43PU\x18\x07 \x01(\x01\x12\x10\n\x08\x46reeDisk\x18\x08 \x01(\x03\x12\x12\n\nMemoryUsed\x18\t \x01(\x03\"\x1d\n\x0b\x43heckResult\x12\x0e\n\x06Result\x18\x01 \x01(\x08\"\x99\x01\n\x06\x45ntity\x12\n\n\x02Id\x18\x01 \x01(\x03\x12\x0e\n\x06PairId\x18\x02 \x01(\x03\x12\x0c\n\x04Link\x18\x03 \x01(\t\x12\x10\n\x08PairLink\x18\x04 \x01(\t\x12\x11\n\tFirstName\x18\x05 \x01(\t\x12\x10\n\x08LastName\x18\x06 \x01(\t\x12\x0c\n\x04\x44\x65sc\x18\x07 \x01(\t\x12 \n\x04Type\x18\x08 \x01(\x0e\x32\x12.orders.EntityType\"\xb2\x02\n\x07Message\x12-\n\tTimestamp\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0c\n\x04Text\x18\x02 \x01(\t\x12\r\n\x05Media\x18\x03 \x01(\t\x12\n\n\x02Id\x18\x04 \x01(\x03\x12\x0e\n\x06\x46romId\x18\x05 \x01(\x03\x12\x15\n\rForwardFromId\x18\x06 \x01(\x03\x12\x1c\n\x14\x46orwardFromMessageId\x18\x07 \x01(\x03\x12\x0e\n\x06\x43hatId\x18\x08 \x01(\x03\x12\x14\n\x0cMediagroupId\x18\t \x01(\x03\x12\x0f\n\x07ReplyTo\x18\n \x01(\x03\x12\x13\n\x0bThreadStart\x18\x0b \x01(\x03\x12\x18\n\x10\x46romExistingUser\x18\x0c \x01(\x08\x12$\n\tFormating\x18\r \x03(\x0b\x32\x11.orders.Formating\"a\n\tFormating\x12#\n\x04Type\x18\x01 \x01(\x0e\x32\x15.orders.FormatingType\x12\x0e\n\x06Length\x18\x02 \x01(\x05\x12\x0e\n\x06Offset\x18\x03 \x01(\x05\x12\x0f\n\x07\x43ontent\x18\x04 \x01(\t\"\x9e\x01\n\x05Order\x12\x0f\n\x07OrderId\x18\x01 \x01(\x03\x12\n\n\x02Id\x18\x02 \x01(\x03\x12\x0e\n\x06PairId\x18\x03 \x01(\x03\x12\x0e\n\x06Offset\x18\x04 \x01(\x03\x12\x0c\n\x04Link\x18\x05 \x01(\t\x12\x10\n\x08PairLink\x18\x06 \x01(\t\x12\x1f\n\x04Type\x18\x07 \x01(\x0e\x32\x11.orders.OrderType\x12\x17\n\x0fRedirectCounter\x18\x08 \x01(\x05*.\n\nEntityType\x12\x08\n\x04User\x10\x00\x12\x0b\n\x07\x43hannel\x10\x01\x12\t\n\x05Group\x10\x02*r\n\rFormatingType\x12\x08\n\x04\x42old\x10\x00\x12\n\n\x06Strike\x10\x01\x12\n\n\x06Italic\x10\x02\x12\r\n\tUnderline\x10\x03\x12\x08\n\x04\x43ode\x10\x04\x12\x07\n\x03Pre\x10\x05\x12\x0f\n\x0bTextMention\x10\x06\x12\x0c\n\x08TextLink\x10\x07*7\n\tOrderType\x12\t\n\x05\x45mpty\x10\x00\x12\x0b\n\x07History\x10\x01\x12\x12\n\x0eGetFullChannel\x10\x02\x32\xd3\x02\n\nOrderBoard\x12\x31\n\x08GetOrder\x12\x16.google.protobuf.Empty\x1a\r.orders.Order\x12\x32\n\tPostOrder\x12\r.orders.Order\x1a\x16.google.protobuf.Empty\x12\x34\n\nPostEntity\x12\x0e.orders.Entity\x1a\x16.google.protobuf.Empty\x12\x32\n\x0b\x43heckEntity\x12\x0e.orders.Entity\x1a\x13.orders.CheckResult\x12;\n\x0eStreamMessages\x12\x0f.orders.Message\x1a\x16.google.protobuf.Empty(\x01\x12\x37\n\x08GetState\x12\x16.google.protobuf.Empty\x1a\x13.orders.StateReportB\t\xaa\x02\x06\x43ommonb\x06proto3'
   ,
   dependencies=[google_dot_protobuf_dot_empty__pb2.DESCRIPTOR,google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,])
 
@@ -51,8 +51,8 @@ _ENTITYTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=821,
-  serialized_end=867,
+  serialized_start=1026,
+  serialized_end=1072,
 )
 _sym_db.RegisterEnumDescriptor(_ENTITYTYPE)
 
@@ -107,8 +107,8 @@ _FORMATINGTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=869,
-  serialized_end=983,
+  serialized_start=1074,
+  serialized_end=1188,
 )
 _sym_db.RegisterEnumDescriptor(_FORMATINGTYPE)
 
@@ -138,8 +138,8 @@ _ORDERTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=985,
-  serialized_end=1040,
+  serialized_start=1190,
+  serialized_end=1245,
 )
 _sym_db.RegisterEnumDescriptor(_ORDERTYPE)
 
@@ -159,6 +159,94 @@ Empty = 0
 History = 1
 GetFullChannel = 2
 
+
+
+_STATEREPORT = _descriptor.Descriptor(
+  name='StateReport',
+  full_name='orders.StateReport',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='Messages', full_name='orders.StateReport.Messages', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='Entities', full_name='orders.StateReport.Entities', index=1,
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='Orders', full_name='orders.StateReport.Orders', index=2,
+      number=3, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='SessionsStorages', full_name='orders.StateReport.SessionsStorages', index=3,
+      number=4, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='Collectors', full_name='orders.StateReport.Collectors', index=4,
+      number=5, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='Users', full_name='orders.StateReport.Users', index=5,
+      number=6, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='CPU', full_name='orders.StateReport.CPU', index=6,
+      number=7, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='FreeDisk', full_name='orders.StateReport.FreeDisk', index=7,
+      number=8, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='MemoryUsed', full_name='orders.StateReport.MemoryUsed', index=8,
+      number=9, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=91,
+  serialized_end=268,
+)
 
 
 _CHECKRESULT = _descriptor.Descriptor(
@@ -188,8 +276,8 @@ _CHECKRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=90,
-  serialized_end=119,
+  serialized_start=270,
+  serialized_end=299,
 )
 
 
@@ -269,8 +357,8 @@ _ENTITY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=122,
-  serialized_end=275,
+  serialized_start=302,
+  serialized_end=455,
 )
 
 
@@ -385,8 +473,8 @@ _MESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=278,
-  serialized_end=584,
+  serialized_start=458,
+  serialized_end=764,
 )
 
 
@@ -438,8 +526,8 @@ _FORMATING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=586,
-  serialized_end=683,
+  serialized_start=766,
+  serialized_end=863,
 )
 
 
@@ -500,6 +588,13 @@ _ORDER = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='RedirectCounter', full_name='orders.Order.RedirectCounter', index=7,
+      number=8, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -512,8 +607,8 @@ _ORDER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=686,
-  serialized_end=819,
+  serialized_start=866,
+  serialized_end=1024,
 )
 
 _ENTITY.fields_by_name['Type'].enum_type = _ENTITYTYPE
@@ -521,6 +616,7 @@ _MESSAGE.fields_by_name['Timestamp'].message_type = google_dot_protobuf_dot_time
 _MESSAGE.fields_by_name['Formating'].message_type = _FORMATING
 _FORMATING.fields_by_name['Type'].enum_type = _FORMATINGTYPE
 _ORDER.fields_by_name['Type'].enum_type = _ORDERTYPE
+DESCRIPTOR.message_types_by_name['StateReport'] = _STATEREPORT
 DESCRIPTOR.message_types_by_name['CheckResult'] = _CHECKRESULT
 DESCRIPTOR.message_types_by_name['Entity'] = _ENTITY
 DESCRIPTOR.message_types_by_name['Message'] = _MESSAGE
@@ -530,6 +626,13 @@ DESCRIPTOR.enum_types_by_name['EntityType'] = _ENTITYTYPE
 DESCRIPTOR.enum_types_by_name['FormatingType'] = _FORMATINGTYPE
 DESCRIPTOR.enum_types_by_name['OrderType'] = _ORDERTYPE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
+
+StateReport = _reflection.GeneratedProtocolMessageType('StateReport', (_message.Message,), {
+  'DESCRIPTOR' : _STATEREPORT,
+  '__module__' : 'OrderBoard_pb2'
+  # @@protoc_insertion_point(class_scope:orders.StateReport)
+  })
+_sym_db.RegisterMessage(StateReport)
 
 CheckResult = _reflection.GeneratedProtocolMessageType('CheckResult', (_message.Message,), {
   'DESCRIPTOR' : _CHECKRESULT,
@@ -576,8 +679,8 @@ _ORDERBOARD = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=1043,
-  serialized_end=1325,
+  serialized_start=1248,
+  serialized_end=1587,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetOrder',
@@ -626,6 +729,16 @@ _ORDERBOARD = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_MESSAGE,
     output_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='GetState',
+    full_name='orders.OrderBoard.GetState',
+    index=5,
+    containing_service=None,
+    input_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
+    output_type=_STATEREPORT,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
