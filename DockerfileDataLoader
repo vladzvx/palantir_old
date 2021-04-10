@@ -14,7 +14,6 @@ RUN pip3 install -r requirements.txt
 COPY /DataLoader/ .
 RUN ls -l
 
-RUN python3 --version
 RUN python3 -m grpc_tools.protoc -I /app --python_out=/app --grpc_python_out=. /app/Configurator.proto
 RUN python3 -m grpc_tools.protoc -I /app --python_out=/app --grpc_python_out=. /app/OrderBoard.proto
 
