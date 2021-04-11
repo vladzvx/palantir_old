@@ -69,7 +69,7 @@ namespace DataFair
         {
             if (System.Threading.Monitor.TryEnter(sync))
             {
-                worker.CreateTasksByUnupdatedChats(DateTime.Now.AddHours(-2));
+                worker.CreateTasksByUnupdatedChats(DateTime.Now.AddMinutes(-20));
                 System.Threading.Monitor.Exit(sync);
             }
         }
