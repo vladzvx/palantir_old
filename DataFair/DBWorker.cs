@@ -236,6 +236,7 @@ namespace DataFair
         }
         public void CreateTasksByUnupdatedChats(DateTime BoundDateTime)
         {
+            if (Storage.Orders.Count > 1000) return;
             GetChatsForUpdate.Parameters["dt"].Value = BoundDateTime;
             NpgsqlDataReader reader = GetChatsForUpdate.ExecuteReader();
             while (reader.Read())

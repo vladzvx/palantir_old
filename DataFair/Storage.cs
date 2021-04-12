@@ -12,7 +12,7 @@ namespace DataFair
 {
     internal static class Storage
     {
-        internal static Timer timer = new Timer(60000);
+        internal static Timer timer = new Timer(20000);
         internal static DBWorker worker = new DBWorker(Constants.ConnectionString);
 
 
