@@ -234,7 +234,7 @@ class TgDataGetter():
 			if "Could not find the input entity for" in e.args[0]:
 				logging.debug("Failed.")
 				if order.Link!="":
-					if order.RedirectCounter<5:
+					if order.RedirectCounter<10:
 						order.RedirectCounter+=1;
 						stub.PostOrder(order);
 						return;
@@ -348,7 +348,7 @@ for cfg in config_stub.GetConfiguration(emp):
 
 			if 	ResolveUsernameRequestBan:
 				delta_timeRes =(datetime.datetime.utcnow()-ResolveUsernameRequestTime) 
-				if delta_timeRes.seconds>=10000:
+				if delta_timeRes.seconds>=3600:
 					ResolveUsernameRequestBan=False;
 					
 			delta_time =(datetime.datetime.utcnow()-timestamp) 
@@ -372,8 +372,10 @@ for cfg in config_stub.GetConfiguration(emp):
 					fch = getter.get_full_channel(order)
 					if fch is not None:
 						stub.PostEntity(fch)
-				#else:
-					#stub.PostOrder(order);
+				else:
+					if order.RedirectCounter<3:
+						order.RedirectCounter+=1
+						stub.PostOrder(order);
 			elif order.Type==0:
 				q=0;
 		except telethon.errors.ChannelPrivateError:
