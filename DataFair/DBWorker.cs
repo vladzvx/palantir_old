@@ -13,6 +13,7 @@ namespace DataFair
 {
     public class DBWorker
     {
+        private static Random rnd = new Random();
         private Logger logger = NLog.LogManager.GetCurrentClassLogger();
         private readonly ConcurrentQueue<Message> messages = new ConcurrentQueue<Message>();
         private readonly ConcurrentQueue<Entity> entities = new ConcurrentQueue<Entity>();
@@ -236,43 +237,49 @@ namespace DataFair
         }
         public void CreateTasksByUnupdatedChats(DateTime BoundDateTime)
         {
-            if (Storage.Orders.Count > 1000) return;
-            GetChatsForUpdate.Parameters["dt"].Value = BoundDateTime;
-            NpgsqlDataReader reader = GetChatsForUpdate.ExecuteReader();
-            while (reader.Read())
+            try
             {
-                try
+                if (Storage.Orders.Count > 1000) return;
+                GetChatsForUpdate.Parameters["dt"].Value = BoundDateTime;
+                NpgsqlDataReader reader = GetChatsForUpdate.ExecuteReader();
+                while (reader.Read())
                 {
-                    if (Storage.Orders.Count > 1000) break;
-                    long ChatId = reader.GetInt64(0);
-                    long PairId = reader.IsDBNull(1) ? 0 : reader.GetInt64(1);
-                    long Offset = reader.GetInt64(2);
-                    DateTime LastUpdate = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3);
-                    bool PairChecked = reader.IsDBNull(4) ? true : reader.GetBoolean(4);
-                    string Username = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
-                    string PairUsername = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
-                    
-                    Order order = new Order() { Id = ChatId, Link = Username, Offset = Offset, PairId = PairId, PairLink = PairUsername };
-                    if (!PairChecked)
+                    try
                     {
-                        if (!Storage.Orders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.GetFullChannel; }))
+                        if (Storage.Orders.Count > 1000) break;
+                        long ChatId = reader.GetInt64(0);
+                        long PairId = reader.IsDBNull(1) ? 0 : reader.GetInt64(1);
+                        long Offset = reader.GetInt64(2);
+                        DateTime LastUpdate = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3);
+                        bool PairChecked = reader.IsDBNull(4) ? true : reader.GetBoolean(4);
+                        string Username = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
+                        string PairUsername = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
+
+                        Order order = new Order() { Id = ChatId, Link = Username, Offset = Offset, PairId = PairId, PairLink = PairUsername };
+                        if (!PairChecked)
                         {
-                            order.Type = OrderType.GetFullChannel;
-                            Storage.Orders.Enqueue(order);
+                            if (!Storage.Orders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.GetFullChannel; }))
+                            {
+                                order.Type = OrderType.GetFullChannel;
+                                Storage.Orders.Enqueue(order);
+                            }
+                        }
+                        else
+                        {
+                            if (!Storage.Orders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.History; }))
+                            {
+                                order.Type = OrderType.History;
+                                if(rnd.NextDouble()<0.05)
+                                    Storage.Orders.Enqueue(order);
+                            }
                         }
                     }
-                    else
-                    {
-                        if (!Storage.Orders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.History; }))
-                        {
-                            order.Type = OrderType.History;
-                            Storage.Orders.Enqueue(order);
-                        }
-                    }
+                    catch (InvalidCastException) { }
                 }
-                catch (InvalidCastException) { }
+                reader.Close();
             }
-            reader.Close();
+            catch { }
+
         }
         public async Task<bool> CheckEntity(Entity entity)
         {
