@@ -12,7 +12,7 @@ namespace TestClient
         {
             AppContext.SetSwitch(
     "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            GrpcChannel Channel = GrpcChannel.ForAddress("5");
+            GrpcChannel Channel = GrpcChannel.ForAddress("http://45.132.17.172:5005");
             OrderBoard.OrderBoardClient  Client = new OrderBoard.OrderBoardClient(Channel);
             while (true)
             {

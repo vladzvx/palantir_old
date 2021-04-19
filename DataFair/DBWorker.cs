@@ -261,7 +261,7 @@ namespace DataFair
                             if (!Storage.Orders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.GetFullChannel; }))
                             {
                                 order.Type = OrderType.GetFullChannel;
-                                Storage.Orders.Enqueue(order);
+                               // Storage.Orders.Enqueue(order);
                             }
                         }
                         else
@@ -270,7 +270,7 @@ namespace DataFair
                             {
                                 order.Type = OrderType.History;
                                 //if(rnd.NextDouble()<0.0001)
-                                    //Storage.Orders.Enqueue(order);
+                                Storage.Orders.Enqueue(order);
                             }
                         }
                     }
