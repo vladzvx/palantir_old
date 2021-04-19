@@ -269,7 +269,7 @@ namespace DataFair
                             if (!Storage.Orders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.History; }))
                             {
                                 order.Type = OrderType.History;
-                                if(rnd.NextDouble()<0.05)
+                                if(rnd.NextDouble()<0.005)
                                     Storage.Orders.Enqueue(order);
                             }
                         }
