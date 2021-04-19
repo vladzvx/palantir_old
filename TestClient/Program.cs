@@ -12,13 +12,13 @@ namespace TestClient
         {
             AppContext.SetSwitch(
     "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            GrpcChannel Channel = GrpcChannel.ForAddress("");
+            GrpcChannel Channel = GrpcChannel.ForAddress("5");
             OrderBoard.OrderBoardClient  Client = new OrderBoard.OrderBoardClient(Channel);
             while (true)
             {
                 var order = Client.GetOrder(new Google.Protobuf.WellKnownTypes.Empty());
                 Console.WriteLine(string.Format("{0};{1}",order.Type,order.RedirectCounter));
-                if(order.Type==OrderType.History)
+                //if(order.Type==OrderType.History)
                     Client.PostOrder(order);
                 Thread.Sleep(100);
             }
