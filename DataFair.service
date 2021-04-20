@@ -5,6 +5,8 @@ Description=DataFair
 OOMScoreAdjust=-1000
 Type=simple
 ExecStart=/root/DataFair/DataFair
+ExecReload=/root/DataFair/DataFair
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
