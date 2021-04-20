@@ -10,17 +10,30 @@ namespace TestClient
     {
         static void Main(string[] args)
         {
+            Thread.Sleep(3000);
             AppContext.SetSwitch(
     "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            GrpcChannel Channel = GrpcChannel.ForAddress("http://:5005");
+            GrpcChannel Channel = GrpcChannel.ForAddress("http://localhost:5005");
             OrderBoard.OrderBoardClient  Client = new OrderBoard.OrderBoardClient(Channel);
-            while (true)
+            Order order1 = new Order();
+            order1.Id = 1276769488;
+            order1.PairLink = "ssle1g";
+            order1.Offset = 399;
+
+            //Order order2 = new Order();
+            //order2.Id = 1264079104;
+            //order2.Link = "ssleg";
+
+            order1.Type = OrderType.History;
+            //order2.Type = OrderType.History;
+
+
+            Client.PostOrder(order1);
+            //Client.PostOrder(order2);
+            Thread.Sleep(100);
+            //while (true)
             {
-                var order = Client.GetOrder(new Google.Protobuf.WellKnownTypes.Empty());
-                Console.WriteLine(string.Format("{0};{1};{2}", order.Link,order.Type,order.RedirectCounter));
-                //if(order.Type==OrderType.History)
-                    Client.PostOrder(order);
-                Thread.Sleep(100);
+
 
             }
             

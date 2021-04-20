@@ -264,6 +264,9 @@ class TgDataGetter():
 				raise e;
 			
 		limit_msg=80
+		old_offset = offset;
+		if offset==1:
+			old_offset=0;
 		offset+=limit_msg+1;
 		need_break = False
 		last_action_time=datetime.datetime.min
@@ -281,7 +284,7 @@ class TgDataGetter():
 				peer=entity,
 				offset_date=None, add_offset=0,hash=0,
 				offset_id=offset,
-				min_id=0,
+				min_id=old_offset,
 				max_id=0,
 				limit=limit_msg))
 			logging.debug("Ok!")
@@ -295,16 +298,13 @@ class TgDataGetter():
 				if message.fwd_from is not None:
 					await self.post_entity_if_need(message.fwd_from.from_id)
 			logging.debug("Ok!")
-			if need_break:
-				break
+			old_offset = offset-1;
 			offset=offset+limit_msg
-			diff = offset - history.count
-			if diff>0:
-				offset=0;
-				limit_msg = history.count-history.messages[0].id;
-				if limit_msg<0:
-					limit_msg=0;
-				need_break=True
+			if len(history.messages)==0:
+				if need_break:
+					break;
+				need_break=True;
+				offset = 0;
 
 	def get_history(self,order):
 		loop  = self._loop;
