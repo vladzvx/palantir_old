@@ -339,7 +339,6 @@ namespace DataFair
             WriteConnention.Dispose();
             CancellationTokenSource.Cancel();
         }
-
         public int GetMessagesNumberInQueue()
         {
             return messages.Count;
