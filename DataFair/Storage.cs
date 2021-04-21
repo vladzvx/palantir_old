@@ -14,8 +14,6 @@ namespace DataFair
     {
         internal static Timer timer = new Timer(20000);
         internal static DBWorker worker = new DBWorker(Constants.ConnectionString);
-
-
         internal static ConcurrentQueue<Order> Orders = new ConcurrentQueue<Order>();
         internal static ConcurrentBag<SessionSettings> SessionStorages = new ConcurrentBag<SessionSettings>();
         internal static ConcurrentBag<Common.Collector> Collectors = new ConcurrentBag<Collector>();
@@ -69,7 +67,7 @@ namespace DataFair
         {
             if (System.Threading.Monitor.TryEnter(sync))
             {
-                worker.CreateTasksByUnupdatedChats(DateTime.Now.AddMinutes(-10));
+                worker.CreateTasksByUnupdatedChats(DateTime.Now.AddMinutes(-60));
                 System.Threading.Monitor.Exit(sync);
             }
         }

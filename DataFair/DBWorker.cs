@@ -141,7 +141,7 @@ namespace DataFair
                             catch (Exception ex)
                             {
                                 transaction.Rollback();
-                                logger.Error(ex, "Error while writing entities!");
+                                logger.Error(ex, "Error while writing messages!");
                             }
                         }
                     }
