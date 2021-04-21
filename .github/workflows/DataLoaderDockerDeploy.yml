@@ -28,4 +28,4 @@ jobs:
           context: ./
           file: ./DockerfileDataLoader
           push: true
-          tags: vladzvx/tg-data-miner:data-loader
+          tags: ${{ secrets.DOCKER_HUB_LOGIN }}/tg-data-miner:data-loader
