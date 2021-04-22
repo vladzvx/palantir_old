@@ -265,15 +265,14 @@ namespace DataFair
                                     Storage.Orders.Enqueue(order);
                             }
                         }
-                        else
+
+                        if (!Storage.Orders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.History; }))
                         {
-                            if (!Storage.Orders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.History; }))
-                            {
-                                order.Type = OrderType.History;
-                                //if(rnd.NextDouble()<0.0001)
-                                Storage.Orders.Enqueue(order);
-                            }
+                            order.Type = OrderType.History;
+                            //if(rnd.NextDouble()<0.0001)
+                            Storage.Orders.Enqueue(order);
                         }
+                        
                     }
                     catch (InvalidCastException) { }
                 }
