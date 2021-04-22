@@ -261,7 +261,7 @@ namespace DataFair
                             if (!Storage.Orders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.GetFullChannel; }))
                             {
                                 order.Type = OrderType.GetFullChannel;
-                                if (rnd.NextDouble() < 0.001)
+                                if (rnd.NextDouble() < 0.01)
                                     Storage.Orders.Enqueue(order);
                             }
                         }
