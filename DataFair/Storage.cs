@@ -25,8 +25,8 @@ namespace DataFair
         private static object sync = new object();
         static Storage()
         {
-            LoadCollectorsInfoFromDB(null,null);
-            action(null,null);
+            //LoadCollectorsInfoFromDB(null,null);
+            //action(null,null);
             timer.Elapsed += action;
             timer.Elapsed += LoadCollectorsInfoFromDB;
             timer.AutoReset = true;
@@ -65,7 +65,7 @@ namespace DataFair
         }
         private static void action(object sender, ElapsedEventArgs args)
         {
-            if (System.Threading.Monitor.TryEnter(sync))
+            if (Orders.Count==0&& System.Threading.Monitor.TryEnter(sync))
             {
                 worker.CreateTasksByUnupdatedChats(DateTime.Now.AddMinutes(-60));
                 System.Threading.Monitor.Exit(sync);

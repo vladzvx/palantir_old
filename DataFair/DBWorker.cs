@@ -239,14 +239,14 @@ namespace DataFair
         {
             try
             {
-                if (Storage.Orders.Count > 1000) return;
+                //if (Storage.Orders.Count > 1000) return;
                 GetChatsForUpdate.Parameters["dt"].Value = BoundDateTime;
                 NpgsqlDataReader reader = GetChatsForUpdate.ExecuteReader();
                 while (reader.Read())
                 {
                     try
                     {
-                        if (Storage.Orders.Count > 1000) break;
+                        //if (Storage.Orders.Count > 1000) break;
                         long ChatId = reader.GetInt64(0);
                         long PairId = reader.IsDBNull(1) ? 0 : reader.GetInt64(1);
                         long Offset = reader.GetInt64(2);
@@ -261,7 +261,8 @@ namespace DataFair
                             if (!Storage.Orders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.GetFullChannel; }))
                             {
                                 order.Type = OrderType.GetFullChannel;
-                               // Storage.Orders.Enqueue(order);
+                                if (rnd.NextDouble() < 0.001)
+                                    Storage.Orders.Enqueue(order);
                             }
                         }
                         else
