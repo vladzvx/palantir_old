@@ -13,7 +13,8 @@ namespace DataFair
     public class State
     {
         internal Timer timer = new Timer(20000);
-        internal WorkDB worker = new WorkDB(Options.ConnectionString);
+        internal MessageWriter worker = new MessageWriter(Options.ConnectionString);
+        internal EntityWriter ent_worker = new EntityWriter(Options.ConnectionString);
         internal ConcurrentQueue<Order> Orders = new ConcurrentQueue<Order>();
         internal ConcurrentBag<SessionSettings> SessionStorages = new ConcurrentBag<SessionSettings>();
         internal ConcurrentBag<Common.Collector> Collectors = new ConcurrentBag<Collector>();
@@ -71,7 +72,7 @@ namespace DataFair
             Disk = Disk / 1024 / 1024 / 1024;
             return new StateReport()
             {
-                Entities = worker.GetEntitiesNumberInQueue(),
+                Entities = ent_worker.GetEntitiesNumberInQueue(),
                 Messages = worker.GetMessagesNumberInQueue(),
                 Collectors = Collectors.Count,
                 SessionsStorages = SessionStorages.Count,

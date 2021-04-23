@@ -12,8 +12,12 @@
   </ItemGroup>
 
   <ItemGroup>
-	  <Protobuf Include="gRPC protos\Configurator.proto" GrpcServices="Both" />
-	  <Protobuf Include="gRPC protos\OrderBoard.proto" GrpcServices="Both" />
+	  <Protobuf Include="Configurator.proto" GrpcServices="Both" />
+	  <Protobuf Include="OrderBoard.proto" GrpcServices="Both" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Protobufs\" />
   </ItemGroup>
 
 </Project>

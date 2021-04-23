@@ -27,7 +27,7 @@ namespace DataFair.Services
         public override Task<Empty> PostEntity(Entity entity, ServerCallContext context)
         {
             logger.Trace("New entity Id: {0}; username: {1}; name: {2}; type: {3};", entity.Id, entity.Link,entity.LastName,entity.Type.ToString());
-            state.worker.PutEntity(entity);
+            state.ent_worker.PutEntity(entity);
             return Task.FromResult(new Empty());
         }
 
