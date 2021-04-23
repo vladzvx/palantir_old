@@ -136,7 +136,7 @@ namespace DataFair.Services
             }
 
         }
-        public async Task CreateGetFullChannelOrders()
+        public async Task CreateGetFullChannelOrders(int limit=-1)
         {
             try
             {
@@ -145,10 +145,10 @@ namespace DataFair.Services
                     await connection.OpenAsync(cts.Token);
                     using NpgsqlCommand command = CreateAndConfigureCommand(connection, DateTime.Now, "get_unrequested_channels");
                     using NpgsqlDataReader reader = await command.ExecuteReaderAsync(cts.Token);
-                    //int count = 0;
+                    int count = 0;
                     while (!cts.IsCancellationRequested&& await reader.ReadAsync(cts.Token))
                     {
-                        //if (count > 200 * state.AllCollectors.Count) return;
+                        if (limit>0 && count > limit) return;
                         try
                         {
                             long ChatId = reader.GetInt64(0);
@@ -168,7 +168,7 @@ namespace DataFair.Services
                                     state.Orders.Enqueue(order);
                                 }
                             }
-                            //count++;
+                            count++;
 
                         }
                         catch (InvalidCastException ex) { logger.Warn(ex); }
