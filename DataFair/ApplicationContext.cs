@@ -11,6 +11,9 @@ namespace DataFair
 {
     public class ApplicationContext : DbContext
     {
+
+
+
         public DbSet<Common.SessionSettings> Sessions { get; set; }
         public DbSet<Common.Collector> Collectors { get; set; }
 
