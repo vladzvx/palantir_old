@@ -123,10 +123,6 @@ namespace DataFair.Services
                                     PairLink = PairUsername,
                                     Type = OrderType.History
                                 };
-                                if (Offset != 1)
-                                {
-                                    int q = 0;
-                                }
                                 state.Orders.Enqueue(order);
                             }
                         }
