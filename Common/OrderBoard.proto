@@ -10,7 +10,6 @@ service OrderBoard {
   rpc GetOrder (google.protobuf.Empty) returns (Order);
   rpc PostOrder (Order) returns (google.protobuf.Empty);
   rpc PostEntity (Entity) returns (google.protobuf.Empty);
-  rpc CheckEntity (Entity) returns (CheckResult);
   rpc StreamMessages (stream Message) returns (google.protobuf.Empty);
   rpc GetState(google.protobuf.Empty) returns (StateReport);
 }
@@ -21,14 +20,9 @@ message StateReport{
 	int32 Orders = 3;
 	int32 SessionsStorages = 4;
 	int32 Collectors = 5;
-	int32 Users = 6;
-	double CPU = 7;
-	int64 FreeDisk = 8;
-	int64 MemoryUsed = 9;
-}
-
-message CheckResult{
-	bool Result=1;
+	double CPU = 6;
+	int64 FreeDisk = 7;
+	int64 MemoryUsed = 8;
 }
 
 message Entity{

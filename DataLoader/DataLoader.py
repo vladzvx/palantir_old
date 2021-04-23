@@ -79,8 +79,13 @@ class TgDataGetter():
 				result.PairId = order.Id;
 				result.Type = OrderBoard_pb2.EntityType.Value=2;
 				return result
-			else:
-				return None
+			elif len(res.chats)==1:
+				result = OrderBoard_pb2.Entity();
+				result.Id = 0;
+				result.PairLink = order.Link;
+				result.PairId = order.Id;
+				result.Type = OrderBoard_pb2.EntityType.Value=2;
+				return result
 		except BaseException as e:
 			raise e;
 			return None
@@ -193,15 +198,15 @@ class TgDataGetter():
 				entity = OrderBoard_pb2.Entity();
 				entity.Id = from_id.user_id
 				entity.Type=0;
-				if not stub.CheckEntity(entity).Result:
-					tg_entity = await client.get_entity(from_id)
-					if tg_entity.username is not None:
-						entity.Link = tg_entity.username
-					if tg_entity.first_name is not None:
-						entity.FirstName = tg_entity.first_name
-					if tg_entity.last_name is not None:
-						entity.LastName = tg_entity.last_name
-					stub.PostEntity(entity)
+				#if not stub.CheckEntity(entity).Result:
+				tg_entity = await client.get_entity(from_id)
+				if tg_entity.username is not None:
+					entity.Link = tg_entity.username
+				if tg_entity.first_name is not None:
+					entity.FirstName = tg_entity.first_name
+				if tg_entity.last_name is not None:
+					entity.LastName = tg_entity.last_name
+				stub.PostEntity(entity)
 				users[from_id.user_id] = 0;
 				return True;
 
@@ -210,13 +215,12 @@ class TgDataGetter():
 				entity = OrderBoard_pb2.Entity();
 				entity.Id = from_id.channel_id
 				entity.Type=1;
-				if not stub.CheckEntity(entity).Result:
-					tg_entity = await client.get_entity(from_id)
-					if tg_entity.username is not None:
-						entity.Link = tg_entity.username
-					if tg_entity.title is not None:
-						entity.FirstName = tg_entity.title
-					stub.PostEntity(entity)
+				tg_entity = await client.get_entity(from_id)
+				if tg_entity.username is not None:
+					entity.Link = tg_entity.username
+				if tg_entity.title is not None:
+					entity.FirstName = tg_entity.title
+				stub.PostEntity(entity)
 				chats[from_id.channel_id] = 0;
 		return False;
 
@@ -312,7 +316,7 @@ class TgDataGetter():
 
 
 time.sleep(2);
-grpc_host = os.environ.get('grpc_host') 
+grpc_host ="localhost:5005"# os.environ.get('grpc_host') 
 
 channel = grpc.insecure_channel(grpc_host)
 config_stub = Configurator_pb2_grpc.ConfiguratorStub(channel);
@@ -327,13 +331,13 @@ for cfg in config_stub.GetConfiguration(emp):
 																  config.Session.SessionStoragePassword,
 																  config.Session.SessionStorageHost,
 																  config.Session.SessionStorageDB)
-	getter = TgDataGetter(config.UserParams.SessionName, config.CollectorParams.ApiId, 
+	getter = TgDataGetter(config.CollectorParams.SessionName, config.CollectorParams.ApiId, 
 						  config.CollectorParams.ApiHash,
-						  config.UserParams.Phone,connection_string)
+						  config.CollectorParams.Phone,connection_string)
 	getter.start();
 
 	stub = OrderBoard_pb2_grpc.OrderBoardStub(channel)
-	GetFullChannelCounter = config.UserParams.GetFullChannelCounter
+	GetFullChannelCounter = 0;
 	GetFullChannelCounterLimit=180
 	timestamp = datetime.datetime.utcnow();
 	users = {}

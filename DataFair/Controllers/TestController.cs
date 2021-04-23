@@ -13,12 +13,17 @@ namespace DataFair.Controllers
     [Route("[controller]")]
     public class StateController
     {
+        private readonly State state;
+        public StateController(State state)
+        {
+            this.state = state;
+        }
+
         [HttpPost()]
         [EnableCors()]
-        public string CheckerAnswer()
+        public string GetState()
         {
-            
-            return Newtonsoft.Json.JsonConvert.SerializeObject(Storage.GetState());
+            return Newtonsoft.Json.JsonConvert.SerializeObject(state.GetStateReport());
         }
     }
 }

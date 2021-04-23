@@ -15,11 +15,6 @@ using System.Threading.Tasks;
 
 namespace DataFair
 {
-    internal static class Constants
-    {
-        internal static readonly string SettingsFilename = "settings.txt";
-        internal static readonly string ConnectionString =Environment.GetEnvironmentVariable("ConnectionString")??File.ReadAllText(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), Constants.SettingsFilename));
-    }
     public class Program
     {
         public static void Main(string[] args)

@@ -15,9 +15,11 @@ namespace DataFair
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<State>();
             services.AddGrpc();
             services.AddCors();
             services.AddControllers();
+            services.AddHostedService<OrdersCreator>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

@@ -15,19 +15,21 @@ namespace DataFair.Services
 {
     public class ConfiguratorService :Common.Configurator.ConfiguratorBase
     {
+        private readonly State state;
+        public ConfiguratorService(State state)
+        {
+            this.state = state;
+        }
         public async override Task GetConfiguration(Empty req, IServerStreamWriter<ConfigurationContainer> serverStream, ServerCallContext context)
         {
-            int qq = 0;
             SessionSettings session;
-            UserInfo user;
             Collector collector;
-            if (Storage.SessionStorages.TryPeek(out session)&& 
-                Storage.Users.TryTake(out user) && 
-                Storage.Collectors.TryPeek(out collector))
+            if (state.SessionStorages.TryPeek(out session)&&
+                state.Collectors.TryTake(out collector))
             {
                 ConfigurationContainer cont = new ConfigurationContainer()
                 {
-                    Session = session, CollectorParams=collector,UserParams=user
+                    Session = session, CollectorParams=collector
                 };
                 await serverStream.WriteAsync(cont);
                 try
@@ -36,7 +38,7 @@ namespace DataFair.Services
                 }
                 catch (TaskCanceledException)
                 {
-                    Storage.Users.Add(user);
+                    state.Collectors.Add(collector);
                 }
             }
         }

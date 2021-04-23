@@ -324,9 +324,7 @@ create  or replace function  get_unupdated_chats(dt timestamp) returns table (_i
                                                                             _pair_username text) as
 $$
     begin
-        return query update chats set last_time_checked = current_timestamp  where (getting_last_message_timestamp<dt or
-                                               getting_last_message_timestamp is null or
-                                               chats.pair_id_checked=false) and (last_time_checked is null or last_time_checked <dt)
+        return query update chats set last_time_checked = current_timestamp  where (getting_last_message_timestamp<dt) and (last_time_checked is null or last_time_checked <dt)
                 returning id,
                 pair_id,
                 last_message_id,
@@ -337,6 +335,45 @@ $$
     end;
 $$LANGUAGE plpgsql;
 
+create  or replace function  get_chats_for_history(dt timestamp) returns table (_id bigint,
+                                                                            _pair_id bigint,
+                                                                            _last_message_id bigint,
+                                                                            _getting_last_message_timestamp timestamp,
+                                                                            _pair_id_checked bool,
+                                                                            _username text,
+                                                                            _pair_username text) as
+$$
+    begin
+        return query update chats set last_time_checked = current_timestamp  where getting_last_message_timestamp is null and (last_time_checked is null or last_time_checked <dt)
+                returning id,
+                pair_id,
+                last_message_id,
+                getting_last_message_timestamp,
+                pair_id_checked,
+                username,
+                pair_username;
+    end;
+$$LANGUAGE plpgsql;
+
+create  or replace function  get_unrequested_channels(dt timestamp) returns table (_id bigint,
+                                                                            _pair_id bigint,
+                                                                            _last_message_id bigint,
+                                                                            _getting_last_message_timestamp timestamp,
+                                                                            _pair_id_checked bool,
+                                                                            _username text,
+                                                                            _pair_username text) as
+$$
+    begin
+        return query update chats set last_time_checked = current_timestamp  where chats.pair_id_checked=false and (last_time_checked is null or last_time_checked <dt)
+                returning id,
+                pair_id,
+                last_message_id,
+                getting_last_message_timestamp,
+                pair_id_checked,
+                username,
+                pair_username;
+    end;
+$$LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION message_protect() RETURNS trigger as
@@ -369,6 +406,9 @@ $$
             new.pair_username = (select username from chats where chats.id=new.pair_id);
             return new;
         else
+            if new.id=0 THEN
+                update public.chats set pair_id_checked=true where id = new.pair_id;
+            end if;
             return null;
         end if;
     end;

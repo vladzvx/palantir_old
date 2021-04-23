@@ -8,10 +8,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NLog;
+using Microsoft.Extensions.Hosting;
 
 namespace DataFair
 {
-    public class DBWorker
+
+    public class WorkDB
     {
         private static Random rnd = new Random();
         private Logger logger = NLog.LogManager.GetCurrentClassLogger();
@@ -23,7 +25,7 @@ namespace DataFair
         private readonly NpgsqlConnection WriteConnention;
         private readonly NpgsqlCommand CheckUser;
         private readonly NpgsqlCommand CheckChat;
-        private readonly NpgsqlCommand GetChatsForUpdate;
+        
 
 
         private readonly object ReadLocker = new object();
@@ -32,7 +34,7 @@ namespace DataFair
         private readonly Thread UsersWritingThread;
         private readonly CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
 
-        public DBWorker(string connectionString)
+        public WorkDB(string connectionString)
         {
             this.ConnectionString = connectionString;
             ReadConnention = new NpgsqlConnection(ConnectionString);
@@ -56,10 +58,6 @@ namespace DataFair
             CheckChat.CommandText = "check_chat";
             CheckChat.Parameters.Add(new NpgsqlParameter("chat_id", NpgsqlTypes.NpgsqlDbType.Bigint));
 
-            GetChatsForUpdate = StreamReadConnection.CreateCommand();
-            GetChatsForUpdate.CommandType = System.Data.CommandType.StoredProcedure;
-            GetChatsForUpdate.CommandText = "get_unupdated_chats";
-            GetChatsForUpdate.Parameters.Add(new NpgsqlParameter("dt", NpgsqlTypes.NpgsqlDbType.Timestamp));
         }
         private static void WriteSingleMessage(NpgsqlCommand command, Message message)
         {
@@ -235,52 +233,7 @@ namespace DataFair
         {
             messages.Enqueue(message);
         }
-        public void CreateTasksByUnupdatedChats(DateTime BoundDateTime)
-        {
-            try
-            {
-                //if (Storage.Orders.Count > 1000) return;
-                GetChatsForUpdate.Parameters["dt"].Value = BoundDateTime;
-                NpgsqlDataReader reader = GetChatsForUpdate.ExecuteReader();
-                while (reader.Read())
-                {
-                    try
-                    {
-                        //if (Storage.Orders.Count > 1000) break;
-                        long ChatId = reader.GetInt64(0);
-                        long PairId = reader.IsDBNull(1) ? 0 : reader.GetInt64(1);
-                        long Offset = reader.GetInt64(2);
-                        DateTime LastUpdate = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3);
-                        bool PairChecked = reader.IsDBNull(4) ? true : reader.GetBoolean(4);
-                        string Username = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
-                        string PairUsername = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
-
-                        Order order = new Order() { Id = ChatId, Link = Username, Offset = Offset, PairId = PairId, PairLink = PairUsername };
-                        if (!PairChecked)
-                        {
-                            if (!Storage.Orders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.GetFullChannel; }))
-                            {
-                                order.Type = OrderType.GetFullChannel;
-                                if (rnd.NextDouble() < 0.01)
-                                    Storage.Orders.Enqueue(order);
-                            }
-                        }
-
-                        if (!Storage.Orders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.History; }))
-                        {
-                            order.Type = OrderType.History;
-                            //if(rnd.NextDouble()<0.0001)
-                            Storage.Orders.Enqueue(order);
-                        }
-                        
-                    }
-                    catch (InvalidCastException) { }
-                }
-                reader.Close();
-            }
-            catch { }
-
-        }
+        
         public async Task<bool> CheckEntity(Entity entity)
         {
             try
