@@ -22,7 +22,7 @@ namespace DataFair.Services
         {
             Collectors = state.Collectors.Count;
             SessionsAvaliable = state.SessionStorages.Count;
-            Orders = state.Orders.Count;
+            Orders = state.Orders.Count + state.MaxPriorityOrders.Count;
             Messages = messagesWriter.GetQueueCount();
             FailedMessages = messagesWriter.GetFailedQueueCount();
             Users = usersWriter.GetQueueCount();
