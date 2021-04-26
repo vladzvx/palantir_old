@@ -81,7 +81,7 @@ namespace DataFair.Services
             {
                 try
                 {
-                    CreateGetFullChannelOrders(100).Wait();
+                    CreateGetFullChannelOrders(200).Wait();
                 }
                 catch { }
                 DisableGetFullChannelOrdersGen();
@@ -225,10 +225,10 @@ namespace DataFair.Services
                             Order order = new Order() { Id = ChatId, Link = Username, Offset = Offset, PairId = PairId, PairLink = PairUsername };
                             if (!PairChecked)
                             {
-                                if (!state.Orders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.GetFullChannel; }))
+                                if (!state.MaxPriorityOrders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.GetFullChannel; }))
                                 {
                                     order.Type = OrderType.GetFullChannel;
-                                    state.Orders.Enqueue(order);
+                                    state.MaxPriorityOrders.Enqueue(order);
                                 }
                             }
                             count++;
