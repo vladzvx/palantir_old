@@ -25,17 +25,10 @@ namespace DataFair.Controllers
 
         [HttpPost()]
         [EnableCors()]
-        public string PostRequest(OrderCreationRequest request)
+        public string PostRequest()
         {
-            if (request != null &&
-                request.Type != null &&
-                request.Number != 0 &&
-                Enum.TryParse(request.Type, out OrderType orderType))
-            {
-                creator.CreateGetFullChannelOrders(request.Number).Wait();
-                return "Ok"!;
-            }
-            else return "fail";
+            OrdersManager.EnableGetFullChannelOrdersGen();
+            return "ok";
             
         }
     }
