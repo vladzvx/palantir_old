@@ -47,7 +47,17 @@ namespace DataFair.Services
 
         public int GetQueueCount()
         {
-            return DataQueue.Count+ FailedDataQueue.Count;
+            return DataQueue.Count + FailedDataQueue.Count;
+        }
+
+        public int GetFailedQueueCount()
+        {
+            return FailedDataQueue.Count;
+        }
+
+        private void EreaseFails()
+        {
+            FailedDataQueue.Clear();
         }
 
         private bool ManageConnection()
@@ -139,6 +149,11 @@ namespace DataFair.Services
                 {
                     while (!FailedDataQueue.IsEmpty&& FailedDataQueue.TryPeek(out TData message))
                     {
+                        if (FailedDataQueue.Count > Options.SleepModeStartCount)
+                        {
+                            FailedDataQueue.Clear();
+                            logger.Warn("Clearing failed queue!");
+                        }
                         try
                         {
                             while (FailedDataQueue.TryDequeue(out message))

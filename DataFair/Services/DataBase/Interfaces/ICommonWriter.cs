@@ -10,5 +10,6 @@ namespace DataFair.Services.Interfaces
         public void PutData(TData data);
 
         public int GetQueueCount();
+        public int GetFailedQueueCount();
     }
 }
