@@ -115,9 +115,9 @@ namespace DataFair.Services
                             }
                             catch (Exception ex)
                             {
+                                logger.Error(ex, "Error while writing messages!");
                                 transaction.Rollback();
                                 Task.Factory.StartNew(AddDataToFail, ReserveDataQueue);
-                                logger.Error(ex, "Error while writing messages!");
                             }
                         }
                     }

@@ -17,9 +17,9 @@ namespace DataFair
         internal static int MessageWriterTrasactiobSize = 100000;
         internal static int EntityWriterTrasactiobSize = 25000;
         internal static int ReconnectionRepeatCount = 5;
-        internal static int SleepModeStartCount = 100000;
+        internal static int SleepModeStartCount = 80000;
         internal static int SleepModeEndCount = SleepModeStartCount/2;
-        internal static TimeSpan ReconnerctionPause = new TimeSpan(0,0,10);
+        internal static TimeSpan ReconnerctionPause = new TimeSpan(0,0,5);
     }
 
 }
