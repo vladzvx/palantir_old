@@ -15,6 +15,7 @@ namespace DataFair.Services
         public int SessionsAvaliable;
         public int Orders;
         public int Messages;
+        public int FailedMessages;
         public int Users;
         public int Chats;
         public StateReport(State state, ICommonWriter<Message> messagesWriter, ICommonWriter<User> usersWriter, ICommonWriter<Chat> chatsWriter)
@@ -23,6 +24,7 @@ namespace DataFair.Services
             SessionsAvaliable = state.SessionStorages.Count;
             Orders = state.Orders.Count;
             Messages = messagesWriter.GetQueueCount();
+            FailedMessages = messagesWriter.GetFailedQueueCount();
             Users = usersWriter.GetQueueCount();
             Chats = chatsWriter.GetQueueCount();
         }
