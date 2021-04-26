@@ -4,6 +4,12 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Protobufs\**" />
+    <EmbeddedResource Remove="Protobufs\**" />
+    <None Remove="Protobufs\**" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.35.0" />
@@ -14,10 +20,6 @@
   <ItemGroup>
 	  <Protobuf Include="Configurator.proto" GrpcServices="Both" />
 	  <Protobuf Include="OrderBoard.proto" GrpcServices="Both" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Protobufs\" />
   </ItemGroup>
 
 </Project>

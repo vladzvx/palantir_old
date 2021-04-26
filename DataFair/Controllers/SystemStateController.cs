@@ -12,10 +12,10 @@ namespace DataFair.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class StateController
+    public class SystemStateController
     {
-        private readonly Services.StateReport state;
-        public StateController(Services.StateReport state)
+        private readonly Services.SystemReport state;
+        public SystemStateController(Services.SystemReport state)
         {
             this.state = state;
         }

@@ -16,7 +16,7 @@ namespace DataFair.Controllers
     public class CommandController
     {
         private readonly State state;
-        private readonly OrdersCreator creator;
+        private readonly OrdersManager creator;
         public CommandController(State state)
         {
             this.state = state;

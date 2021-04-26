@@ -1,4 +1,5 @@
 ﻿using Common;
+using DataFair.Services.Interfaces;
 using Microsoft.Extensions.Hosting;
 using Npgsql;
 using System;
@@ -10,21 +11,49 @@ using System.Timers;
 
 namespace DataFair.Services
 {
-    public class OrdersCreator:IHostedService
+    public class OrdersManager:IHostedService
     {
         private System.Timers.Timer timer = new System.Timers.Timer(Options.OrderGenerationTimerPeriod);
         private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
         private readonly State state;
+        private readonly ICommonWriter<Message> messWriter;
+        private readonly ICommonWriter<User> userWriter;
+        private readonly ICommonWriter<Chat> chatWriter;
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
         private readonly object sync = new object();
-        public OrdersCreator(State state)
+        public OrdersManager(State state, ICommonWriter<Message> messWriter, ICommonWriter<User> userWriter, ICommonWriter<Chat> chatWriter)
         {
+            this.messWriter = messWriter;
+            this.userWriter = userWriter;
+            this.chatWriter = chatWriter;
             this.state = state;
             timer.Elapsed += TimerAction;
         }
 
+        private void BalanceLoad()
+        {
+            if (messWriter.GetQueueCount() + userWriter.GetQueueCount() + chatWriter.GetQueueCount() > Options.SleepModeStartCount)
+            {
+                for (int i = 0; i < state.AllCollectors.Count; i++)
+                {
+                    state.MaxPriorityOrders.Enqueue(new Order() {Type=OrderType.Sleep, Time = (int)(Options.OrderGenerationTimerPeriod / 1000) });
+                }
+            }
+            if (messWriter.GetQueueCount() + userWriter.GetQueueCount() + chatWriter.GetQueueCount() < Options.SleepModeEndCount)
+            {
+            int count = 0;
+                int limit = state.MaxPriorityOrders.Count;
+                while (state.MaxPriorityOrders.TryDequeue(out Order order) && count < limit)
+                {
+                    if (order.Type != OrderType.Sleep)
+                        state.MaxPriorityOrders.Enqueue(order);
+                    count++;
+                }
+            }
+        }
         private void TimerAction(object sender,ElapsedEventArgs args)
         {
+            BalanceLoad();
             if (state.Orders.Count==0&&Monitor.TryEnter(sync))
             {
                 try

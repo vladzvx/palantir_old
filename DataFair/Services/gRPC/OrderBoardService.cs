@@ -12,6 +12,7 @@ using System.Threading;
 using Timer = System.Timers.Timer;
 using System.Diagnostics;
 using System.IO;
+using DataFair.Services.Interfaces;
 
 namespace DataFair.Services
 {
@@ -19,15 +20,28 @@ namespace DataFair.Services
     {
         private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
         private static Order EmptyOrder = new Order() { Type = OrderType.Empty };
-        private readonly State state;
-        public OrderBoardService(State state)
+        private readonly State ordersStorage;
+        private readonly ICommonWriter<Message> messagesWriter;
+        private readonly ICommonWriter<User> usersWriter;
+        private readonly ICommonWriter<Chat> chatsWriter;
+        public OrderBoardService(State ordersStorage, ICommonWriter<Message> messagesWriter, ICommonWriter<User> usersWriter, ICommonWriter<Chat> chatsWriter)
         {
-            this.state = state;
+            this.ordersStorage = ordersStorage;
+            this.messagesWriter = messagesWriter;
+            this.usersWriter = usersWriter;
+            this.chatsWriter = chatsWriter;
         }
         public override Task<Empty> PostEntity(Entity entity, ServerCallContext context)
         {
             logger.Trace("New entity Id: {0}; username: {1}; name: {2}; type: {3};", entity.Id, entity.Link,entity.LastName,entity.Type.ToString());
-            state.ent_worker.PutEntity(entity);
+            if (User.TryCast(entity,out User user))
+            {
+                usersWriter.PutData(user);
+            }
+            else if (Chat.TryCast(entity,out Chat chat))
+            {
+                chatsWriter.PutData(chat);
+            }
             return Task.FromResult(new Empty());
         }
 
@@ -37,7 +51,7 @@ namespace DataFair.Services
             {
                 while (await requestStream.MoveNext())
                 {
-                    state.worker.PutMessage(requestStream.Current);
+                    messagesWriter.PutData(requestStream.Current);
                     Message message = requestStream.Current;
                     logger.Trace("Message. DateTime: {0}; FromId: {1}; Text: {2}; Media: {3};", message.Timestamp, message.FromId, message.Text, message.Media);
                 }
@@ -52,14 +66,16 @@ namespace DataFair.Services
         {
             try
             {
-                if (state.Orders.TryDequeue(out Order order))
+                Order order = EmptyOrder;
+                if (ordersStorage.MaxPriorityOrders.TryDequeue(out Order order1))
                 {
-                    return Task.FromResult(order);
+                    order = order1;
                 }
-                else
+                else if (ordersStorage.Orders.TryDequeue(out Order order2))
                 {
-                    return Task.FromResult(EmptyOrder);
+                    order = order2;
                 }
+                return Task.FromResult(order);
             }
             catch (Exception ex )
             {
@@ -72,17 +88,13 @@ namespace DataFair.Services
             try
             {
                 logger.Debug(string.Format("New order received!  Id: {0}; Field: {1};", order.Id, order.Link));
-                state.Orders.Enqueue(order);
+                ordersStorage.Orders.Enqueue(order);
             }
             catch (Exception ex)
             {
                 logger.Error(ex, "Error while PostOrder execution!");
             }
             return Task.FromResult(new Empty());
-        }
-        public override Task<StateReport> GetState(Empty request, ServerCallContext context)
-        {
-            return Task.FromResult(state.GetStateReport());
         }
 
     }

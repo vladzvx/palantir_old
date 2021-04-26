@@ -382,6 +382,8 @@ for cfg in config_stub.GetConfiguration(emp):
 						stub.PostOrder(order);
 			elif order.Type==0:
 				q=0;
+			elif order.Type==3:
+				time.sleep(order.Time)
 		except telethon.errors.ChannelPrivateError:
 			pass;
 		except telethon.errors.FloodWaitError as e:

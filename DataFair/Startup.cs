@@ -1,4 +1,6 @@
-﻿using DataFair.Services;
+﻿using Common;
+using DataFair.Services;
+using DataFair.Services.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -16,10 +18,23 @@ namespace DataFair
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<State>();
+            services.AddSingleton<ICommonWriter<Message>,CommonWriter<Message>>();
+            services.AddSingleton<ICommonWriter<Chat>, CommonWriter<Chat>>();
+            services.AddSingleton<ICommonWriter<User>, CommonWriter<User>>();
+
+            services.AddTransient<IWriterCore<Message>,MessageWriterCore>();
+            services.AddTransient<IWriterCore<User>, UserWriterCore>();
+            services.AddTransient<IWriterCore<Chat>, ChatWriterCore>();
+            services.AddTransient<StateReport>();
+            services.AddTransient<SystemReport>();
+
+            services.AddHostedService<OrdersManager>();
+            services.AddHostedService<CollectorsManager>();
+
             services.AddGrpc();
             services.AddCors();
             services.AddControllers();
-            services.AddHostedService<OrdersCreator>();
+
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
