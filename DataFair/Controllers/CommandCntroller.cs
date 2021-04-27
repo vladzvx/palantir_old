@@ -10,24 +10,21 @@ using System.Threading.Tasks;
 
 namespace DataFair.Controllers
 {
-
     [ApiController]
     [Route("[controller]")]
     public class CommandController
     {
-        private readonly State state;
-        private readonly OrdersManager creator;
-        public CommandController(State state)
+        private readonly OrdersGenerator ordersGenerator;
+        public CommandController(OrdersGenerator ordersGenerator)
         {
-            this.state = state;
-            //creator = new  OrdersCreator(state);
+            this.ordersGenerator = ordersGenerator;
         }
 
         [HttpPost()]
         [EnableCors()]
         public string PostRequest()
         {
-            OrdersManager.EnableGetFullChannelOrdersGen();
+            ordersGenerator.CreateGetFullChannelOrders(200).Wait();
             return "ok";
             
         }
