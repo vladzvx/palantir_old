@@ -12,6 +12,7 @@ namespace DataFair
         internal static readonly string ConnectionString = Environment.GetEnvironmentVariable("ConnectionString") ?? File.ReadAllText(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), Options.SettingsFilename));
 
         internal static TimeSpan OrderGenerationTimeSpan = - new TimeSpan(1, 10, 0);
+        internal static double StartWritingInterval = 1000;
         internal static double OrderGenerationTimerPeriod = 10000;
         internal static double CollectorsSyncTimerPeriod = 15000;
         internal static int MessageWriterTrasactiobSize = 100000;

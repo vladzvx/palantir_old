@@ -9,11 +9,14 @@ using System.Data.Common;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
+using Timer = System.Timers.Timer;
 
 namespace DataFair.Services
 {
     public class CommonWriter<TData> :ICommonWriter<TData> where TData : class
     {
+        private Timer Timer;
         internal Logger logger = NLog.LogManager.GetCurrentClassLogger();
         internal Task WritingTask;
         internal Task FailedWritingTask;
@@ -26,24 +29,32 @@ namespace DataFair.Services
         public CommonWriter(IWriterCore<TData> writerSettings)
         {
             this.writerSettings = writerSettings;
+            Timer = new Timer();
+            Timer.Interval = Options.StartWritingInterval;
+            Timer.Elapsed += TryStartWriting;
+            Timer.AutoReset = true;
+            Timer.Start();
             //Connention = new NpgsqlConnection(writerSettings.ConnectionString);
         }
 
-        public void PutData(TData data)
+        private void TryStartWriting(object sender, ElapsedEventArgs args)
         {
-            DataQueue.Enqueue(data);
             if (Monitor.TryEnter(sync))
             {
-                if (WritingTask == null || WritingTask.IsCompleted)
+                if (DataQueue.Count > 0 && (WritingTask == null || WritingTask.IsCompleted)) 
                 {
                     WritingTask = Task.Factory.StartNew(WritingTaskAction);
                 }
-                if (FailedWritingTask == null || FailedWritingTask.IsCompleted)
+                if (FailedDataQueue.Count > 0 && (FailedWritingTask == null || FailedWritingTask.IsCompleted)) 
                 {
                     FailedWritingTask = Task.Factory.StartNew(FailedWriting);
                 }
                 Monitor.Exit(sync);
             }
+        }
+        public void PutData(TData data)
+        {
+            DataQueue.Enqueue(data);
         }
 
         public int GetQueueCount()
