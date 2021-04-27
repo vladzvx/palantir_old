@@ -19,9 +19,9 @@ namespace DataFair
         {
             services.AddSingleton<State>();
 
-            services.AddScoped<ICommonWriter<Message>,CommonWriter<Message>>();
-            services.AddScoped<ICommonWriter<Chat>, CommonWriter<Chat>>();
-            services.AddScoped<ICommonWriter<User>, CommonWriter<User>>();
+            services.AddSingleton<ICommonWriter<Message>,CommonWriter<Message>>();
+            services.AddSingleton<ICommonWriter<Chat>, CommonWriter<Chat>>();
+            services.AddSingleton<ICommonWriter<User>, CommonWriter<User>>();
 
             services.AddTransient<IWriterCore<Message>,MessageWriterCore>();
             services.AddTransient<IWriterCore<User>, UserWriterCore>();
