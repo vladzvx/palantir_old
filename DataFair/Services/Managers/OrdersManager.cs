@@ -21,6 +21,30 @@ namespace DataFair.Services
         private readonly ICommonWriter<Chat> chatWriter;
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
         private readonly object sync = new object();
+
+        #region temp generation ruling
+        private static bool GenerateGetFullChannelOrders = false;
+        private static object sync2 = new object();
+
+        internal static void EnableGetFullChannelOrdersGen()
+        {
+            lock (sync2)
+                GenerateGetFullChannelOrders = true;
+        }
+
+        internal static void DisableGetFullChannelOrdersGen()
+        {
+            lock (sync2)
+                GenerateGetFullChannelOrders = false;
+        }
+
+        internal static bool GenerateGetFullChannelOrdersStatus()
+        {
+            lock (sync2)
+                return GenerateGetFullChannelOrders;
+        }
+        #endregion
+
         public OrdersManager(State state, ICommonWriter<Message> messWriter, ICommonWriter<User> userWriter, ICommonWriter<Chat> chatWriter)
         {
             this.messWriter = messWriter;
@@ -53,6 +77,16 @@ namespace DataFair.Services
         }
         private void TimerAction(object sender,ElapsedEventArgs args)
         {
+            if (GenerateGetFullChannelOrdersStatus())
+            {
+                try
+                {
+                    CreateGetFullChannelOrders(200).Wait();
+                }
+                catch { }
+                DisableGetFullChannelOrdersGen();
+            }
+                
             BalanceLoad();
             if (state.Orders.Count==0&&Monitor.TryEnter(sync))
             {
@@ -191,10 +225,10 @@ namespace DataFair.Services
                             Order order = new Order() { Id = ChatId, Link = Username, Offset = Offset, PairId = PairId, PairLink = PairUsername };
                             if (!PairChecked)
                             {
-                                if (!state.Orders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.GetFullChannel; }))
+                                if (!state.MaxPriorityOrders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.GetFullChannel; }))
                                 {
                                     order.Type = OrderType.GetFullChannel;
-                                    state.Orders.Enqueue(order);
+                                    state.MaxPriorityOrders.Enqueue(order);
                                 }
                             }
                             count++;

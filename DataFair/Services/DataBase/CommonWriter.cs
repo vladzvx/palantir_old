@@ -21,11 +21,12 @@ namespace DataFair.Services
         private readonly ConcurrentQueue<TData> FailedDataQueue = new ConcurrentQueue<TData>();
         private readonly object sync = new object();
         private readonly IWriterCore<TData> writerSettings;
-        private DbConnection Connention;
+        //private DateTime LastConnectionOpening = DateTime.UtcNow;
+        //private DbConnection Connention;
         public CommonWriter(IWriterCore<TData> writerSettings)
         {
             this.writerSettings = writerSettings;
-            Connention = new NpgsqlConnection(writerSettings.ConnectionString);
+            //Connention = new NpgsqlConnection(writerSettings.ConnectionString);
         }
 
         public void PutData(TData data)
@@ -60,38 +61,39 @@ namespace DataFair.Services
             FailedDataQueue.Clear();
         }
 
-        private bool ManageConnection()
-        {
-            int TryCounter = 0;
-            while (Connention.State != System.Data.ConnectionState.Open && TryCounter<Options.ReconnectionRepeatCount)
-            {
-                try
-                {
-                    if (Connention.State == System.Data.ConnectionState.Closed)
-                    {
-                        Connention.Open();
-                    }
-                    else if (Connention.State == System.Data.ConnectionState.Broken)
-                    {
-                        Connention.Close();
-                        Connention.Open();
-                    }
-                    else
-                    {
-                        Thread.Sleep(Options.ReconnerctionPause);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    logger.Error(ex,"Error while reconnection");
-                }
-            }
-            return Connention.State == System.Data.ConnectionState.Open;
-        }
+        //private bool ManageConnection()
+        //{
+        //    int TryCounter = 0;
+        //    while (Connention.State != System.Data.ConnectionState.Open && TryCounter<Options.ReconnectionRepeatCount)
+        //    {
+        //        try
+        //        {
+        //            if (Connention.State == System.Data.ConnectionState.Closed)
+        //            {
+        //                Connention.Open();
+        //            }
+        //            else if (Connention.State == System.Data.ConnectionState.Broken)
+        //            {
+        //                Connention.Close();
+        //                Connention.Open();
+        //            }
+        //            else
+        //            {
+        //                Thread.Sleep(Options.ReconnerctionPause);
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            logger.Error(ex,"Error while reconnection");
+        //        }
+        //    }
+        //    return Connention.State == System.Data.ConnectionState.Open;
+        //}
         private void WritingTaskAction()
         {
-            if (ManageConnection())
+            using (DbConnection Connention = new NpgsqlConnection(writerSettings.ConnectionString))
             {
+                Connention.Open();
                 using DbCommand AddMessageCommand = writerSettings.CommandCreator(Connention);
                 try
                 {
@@ -115,9 +117,9 @@ namespace DataFair.Services
                             }
                             catch (Exception ex)
                             {
+                                logger.Error(ex, "Error while writing messages!");
                                 transaction.Rollback();
                                 Task.Factory.StartNew(AddDataToFail, ReserveDataQueue);
-                                logger.Error(ex, "Error while writing messages!");
                             }
                         }
                     }
