@@ -93,6 +93,7 @@ namespace DataFair.Services
         {
             using (DbConnection Connention = new NpgsqlConnection(writerSettings.ConnectionString))
             {
+                Connention.Open();
                 using DbCommand AddMessageCommand = writerSettings.CommandCreator(Connention);
                 try
                 {
