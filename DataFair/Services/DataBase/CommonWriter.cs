@@ -119,7 +119,6 @@ namespace DataFair.Services
                                         AddMessageCommand.Transaction = transaction;
                                         writerSettings.WriteSingleObject(AddMessageCommand, message);
                                     }
-                                    Task.Delay(100).Wait();
                                 }
                                 transaction.Commit();
                             }
