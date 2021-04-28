@@ -25,6 +25,7 @@ namespace DataFair.Services
         private readonly object sync = new object();
         private readonly IWriterCore<TData> writerSettings;
         private readonly LoadManager loadManager;
+        private DbConnection Connention;
         public CommonWriter(IWriterCore<TData> writerSettings, LoadManager loadManager)
         {
             this.writerSettings = writerSettings;
@@ -34,7 +35,7 @@ namespace DataFair.Services
             Timer.Elapsed += TryStartWriting;
             Timer.AutoReset = true;
             Timer.Start();
-            //Connention = new NpgsqlConnection(writerSettings.ConnectionString);
+            Connention = new NpgsqlConnection(writerSettings.ConnectionString);
         }
 
         private void TryStartWriting(object sender, ElapsedEventArgs args)
@@ -67,13 +68,41 @@ namespace DataFair.Services
             return FailedDataQueue.Count;
         }
 
+        private bool ManageConnection()
+        {
+            int TryCounter = 0;
+            while (Connention.State != System.Data.ConnectionState.Open && TryCounter < Options.ReconnectionRepeatCount)
+            {
+                try
+                {
+                    if (Connention.State == System.Data.ConnectionState.Closed)
+                    {
+                        Connention.Open();
+                    }
+                    else if (Connention.State == System.Data.ConnectionState.Broken)
+                    {
+                        Connention.Close();
+                        Connention.Open();
+                    }
+                    else
+                    {
+                        Thread.Sleep(Options.ReconnerctionPause);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex, "Error while reconnection");
+                }
+            }
+            return Connention.State == System.Data.ConnectionState.Open;
+        }
+
         private void WritingTaskAction()
         {
             try
             {
-                using (DbConnection Connention = new NpgsqlConnection(writerSettings.ConnectionString))
+                if (ManageConnection())
                 {
-                    Connention.Open();
                     using DbCommand AddMessageCommand = writerSettings.CommandCreator(Connention);
                     while (!DataQueue.IsEmpty)
                     {
@@ -90,6 +119,7 @@ namespace DataFair.Services
                                         AddMessageCommand.Transaction = transaction;
                                         writerSettings.WriteSingleObject(AddMessageCommand, message);
                                     }
+                                    Task.Delay(100).Wait();
                                 }
                                 transaction.Commit();
                             }

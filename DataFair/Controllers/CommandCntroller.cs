@@ -20,13 +20,22 @@ namespace DataFair.Controllers
             this.ordersGenerator = ordersGenerator;
         }
 
-        [HttpPost()]
+        [HttpPost("GetFullChannel")]
         [EnableCors()]
         public string PostRequest()
         {
             ordersGenerator.CreateGetFullChannelOrders(200).Wait();
             return "ok";
             
+        }
+
+        [HttpPost("GetGroupsHistory")]
+        [EnableCors()]
+        public string PostRequest2()
+        {
+            ordersGenerator.CreateGroupHistoryLoadingOrders().Wait();
+            return "ok";
+
         }
     }
 }

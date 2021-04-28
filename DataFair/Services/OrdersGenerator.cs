@@ -27,7 +27,6 @@ namespace DataFair.Services
             command.Parameters["dt"].Value = BoundDateTime;
             return command;
         }
-
         public async Task CreateUpdateOrders()
         {
             try
@@ -107,6 +106,47 @@ namespace DataFair.Services
                                 };
                                 state.Orders.Enqueue(order);
                             }
+                        }
+                        catch (InvalidCastException ex) { logger.Warn(ex); }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Error while UpdateOrdersCreation");
+            }
+
+        }
+        public async Task CreateGroupHistoryLoadingOrders()
+        {
+            try
+            {
+                using (NpgsqlConnection connection = new NpgsqlConnection(Options.ConnectionString))
+                {
+                    await connection.OpenAsync(cts.Token);
+                    using NpgsqlCommand command = CreateAndConfigureCommand(connection, DateTime.Now - Options.OrderGenerationTimeSpan, "get_groups_for_history");
+                    using NpgsqlDataReader reader = await command.ExecuteReaderAsync(cts.Token);
+                    while (!cts.IsCancellationRequested && await reader.ReadAsync(cts.Token))
+                    {
+                        try
+                        {
+                            long ChatId = reader.GetInt64(0);
+                            long PairId = reader.IsDBNull(1) ? 0 : reader.GetInt64(1);
+                            long Offset = reader.GetInt64(2);
+                            DateTime LastUpdate = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3);
+                            bool PairChecked = reader.IsDBNull(4) ? true : reader.GetBoolean(4);
+                            string Username = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
+                            string PairUsername = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
+                            Order order = new Order()
+                            {
+                                Id = ChatId,
+                                Link = Username,
+                                Offset = Offset,
+                                PairId = PairId,
+                                PairLink = PairUsername,
+                                Type = OrderType.History
+                            };
+                            state.MaxPriorityOrders.Enqueue(order);
                         }
                         catch (InvalidCastException ex) { logger.Warn(ex); }
                     }

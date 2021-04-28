@@ -391,7 +391,14 @@ for cfg in config_stub.GetConfiguration(emp):
 				ResolveUsernameRequestBan = True;
 				ResolveUsernameRequestTime = datetime.datetime.utcnow();
 		except BaseException as e:
-			logging.error(e.args[0])
+			if "This session is in 'prepared' state;" in e.args[0]:
+				time.sleep(120)
+				getter = TgDataGetter(config.CollectorParams.SessionName, config.CollectorParams.ApiId, 
+						config.CollectorParams.ApiHash,
+						config.CollectorParams.Phone,connection_string)
+				getter.start();
+			else:
+				logging.error(e.args[0])
 
 		time.sleep(1)
 

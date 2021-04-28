@@ -355,6 +355,26 @@ $$
     end;
 $$LANGUAGE plpgsql;
 
+create  or replace function  get_groups_for_history(dt timestamp) returns table (_id bigint,
+                                                                            _pair_id bigint,
+                                                                            _last_message_id bigint,
+                                                                            _getting_last_message_timestamp timestamp,
+                                                                            _pair_id_checked bool,
+                                                                            _username text,
+                                                                            _pair_username text) as
+$$
+    begin
+        return query update chats set last_time_checked = current_timestamp  where getting_last_message_timestamp is null and is_group and (last_time_checked is null or last_time_checked <dt)
+                returning id,
+                pair_id,
+                last_message_id,
+                getting_last_message_timestamp,
+                pair_id_checked,
+                username,
+                pair_username;
+    end;
+$$LANGUAGE plpgsql;
+
 create  or replace function  get_unrequested_channels(dt timestamp) returns table (_id bigint,
                                                                             _pair_id bigint,
                                                                             _last_message_id bigint,
