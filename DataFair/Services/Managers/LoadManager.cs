@@ -10,7 +10,7 @@ namespace DataFair.Services
         public void AddValue(int size)
         {
             if (size > Options.SleepModeStartCount)
-                Task.Delay(1000);
+                Task.Delay(1000).Wait() ;
         }
     }
 }
