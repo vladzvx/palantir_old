@@ -14,6 +14,7 @@ namespace DataFair.Services
         public int Collectors;
         public int SessionsAvaliable;
         public int Orders;
+        public int MaxPriorityOrders;
         public int Messages;
         public int FailedMessages;
         public int Users;
@@ -22,7 +23,8 @@ namespace DataFair.Services
         {
             Collectors = state.Collectors.Count;
             SessionsAvaliable = state.SessionStorages.Count;
-            Orders = state.Orders.Count + state.MaxPriorityOrders.Count;
+            Orders = state.Orders.Count;
+            MaxPriorityOrders = state.MaxPriorityOrders.Count;
             Messages = messagesWriter.GetQueueCount();
             FailedMessages = messagesWriter.GetFailedQueueCount();
             Users = usersWriter.GetQueueCount();

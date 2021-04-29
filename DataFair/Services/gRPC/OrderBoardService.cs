@@ -24,12 +24,14 @@ namespace DataFair.Services
         private readonly ICommonWriter<Message> messagesWriter;
         private readonly ICommonWriter<User> usersWriter;
         private readonly ICommonWriter<Chat> chatsWriter;
-        public OrderBoardService(State ordersStorage, ICommonWriter<Message> messagesWriter, ICommonWriter<User> usersWriter, ICommonWriter<Chat> chatsWriter)
+        private readonly LoadManager loadManager;
+        public OrderBoardService(State ordersStorage, ICommonWriter<Message> messagesWriter, ICommonWriter<User> usersWriter, ICommonWriter<Chat> chatsWriter, LoadManager loadManager)
         {
             this.ordersStorage = ordersStorage;
             this.messagesWriter = messagesWriter;
             this.usersWriter = usersWriter;
             this.chatsWriter = chatsWriter;
+            this.loadManager = loadManager;
         }
         public override Task<Empty> PostEntity(Entity entity, ServerCallContext context)
         {
@@ -52,8 +54,9 @@ namespace DataFair.Services
                 while (await requestStream.MoveNext())
                 {
                     messagesWriter.PutData(requestStream.Current);
-                    Message message = requestStream.Current;
-                    logger.Trace("Message. DateTime: {0}; FromId: {1}; Text: {2}; Media: {3};", message.Timestamp, message.FromId, message.Text, message.Media);
+                    loadManager.AddValue(messagesWriter.GetQueueCount());
+                    //Message message = requestStream.Current;
+                    //logger.Trace("Message. DateTime: {0}; FromId: {1}; Text: {2}; Media: {3};", message.Timestamp, message.FromId, message.Text, message.Media);
                 }
             }
             catch (Exception ex)
