@@ -21,7 +21,7 @@ namespace DataFair.Services
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
         private readonly object sync = new object();
         private readonly LoadManager manager;
-        private bool GenerationOn = false;
+        private bool GenerationOn = true;
         public OrdersManager(State state, OrdersGenerator ordersGenerator, LoadManager manager)
         {
             this.state = state;
