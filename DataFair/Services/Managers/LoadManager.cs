@@ -37,13 +37,15 @@ namespace DataFair.Services
             {
                 if (!slowMode)
                 {
+                    cacheLock.ExitReadLock();
                     return;
                 }
                 else
                 {
+                    cacheLock.ExitReadLock();
                     await Task.Delay(Options.Pasue);
                 }
-                cacheLock.ExitReadLock();
+                
             }
             
         }
