@@ -72,7 +72,7 @@ namespace DataFair.Services
                 }
                 else if (ordersStorage.MiddlePriorityOrders.TryDequeue(out Order order2))
                 {
-                    order = order1;
+                    order = order2;
                 }
                 else if (ordersStorage.Orders.TryDequeue(out Order order3))
                 {
