@@ -1,4 +1,5 @@
-﻿using DataFair.Services.Interfaces;
+﻿using Common;
+using DataFair.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using NLog;
 using Npgsql;
@@ -14,24 +15,22 @@ using Timer = System.Timers.Timer;
 
 namespace DataFair.Services
 {
-    public class CommonWriter<TData> :ICommonWriter<TData> where TData : class
+    public class CommonWriter:ICommonWriter 
     {
         private Timer Timer;
         internal Logger logger = NLog.LogManager.GetCurrentClassLogger();
         internal Task WritingTask;
-        internal Task FailedWritingTask;
-        private readonly ConcurrentQueue<TData> DataQueue = new ConcurrentQueue<TData>();
-        private readonly ConcurrentQueue<TData> FailedDataQueue = new ConcurrentQueue<TData>();
+        private readonly ConcurrentQueue<object> DataQueue = new ConcurrentQueue<object>();
         private readonly object sync = new object();
-        private readonly IWriterCore<TData> writerSettings;
+        private readonly IWriterCore writerSettings;
         private readonly LoadManager loadManager;
         private DbConnection Connention;
-        public CommonWriter(IWriterCore<TData> writerSettings, LoadManager loadManager)
+        public CommonWriter(LoadManager loadManager, IWriterCore writerSettings)
         {
             this.writerSettings = writerSettings;
             this.loadManager = loadManager;
             Timer = new Timer();
-            Timer.Interval = Options.StartWritingInterval;
+            Timer.Interval = writerSettings.StartWritingInterval;
             Timer.Elapsed += TryStartWriting;
             Timer.AutoReset = true;
             Timer.Start();
@@ -47,25 +46,16 @@ namespace DataFair.Services
                 {
                     WritingTask = Task.Factory.StartNew(WritingTaskAction);
                 }
-                //if (FailedDataQueue.Count > 0 && (FailedWritingTask == null || FailedWritingTask.IsCompleted)) 
-                //{
-                //    FailedWritingTask = Task.Factory.StartNew(FailedWriting);
-                //}
                 Monitor.Exit(sync);
             }
         }
-        public void PutData(TData data)
+        public void PutData(object data)
         {
             DataQueue.Enqueue(data);
         }
         public int GetQueueCount()
         {
-            return DataQueue.Count + FailedDataQueue.Count;
-        }
-
-        public int GetFailedQueueCount()
-        {
-            return FailedDataQueue.Count;
+            return DataQueue.Count;
         }
 
         private bool ManageConnection()
@@ -86,7 +76,7 @@ namespace DataFair.Services
                     }
                     else
                     {
-                        Thread.Sleep(Options.ReconnerctionPause);
+                        Thread.Sleep(writerSettings.ReconnerctionPause);
                     }
                 }
                 catch (Exception ex)
@@ -103,21 +93,19 @@ namespace DataFair.Services
             {
                 if (ManageConnection())
                 {
-                    using DbCommand AddMessageCommand = writerSettings.CommandCreator(Connention);
-                    while (!DataQueue.IsEmpty)
+                    using DbCommand AddMessageCommand = writerSettings.CreateCommand(Connention,typeof(Message));
+                    using DbCommand AddChatCommand = writerSettings.CreateCommand(Connention,typeof(Chat));
+                    using DbCommand AddUserCommand = writerSettings.CreateCommand(Connention, typeof(User));
                     {
-                        List<TData> ReserveDataQueue = new List<TData>();
                         using (DbTransaction transaction = Connention.BeginTransaction())
                         {
                             try
                             {
-                                for (int i = 0; i < writerSettings.TrasactionSize && !DataQueue.IsEmpty; i++)
+                                for (int i = 0; i < Options.WriterTransactionSize && !DataQueue.IsEmpty; i++)
                                 {
-                                    if (DataQueue.TryDequeue(out TData message))
+                                    if (DataQueue.TryDequeue(out object message))
                                     {
-                                        ReserveDataQueue.Add(message);
-                                        AddMessageCommand.Transaction = transaction;
-                                        writerSettings.WriteSingleObject(AddMessageCommand, message);
+                                        writerSettings.WriteSingleObject(message, transaction);
                                     }
                                 }
                                 transaction.Commit();
@@ -126,7 +114,6 @@ namespace DataFair.Services
                             {
                                 logger.Error(ex, "Error while writing messages!");
                                 transaction.Rollback();
-                                //Task.Factory.StartNew(AddDataToFail, ReserveDataQueue);
                                 throw ex;
                             }
                         }
@@ -139,50 +126,5 @@ namespace DataFair.Services
             }
 
         }
-
-        //private void AddDataToFail(object? data)
-        //{
-        //    List<TData> datas = (List<TData>)data;
-        //    if (datas != null)
-        //    {
-        //        foreach (TData d in datas)
-        //        {
-        //            FailedDataQueue.Enqueue(d);
-        //        }
-        //    }
-        //}
-        //private void FailedWriting()
-        //{
-        //    try
-        //    {
-        //        using (DbConnection Connention = new NpgsqlConnection(writerSettings.ConnectionString))
-        //        {
-        //            using DbCommand AddMessageCommand = writerSettings.CommandCreator(Connention);
-        //            while (!FailedDataQueue.IsEmpty&& FailedDataQueue.TryPeek(out TData message))
-        //            {
-        //                if (FailedDataQueue.Count > Options.SleepModeStartCount)
-        //                {
-        //                    FailedDataQueue.Clear();
-        //                    logger.Warn("Clearing failed queue!");
-        //                }
-        //                try
-        //                {
-        //                    while (FailedDataQueue.TryDequeue(out message))
-        //                    {
-        //                        writerSettings.WriteSingleObject(AddMessageCommand, message);
-        //                    }
-        //                } 
-        //                catch (Exception ex)
-        //                {
-        //                    logger.Error(ex, "Error while writing FailedMessage! Data: "+ Newtonsoft.Json.JsonConvert.SerializeObject(message));
-        //                }
-        //            }
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        logger.Error(ex);
-        //    }
-        //}
     }
 }

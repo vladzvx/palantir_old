@@ -24,7 +24,7 @@ namespace DataFair.Controllers
         [EnableCors()]
         public string PostRequest()
         {
-            ordersGenerator.CreateGetFullChannelOrders(200).Wait();
+            ordersGenerator.CreateGetFullChannelOrders(800).Wait();
             return "ok";
             
         }

@@ -188,10 +188,9 @@ namespace DataFair.Services
                                 {
                                     order.Type = OrderType.GetFullChannel;
                                     state.MaxPriorityOrders.Enqueue(order);
+                                    count++;
                                 }
                             }
-                            count++;
-
                         }
                         catch (InvalidCastException ex) { logger.Warn(ex); }
                     }

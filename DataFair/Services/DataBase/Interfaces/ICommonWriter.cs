@@ -5,11 +5,10 @@ using System.Threading.Tasks;
 
 namespace DataFair.Services.Interfaces
 {
-    public interface ICommonWriter<TData> where TData : class
+    public interface ICommonWriter
     {
-        public void PutData(TData data);
+        public void PutData(object data);
 
         public int GetQueueCount();
-        public int GetFailedQueueCount();
     }
 }

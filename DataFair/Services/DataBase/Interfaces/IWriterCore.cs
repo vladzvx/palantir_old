@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 
 namespace DataFair.Services.Interfaces
 {
-    public interface IWriterCore<TData> where TData : class
+    public interface IWriterCore
     {
+        public TimeSpan ReconnerctionPause { get; }
+        public double StartWritingInterval { get; }
         public string ConnectionString { get; }
         public int TrasactionSize { get; }
-        public DbCommand CommandCreator(DbConnection connection);
-        public void WriteSingleObject(DbCommand command, TData data);
+        public DbCommand CreateCommand(DbConnection connection,Type dataType);
+        public void WriteSingleObject(object data, DbTransaction transaction);
     }
 }

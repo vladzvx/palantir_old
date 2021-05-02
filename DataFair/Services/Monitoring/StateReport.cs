@@ -15,20 +15,16 @@ namespace DataFair.Services
         public int SessionsAvaliable;
         public int Orders;
         public int MaxPriorityOrders;
+        public int MiddlePriorityOrders;
         public int Messages;
-        public int FailedMessages;
-        public int Users;
-        public int Chats;
-        public StateReport(State state, ICommonWriter<Message> messagesWriter, ICommonWriter<User> usersWriter, ICommonWriter<Chat> chatsWriter)
+        public StateReport(State state, ICommonWriter messagesWriter)
         {
             Collectors = state.Collectors.Count;
             SessionsAvaliable = state.SessionStorages.Count;
             Orders = state.Orders.Count;
             MaxPriorityOrders = state.MaxPriorityOrders.Count;
+            MiddlePriorityOrders = state.MiddlePriorityOrders.Count;
             Messages = messagesWriter.GetQueueCount();
-            FailedMessages = messagesWriter.GetFailedQueueCount();
-            Users = usersWriter.GetQueueCount();
-            Chats = chatsWriter.GetQueueCount();
         }
     }
 }

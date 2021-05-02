@@ -13,46 +13,26 @@ namespace DataFair.Services
 {
     public class OrdersManager:IHostedService
     {
+        
         private System.Timers.Timer timer = new System.Timers.Timer(Options.OrderGenerationTimerPeriod);
         private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
         private readonly State state;
         private readonly OrdersGenerator ordersGenerator;
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
         private readonly object sync = new object();
-
-        #region temp generation ruling
-        private static bool GenerateGetFullChannelOrders = false;
-        private static object sync2 = new object();
-
-        internal static void EnableGetFullChannelOrdersGen()
-        {
-            lock (sync2)
-                GenerateGetFullChannelOrders = true;
-        }
-
-        internal static void DisableGetFullChannelOrdersGen()
-        {
-            lock (sync2)
-                GenerateGetFullChannelOrders = false;
-        }
-
-        internal static bool GenerateGetFullChannelOrdersStatus()
-        {
-            lock (sync2)
-                return GenerateGetFullChannelOrders;
-        }
-        #endregion
-
-        public OrdersManager(State state, OrdersGenerator ordersGenerator)
+        private readonly LoadManager manager;
+        private bool GenerationOn = false;
+        public OrdersManager(State state, OrdersGenerator ordersGenerator, LoadManager manager)
         {
             this.state = state;
             this.ordersGenerator = ordersGenerator;
             timer.Elapsed += TimerAction;
+            this.manager = manager;
         }
 
         private void TimerAction(object sender,ElapsedEventArgs args)
         {   
-            if (state.Orders.Count==0&&Monitor.TryEnter(sync))
+            if (GenerationOn&&state.Orders.Count==0&&Monitor.TryEnter(sync))
             {
                 try
                 {
@@ -61,6 +41,7 @@ namespace DataFair.Services
                 catch { }
                 Monitor.Exit(sync);
             }
+            //manager.AddValue();
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
