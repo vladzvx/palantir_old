@@ -15,9 +15,11 @@ namespace DataFair.Controllers
     public class CommandController
     {
         private readonly OrdersGenerator ordersGenerator;
-        public CommandController(OrdersGenerator ordersGenerator)
+        private readonly State state;
+        public CommandController(OrdersGenerator ordersGenerator, State state)
         {
             this.ordersGenerator = ordersGenerator;
+            this.state = state;
         }
 
         [HttpPost("GetFullChannel")]
@@ -27,6 +29,15 @@ namespace DataFair.Controllers
             ordersGenerator.CreateGetFullChannelOrders(800).Wait();
             return "ok";
             
+        }
+
+        [HttpPost("PostEmptyOrder")]
+        [EnableCors()]
+        public string PostEmptyOrder()
+        {
+            state.Orders.Enqueue(new Order() { Type = OrderType.Empty });
+            return "ok";
+
         }
 
         [HttpPost("GetGroupsHistory")]

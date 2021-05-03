@@ -13,7 +13,7 @@ namespace DataFair
 
         internal static TimeSpan OrderGenerationTimeSpan = - new TimeSpan(1, 10, 0);
         internal static double StartWritingInterval = 20000;
-        internal static double OrderGenerationTimerPeriod = 5000;
+        internal static double OrderGenerationTimerPeriod = 25000;
         internal static double CollectorsSyncTimerPeriod = 15000;
         internal static int WriterTransactionSize = 100000;
         internal static int EntityWriterTrasactiobSize = 25000;
