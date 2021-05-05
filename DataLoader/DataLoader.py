@@ -434,6 +434,6 @@ for cfg in config_stub.GetConfiguration(emp):
 			else:
 				logging.error(e.args[0])
 
-		time.sleep(6000)
+		time.sleep(1)
 
 
