@@ -251,7 +251,7 @@ CREATE TABLE messages_2029_m12 PARTITION OF messages FOR VALUES FROM ('2029-12-0
 
 CREATE OR REPLACE FUNCTION add_message(_message_timestamp timestamp,_message_id bigint, _chat_id bigint, _user_id bigint,
     _reply_to bigint,_thread_start bigint,_media_group_id bigint,_forward_from_id BIGINT,_forward_from_message_id bigint,
-     _text text, _media text, _formatting text) RETURNS void as
+     _text text, _media jsonb, _formatting jsonb) RETURNS void as
 $$
     begin
             insert into public.messages (message_timestamp,
@@ -264,8 +264,8 @@ $$
                                          forward_from_id,
                                          forward_from_message_id,
                                          text,
-                                         media_costyl,
-                                         formatting_costyl) values (_message_timestamp,
+                                         media,
+                                         formatting) values (_message_timestamp,
                                                              _message_id,
                                                              _chat_id,
                                                              _user_id,

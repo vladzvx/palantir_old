@@ -24,6 +24,7 @@ class CustomEncoder(json.JSONEncoder):
                 '__value__': list(o)}     
 		if isinstance(o, datetime.datetime):
 			return {'__datetime__': o.replace(microsecond=0).isoformat()}
+
 		return {'__{}__'.format(o.__class__.__name__): o.__dict__}
 
 class TgDataGetter():
@@ -92,7 +93,9 @@ class TgDataGetter():
 
 	def get_full_channel(self,order):
 		return self._loop.run_until_complete(self._get_full_channel(order))
-
+	def create_json(type,id,content):
+		result = '{"type":'+str(type)+',"id":'+str(id)+',"content":'+content+'}'
+		return result;
 	def messages_iteration(messages):
 		for message in messages:
 			message_for_send = OrderBoard_pb2.Message()
@@ -112,7 +115,24 @@ class TgDataGetter():
 					message_for_send.FromId = message.from_id.user_id
 
 			if (message.media is not None):
-				message_for_send.Media = json.dumps(message.media,cls=CustomEncoder)
+				
+				try:
+					if isinstance( message.media, telethon.types.MessageMediaPoll):
+						message_for_send.Media = TgDataGetter.create_json(1,message.media.poll.id,'"'+str(message.media)+'"')
+					elif isinstance( message.media, telethon.types.MessageMediaDocument):
+						message_for_send.Media = TgDataGetter.create_json(2,message.media.document.id,'{"dc_id":'+str(message.media.document.dc_id)+"}")
+					elif isinstance( message.media, telethon.types.MessageMediaPhoto):
+						message_for_send.Media = TgDataGetter.create_json(3,message.media.photo.id,'{"dc_id":'+str(message.media.photo.dc_id)+"}")
+					elif isinstance( message.media, telethon.types.MessageMediaWebPage):
+						if isinstance( message.media.webpage, telethon.types.WebPage):
+							type = 4;
+							id  = message.media.webpage.id
+							url = message.media.webpage.url
+							message_for_send.Media = TgDataGetter.create_json(type,id,'"'+url+'"')
+					else:
+						message_for_send.Media = TgDataGetter.create_json(0,-1,json.dumps(message.media,cls=CustomEncoder)) 
+				except BaseException as e:
+					pass
 
 			if (message.fwd_from  is not None):#обработку пользователя добавить
 				if (message.fwd_from.from_id is not None and isinstance(message.fwd_from.from_id,telethon.types.PeerChannel)):
@@ -133,6 +153,7 @@ class TgDataGetter():
 			if message.entities is not None:
 				for entity in message.entities:
 					format = OrderBoard_pb2.Formating();
+					format_exists = False;
 					if isinstance(entity,telethon.types.MessageEntityTextUrl):
 						format.Type = 7
 						format.Content = entity.url
@@ -140,6 +161,7 @@ class TgDataGetter():
 							format.Length = entity.length
 						if entity.length is not None:
 							format.Offset = entity.offset
+						format_exists=True;
 					elif isinstance(entity,telethon.types.MessageEntityMentionName):
 						format.Type = 6
 						format.Content = str(entity.user_id)
@@ -147,44 +169,52 @@ class TgDataGetter():
 							format.Length = entity.length
 						if entity.length is not None:
 							format.Offset = entity.offset
+						format_exists=True;
 					elif isinstance(entity,telethon.types.MessageEntityBold):
 						format.Type = 0
 						if entity.length is not None:
 							format.Length = entity.length
 						if entity.length is not None:
 							format.Offset = entity.offset
+						format_exists=True;
 					elif isinstance(entity,telethon.types.MessageEntityItalic):
 						format.Type = 2
 						if entity.length is not None:
 							format.Length = entity.length
 						if entity.length is not None:
 							format.Offset = entity.offset
+						format_exists=True;
 					elif isinstance(entity,telethon.types.MessageEntityStrike):
 						format.Type = 1
 						if entity.length is not None:
 							format.Length = entity.length
 						if entity.length is not None:
 							format.Offset = entity.offset
+						format_exists=True;
 					elif isinstance(entity,telethon.types.MessageEntityUnderline):
 						format.Type = 3
 						if entity.length is not None:
 							format.Length = entity.length
 						if entity.length is not None:
 							format.Offset = entity.offset
+						format_exists=True;
 					elif isinstance(entity,telethon.types.MessageEntityCode):
 						format.Type = 4
 						if entity.length is not None:
 							format.Length = entity.length
 						if entity.length is not None:
 							format.Offset = entity.offset
+						format_exists=True;
 					elif isinstance(entity,telethon.types.MessageEntityPre):
 						format.Type = 5
 						if entity.length is not None:
 							format.Length = entity.length
 						if entity.length is not None:
 							format.Offset = entity.offset
+						format_exists=True;
 
-					message_for_send.Formating.append(format);
+					if format_exists:
+						message_for_send.Formating.append(format);
 
 			yield message_for_send
 
@@ -235,37 +265,41 @@ class TgDataGetter():
 			logging.debug("Trying get chat (channel) entity by id...")
 			entity = await client.get_entity(order.Id)
 		except ValueError as e:
-			if "Could not find the input entity for" in e.args[0]:
-				logging.debug("Failed.")
-				if order.Link!="":
-					if order.RedirectCounter<10:
-						order.RedirectCounter+=1;
-						stub.PostOrder(order);
-						return;
-					logging.debug("Trying by link...")
-					if ResolveUsernameRequestBan:
-						return;
-					entity = await client.get_entity(order.Link)
-				elif order.PairLink!="" and GetFullChannelCounter<GetFullChannelCounterLimit:
-					logging.info("Trying learn id by get_full_channel request...")
-					temp_entity = await self._get_full_channel(order)
-					GetFullChannelCounter+=1
-					if temp_entity is not None:
-						logging.info("Full channel getted!")
-						logging.info("Trying get chat (channel) entity by id...")
-						#stub.PostEntity(temp_entity)
-						if ResolveUsernameRequestBan:
-							return;
-						entity = await client.get_entity(order.Id)
-						if entity is not None:
-							logging.info("Ok!")
-					else:
-						return;
-				else:
-					return;
-			else:
-				logging.warn("Unexpected exception! "+e.args[0])
-				raise e;
+			if order.RedirectCounter<10:
+				order.RedirectCounter+=1;
+				stub.PostOrder(order);
+			return;
+			#if "Could not find the input entity for" in e.args[0]:
+			#	logging.debug("Failed.")
+			#	if order.Link!="":
+			#		if order.RedirectCounter<10:
+			#			order.RedirectCounter+=1;
+			#			stub.PostOrder(order);
+			#			return;
+			#		logging.debug("Trying by link...")
+			#		if ResolveUsernameRequestBan:
+			#			return;
+			#		entity = await client.get_entity(order.Link)
+			#	elif order.PairLink!="" and GetFullChannelCounter<GetFullChannelCounterLimit:
+			#		logging.info("Trying learn id by get_full_channel request...")
+			#		temp_entity = await self._get_full_channel(order)
+			#		GetFullChannelCounter+=1
+			#		if temp_entity is not None:
+			#			logging.info("Full channel getted!")
+			#			logging.info("Trying get chat (channel) entity by id...")
+			#			#stub.PostEntity(temp_entity)
+			#			if ResolveUsernameRequestBan:
+			#				return;
+			#			entity = await client.get_entity(order.Id)
+			#			if entity is not None:
+			#				logging.info("Ok!")
+			#		else:
+			#			return;
+			#	else:
+			#		return;
+			#else:
+			#	logging.warn("Unexpected exception! "+e.args[0])
+			#	raise e;
 			
 		limit_msg=80
 		old_offset = offset;
@@ -400,6 +434,6 @@ for cfg in config_stub.GetConfiguration(emp):
 			else:
 				logging.error(e.args[0])
 
-		time.sleep(1)
+		time.sleep(6000)
 
 
