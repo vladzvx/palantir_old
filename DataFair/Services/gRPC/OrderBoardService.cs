@@ -19,7 +19,7 @@ namespace DataFair.Services
     public class OrderBoardService : OrderBoard.OrderBoardBase
     {
         private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
-        private static Order EmptyOrder = new Order() { Type = OrderType.History, Id= 1367267575,Offset=1 };
+        private static Order EmptyOrder = new Order() { Type = OrderType.Empty};
         private readonly State ordersStorage;
         private readonly ICommonWriter messagesWriter;
         private readonly LoadManager loadManager;
