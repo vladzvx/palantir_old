@@ -96,6 +96,7 @@ namespace DataFair.Services
                     using DbCommand AddMessageCommand = writerSettings.CreateCommand(Connention,typeof(Message));
                     using DbCommand AddChatCommand = writerSettings.CreateCommand(Connention,typeof(Chat));
                     using DbCommand AddUserCommand = writerSettings.CreateCommand(Connention, typeof(User));
+                    using DbCommand BanChatCommand = writerSettings.CreateCommand(Connention, typeof(Ban));
                     {
                         using (DbTransaction transaction = Connention.BeginTransaction())
                         {

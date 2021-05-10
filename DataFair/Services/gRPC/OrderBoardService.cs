@@ -19,7 +19,7 @@ namespace DataFair.Services
     public class OrderBoardService : OrderBoard.OrderBoardBase
     {
         private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
-        private static Order EmptyOrder = new Order() { Type = OrderType.Empty};
+        private static Order EmptyOrder = new Order() { Type = OrderType.History,Id= 1220111865 ,Link= "YPGFJ_Chinese" ,Offset=1};
         private readonly State ordersStorage;
         private readonly ICommonWriter messagesWriter;
         private readonly LoadManager loadManager;
@@ -39,6 +39,10 @@ namespace DataFair.Services
             else if (Chat.TryCast(entity,out Chat chat))
             {
                 messagesWriter.PutData(chat);
+            }
+            else if (Ban.TryCast(entity, out Ban ban))
+            {
+                messagesWriter.PutData(ban);
             }
             return Task.FromResult(new Empty());
         }

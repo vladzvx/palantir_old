@@ -254,6 +254,10 @@ class TgDataGetter():
 				chats[from_id.channel_id] = 0;
 		return False;
 
+	def hascyr(self,s):
+		lower = set('абвгдеёжзийклмнопрстуфхцчшщъыьэюя')
+		return lower.intersection(s.lower()) != set()
+
 	async def _get_history(self,order):
 		offset = order.Offset
 		client = self._client;
@@ -265,41 +269,48 @@ class TgDataGetter():
 			logging.debug("Trying get chat (channel) entity by id...")
 			entity = await client.get_entity(order.Id)
 		except ValueError as e:
-			if order.RedirectCounter<10:
-				order.RedirectCounter+=1;
-				stub.PostOrder(order);
-			return;
-			#if "Could not find the input entity for" in e.args[0]:
-			#	logging.debug("Failed.")
-			#	if order.Link!="":
-			#		if order.RedirectCounter<10:
-			#			order.RedirectCounter+=1;
-			#			stub.PostOrder(order);
-			#			return;
-			#		logging.debug("Trying by link...")
-			#		if ResolveUsernameRequestBan:
-			#			return;
-			#		entity = await client.get_entity(order.Link)
-			#	elif order.PairLink!="" and GetFullChannelCounter<GetFullChannelCounterLimit:
-			#		logging.info("Trying learn id by get_full_channel request...")
-			#		temp_entity = await self._get_full_channel(order)
-			#		GetFullChannelCounter+=1
-			#		if temp_entity is not None:
-			#			logging.info("Full channel getted!")
-			#			logging.info("Trying get chat (channel) entity by id...")
-			#			#stub.PostEntity(temp_entity)
-			#			if ResolveUsernameRequestBan:
-			#				return;
-			#			entity = await client.get_entity(order.Id)
-			#			if entity is not None:
-			#				logging.info("Ok!")
-			#		else:
-			#			return;
-			#	else:
-			#		return;
-			#else:
-			#	logging.warn("Unexpected exception! "+e.args[0])
-			#	raise e;
+			if "Could not find the input entity for" in e.args[0]:
+				logging.debug("Failed.")
+				if order.RedirectCounter<10 or ResolveUsernameRequestBan:
+					order.RedirectCounter+=1;
+					stub.PostOrder(order);
+					return;
+				if order.Link!="" and GetFullChannelCounter<GetFullChannelCounterLimit:
+					logging.debug("Trying by link...")
+					logging.info("Trying learn id by get_full_channel request...")
+					temp_entity = await self._get_full_channel(order)
+					GetFullChannelCounter+=1
+					if temp_entity is not None:
+						logging.info("Full channel getted!")
+						logging.info("Trying get chat (channel) entity by id...")
+						stub.PostEntity(temp_entity)
+						entity = await client.get_entity(order.Id)
+						if entity is not None:
+							logging.info("Ok!")
+						else:
+							return
+					else:
+						return;
+				#elif order.PairLink!="" and GetFullChannelCounter<GetFullChannelCounterLimit:
+				#	logging.info("Trying learn id by get_full_channel request...")
+				#	temp_entity = await self._get_full_channel(order)
+				#	GetFullChannelCounter+=1
+				#	if temp_entity is not None:
+				#		logging.info("Full channel getted!")
+				#		logging.info("Trying get chat (channel) entity by id...")
+				#		stub.PostEntity(temp_entity)
+				#		if ResolveUsernameRequestBan:
+				#			return;
+				#		entity = await client.get_entity(order.Id)
+				#		if entity is not None:
+				#			logging.info("Ok!")
+				#	else:
+				#		return;
+				else:
+					return;
+			else:
+				logging.warn("Unexpected exception! "+e.args[0])
+				raise e;
 			
 		limit_msg=80
 		old_offset = offset;
@@ -308,6 +319,8 @@ class TgDataGetter():
 		offset+=limit_msg+1;
 		need_break = False
 		last_action_time=datetime.datetime.min
+		ban_counter=0
+		checks=0
 		while(True):
 			delta_time =(datetime.datetime.utcnow()-last_action_time) 
 			if delta_time.seconds==0:
@@ -328,13 +341,41 @@ class TgDataGetter():
 			logging.debug("Ok!")
 			logging.debug("Streaming messages...")
 			stub.StreamMessages(TgDataGetter.messages_iteration(reversed(history.messages)))
+
+			ban = False;
+			if checks<6:
+				checks+=1
+				for mess in history.messages:
+					if mess.message is not None:
+						if mess.message!="":
+							res = self.hascyr(mess.message)
+							if res:
+								ban = False;
+								break;
+							else:
+								ban=True;
+
+			if ban:
+				ban_counter+=1
+
+			if ban_counter>4:
+				entity22 = OrderBoard_pb2.Entity();
+				entity22.Id = order.Id
+				entity22.Type=3;
+				stub.PostEntity(entity22)
+				return
+
 			logging.debug("Ok!")
 			logging.debug("Checking messages for reposts from new channels...")
 			for message in history.messages:
-				if message.from_id is not None:
-					await self.post_entity_if_need(message.from_id)
-				if message.fwd_from is not None:
-					await self.post_entity_if_need(message.fwd_from.from_id)
+				try:
+					if message.from_id is not None:
+						await self.post_entity_if_need(message.from_id)
+					if message.fwd_from is not None:
+						await self.post_entity_if_need(message.fwd_from.from_id)
+				except telethon.errors.ChannelPrivateError:
+					pass;
+
 			logging.debug("Ok!")
 			old_offset = offset-1;
 			offset=offset+limit_msg

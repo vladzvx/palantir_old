@@ -28,6 +28,7 @@ enum EntityType{
 	User = 0;
 	Channel = 1;
 	Group = 2;
+	Ban = 3;
 	
 }
 

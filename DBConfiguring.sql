@@ -19,6 +19,7 @@ create table public.chats (
     description text,
     pair_id bigint default null,
     pair_id_checked bool default null,
+	banned bool default false,
     primary key (id)
 );
 
@@ -324,7 +325,7 @@ create  or replace function  get_unupdated_chats(dt timestamp) returns table (_i
                                                                             _pair_username text) as
 $$
     begin
-        return query update chats set last_time_checked = current_timestamp  where (getting_last_message_timestamp<dt) and (last_time_checked is null or last_time_checked <dt)
+        return query update chats set last_time_checked = current_timestamp  where (getting_last_message_timestamp<dt) and (last_time_checked is null or last_time_checked <dt) and not banned
                 returning id,
                 pair_id,
                 last_message_id,
@@ -344,7 +345,7 @@ create  or replace function  get_chats_for_history(dt timestamp) returns table (
                                                                             _pair_username text) as
 $$
     begin
-        return query update chats set last_time_checked = current_timestamp  where getting_last_message_timestamp is null and (last_time_checked is null or last_time_checked <dt)
+        return query update chats set last_time_checked = current_timestamp  where getting_last_message_timestamp is null and (last_time_checked is null or last_time_checked <dt) and not banned
                 returning id,
                 pair_id,
                 last_message_id,
@@ -364,7 +365,7 @@ create  or replace function  get_groups_for_history(dt timestamp) returns table 
                                                                             _pair_username text) as
 $$
     begin
-        return query update chats set last_time_checked = current_timestamp  where getting_last_message_timestamp is null and is_group and (last_time_checked is null or last_time_checked <dt)
+        return query update chats set last_time_checked = current_timestamp  where getting_last_message_timestamp is null and is_group and (last_time_checked is null or last_time_checked <dt) and not banned
                 returning id,
                 pair_id,
                 last_message_id,
@@ -384,7 +385,7 @@ create  or replace function  get_unrequested_channels(dt timestamp) returns tabl
                                                                             _pair_username text) as
 $$
     begin
-        return query update chats set last_time_checked = current_timestamp  where chats.pair_id_checked=false and (last_time_checked is null or last_time_checked <dt)
+        return query update chats set last_time_checked = current_timestamp  where chats.pair_id_checked=false and (last_time_checked is null or last_time_checked <dt) and not banned
                 returning id,
                 pair_id,
                 last_message_id,

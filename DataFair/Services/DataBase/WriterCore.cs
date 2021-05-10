@@ -14,6 +14,7 @@ namespace DataFair.Services
     {
         private DbCommand AddMessageCommand;
         private DbCommand AddChatCommand;
+        private DbCommand BanChatCommand;
         private DbCommand AddUserCommand;
         public string ConnectionString => Options.ConnectionString;
 
@@ -68,6 +69,14 @@ namespace DataFair.Services
                 AddChatCommand.Parameters.Add(new NpgsqlParameter("_is_channel", NpgsqlTypes.NpgsqlDbType.Boolean));
                 return AddChatCommand;
             }
+            else if (dataType == typeof(Ban))
+            {
+                BanChatCommand = connection.CreateCommand();
+                BanChatCommand.CommandType = System.Data.CommandType.Text;
+                BanChatCommand.CommandText = "update chats set banned = true where id = @_id"; ;
+                BanChatCommand.Parameters.Add(new NpgsqlParameter("_id", NpgsqlTypes.NpgsqlDbType.Bigint));
+                return BanChatCommand;
+            }
             else throw new InvalidCastException();
         }
 
@@ -95,6 +104,7 @@ namespace DataFair.Services
                         DBNull.Value: 
                         "{\"formats\":"+ Newtonsoft.Json.JsonConvert.SerializeObject(message.Formating) + "}";
                     command.ExecuteNonQuery();
+                    return;
                 }
                 catch (Exception ex)
                 {
@@ -115,6 +125,7 @@ namespace DataFair.Services
                 command.Parameters["_is_group"].Value = chat.Entity.Type == EntityType.Group;
                 command.Parameters["_is_channel"].Value = chat.Entity.Type == EntityType.Channel;
                 command.ExecuteNonQuery();
+                return;
             }
 
             User user = data as User;
@@ -127,8 +138,19 @@ namespace DataFair.Services
                 command.Parameters["sender_first_name"].Value = user.Entity.FirstName;
                 command.Parameters["sender_last_name"].Value = user.Entity.LastName;
                 command.ExecuteNonQuery();
+                return;
+
             }
 
+            Ban ban = data as Ban;
+            if (ban != null && BanChatCommand != null)
+            {
+                DbCommand command = BanChatCommand;
+                command.Transaction = transaction;
+                command.Parameters["_id"].Value = ban.Entity.Id;
+                command.ExecuteNonQuery();
+                return;
+            }
         }
     }
 }
