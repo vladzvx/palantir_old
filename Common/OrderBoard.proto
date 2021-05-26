@@ -9,9 +9,25 @@ package orders;
 service OrderBoard {
   rpc GetOrder (google.protobuf.Empty) returns (Order);
   rpc PostOrder (Order) returns (google.protobuf.Empty);
+  rpc PostReport (Report) returns (google.protobuf.Empty);
   rpc PostEntity (Entity) returns (google.protobuf.Empty);
   rpc StreamMessages (stream Message) returns (google.protobuf.Empty);
 }
+
+message Report{
+	string SourceId= 1;
+	google.protobuf.Timestamp Timestamp = 2;
+	string Message = 3;
+	ReportType Type = 4;
+}
+
+enum ReportType {
+	Ban = 0;
+	FloodWait = 1;
+	Exception = 2;
+	GetOrder = 3;
+}
+
 
 message Entity{
 	int64 Id = 1;
@@ -28,7 +44,7 @@ enum EntityType{
 	User = 0;
 	Channel = 1;
 	Group = 2;
-	Ban = 3;
+	Stop = 3;
 	
 }
 

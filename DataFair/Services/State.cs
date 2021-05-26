@@ -9,6 +9,7 @@ namespace DataFair.Services
 {
     public class State
     {
+        internal ConcurrentQueue<Report> Reports = new ConcurrentQueue<Report>();
         internal ConcurrentQueue<Order> MaxPriorityOrders = new ConcurrentQueue<Order>();
         internal ConcurrentQueue<Order> MiddlePriorityOrders = new ConcurrentQueue<Order>();
         internal ConcurrentQueue<Order> Orders = new ConcurrentQueue<Order>();

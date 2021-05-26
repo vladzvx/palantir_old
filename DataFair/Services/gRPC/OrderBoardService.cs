@@ -46,7 +46,6 @@ namespace DataFair.Services
             }
             return Task.FromResult(new Empty());
         }
-
         public async override Task<Empty> StreamMessages(IAsyncStreamReader<Message> requestStream, ServerCallContext context)
         {
             try
@@ -107,6 +106,18 @@ namespace DataFair.Services
             }
             return Task.FromResult(new Empty());
         }
-
+        public override Task<Empty> PostReport(Report report, ServerCallContext context)
+        {
+            try
+            {
+                logger.Debug(string.Format("New order received!  Id: {0}; Field: {1};", report.SourceId, report.Type));
+                ordersStorage.Reports.Enqueue(report);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Error while PostOrder execution!");
+            }
+            return Task.FromResult(new Empty());
+        }
     }
 }

@@ -13,7 +13,7 @@ namespace Common
         {
             switch (entity.Type)
             {
-                case EntityType.Ban:
+                case EntityType.Stop:
                     chat = new Ban() { Entity = entity };
                     return true;
                 default:

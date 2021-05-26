@@ -17,6 +17,7 @@ namespace DataFair.Services
         public int MaxPriorityOrders;
         public int MiddlePriorityOrders;
         public int Messages;
+        public long FreeDisk;
         public StateReport(State state, ICommonWriter messagesWriter)
         {
             Collectors = state.Collectors.Count;
@@ -25,6 +26,17 @@ namespace DataFair.Services
             MaxPriorityOrders = state.MaxPriorityOrders.Count;
             MiddlePriorityOrders = state.MiddlePriorityOrders.Count;
             Messages = messagesWriter.GetQueueCount();
+
+            DriveInfo[] allDrives = DriveInfo.GetDrives();
+            long disk = 0;
+            foreach (DriveInfo d in allDrives)
+            {
+                if (d.IsReady == true)
+                {
+                    disk += d.TotalFreeSpace;
+                }
+            }
+            FreeDisk = disk / 1024 / 1024 / 1024;
         }
     }
 }

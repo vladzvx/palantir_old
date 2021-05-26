@@ -55,9 +55,8 @@ class TgDataGetter():
 				if link=="":
 					return None;
 			client = self._client;
-			global ResolveUsernameRequestBan;
-			if ResolveUsernameRequestBan:
-				return None;
+			global last_expensive_operation_time
+			last_expensive_operation_time = datetime.datetime.utcnow()
 			ie = await client.get_input_entity(link)
 			ipc = telethon.types.InputPeerChannel(ie.channel_id,ie.access_hash);
 			return await client(functions.channels.GetFullChannelRequest(ipc))
@@ -93,6 +92,7 @@ class TgDataGetter():
 
 	def get_full_channel(self,order):
 		return self._loop.run_until_complete(self._get_full_channel(order))
+
 	def create_json(type,id,content):
 		result = '{"type":'+str(type)+',"id":'+str(id)+',"content":'+content+'}'
 		return result;
@@ -265,47 +265,44 @@ class TgDataGetter():
 		global GetFullChannelCounter
 		global GetFullChannelCounterLimit
 		global ResolveUsernameRequestBan
+		global last_expensive_operation_time
 		try:
 			logging.debug("Trying get chat (channel) entity by id...")
 			entity = await client.get_entity(order.Id)
 		except ValueError as e:
 			if "Could not find the input entity for" in e.args[0]:
 				logging.debug("Failed.")
-				if order.RedirectCounter<10 or ResolveUsernameRequestBan:
+				if ResolveUsernameRequestBan:
 					order.RedirectCounter+=1;
 					stub.PostOrder(order);
 					return;
-				if order.Link!="" and GetFullChannelCounter<GetFullChannelCounterLimit:
+
+				if order.Link!="":
 					logging.debug("Trying by link...")
 					logging.info("Trying learn id by get_full_channel request...")
+					last_expensive_operation_time = datetime.datetime.utcnow()
 					temp_entity = await self._get_full_channel(order)
-					GetFullChannelCounter+=1
 					if temp_entity is not None:
 						logging.info("Full channel getted!")
-						logging.info("Trying get chat (channel) entity by id...")
+						#logging.info("Trying get chat (channel) entity by id...")
 						stub.PostEntity(temp_entity)
 						entity = await client.get_entity(order.Id)
 						if entity is not None:
-							logging.info("Ok!")
+							pass
+							#logging.info("Ok!")
 						else:
 							return
 					else:
 						return;
-				#elif order.PairLink!="" and GetFullChannelCounter<GetFullChannelCounterLimit:
-				#	logging.info("Trying learn id by get_full_channel request...")
-				#	temp_entity = await self._get_full_channel(order)
-				#	GetFullChannelCounter+=1
-				#	if temp_entity is not None:
-				#		logging.info("Full channel getted!")
-				#		logging.info("Trying get chat (channel) entity by id...")
-				#		stub.PostEntity(temp_entity)
-				#		if ResolveUsernameRequestBan:
-				#			return;
-				#		entity = await client.get_entity(order.Id)
-				#		if entity is not None:
-				#			logging.info("Ok!")
-				#	else:
-				#		return;
+				elif order.PairLink!="":
+					#logging.info("Trying learn id by get_full_channel request...")
+					last_expensive_operation_time = datetime.datetime.utcnow()
+					entity = await client.get_entity(order.PairLink)
+					if entity is not None:
+						pass
+						#logging.info("Ok!")
+					else:
+						return;
 				else:
 					return;
 			else:
@@ -321,7 +318,9 @@ class TgDataGetter():
 		last_action_time=datetime.datetime.min
 		ban_counter=0
 		checks=0
+		last_expensive_operation_time = datetime.datetime.utcnow()
 		while(True):
+			
 			delta_time =(datetime.datetime.utcnow()-last_action_time) 
 			if delta_time.seconds==0:
 				logging.debug("Waiting next iteration...")
@@ -391,7 +390,7 @@ class TgDataGetter():
 
 
 time.sleep(2);
-grpc_host = os.environ.get('grpc_host') 
+grpc_host ="localhost:5005"# os.environ.get('grpc_host') 
 
 channel = grpc.insecure_channel(grpc_host)
 config_stub = Configurator_pb2_grpc.ConfiguratorStub(channel);
@@ -445,9 +444,9 @@ for cfg in config_stub.GetConfiguration(emp):
 			if order.Type==1:
 					logging.debug("History reading...")
 					getter.get_history(order)
+
 			elif order.Type==2:
-				if GetFullChannelCounter<GetFullChannelCounterLimit:
-					GetFullChannelCounter+=1
+				if not ResolveUsernameRequestBan:
 					fch = getter.get_full_channel(order)
 					if fch is not None:
 						stub.PostEntity(fch)

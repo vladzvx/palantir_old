@@ -85,32 +85,24 @@ namespace DataFair.Services
             Message message = data as Message;
             if (message != null && AddMessageCommand!=null)
             {
-                try
-                {
-                    DbCommand command = AddMessageCommand;
-                    command.Transaction = transaction;
-                    command.Parameters["_message_timestamp"].Value = message.Timestamp.ToDateTime();
-                    command.Parameters["_message_id"].Value = message.Id;
-                    command.Parameters["_chat_id"].Value = message.ChatId;
-                    command.Parameters["_user_id"].Value = message.FromId != 0 ? message.FromId : DBNull.Value;
-                    command.Parameters["_reply_to"].Value = message.ReplyTo != 0 ? message.ReplyTo : DBNull.Value;
-                    command.Parameters["_thread_start"].Value = message.ThreadStart != 0 ? message.ThreadStart : DBNull.Value;
-                    command.Parameters["_media_group_id"].Value = message.MediagroupId != 0 ? message.MediagroupId : DBNull.Value;
-                    command.Parameters["_forward_from_id"].Value = message.ForwardFromId != 0 ? message.ForwardFromId : DBNull.Value;
-                    command.Parameters["_forward_from_message_id"].Value = message.ForwardFromMessageId != 0 ? message.ForwardFromMessageId : DBNull.Value;
-                    command.Parameters["_text"].Value = message.Text;
-                    command.Parameters["_media"].Value = string.IsNullOrEmpty(message.Media)?DBNull.Value: message.Media;
-                    command.Parameters["_formatting"].Value = message.Formating.Count == 0 || Formating.IsEmpty(message.Formating) ? 
-                        DBNull.Value: 
-                        "{\"formats\":"+ Newtonsoft.Json.JsonConvert.SerializeObject(message.Formating) + "}";
-                    command.ExecuteNonQuery();
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    int q = 0;
-                }
-
+                DbCommand command = AddMessageCommand;
+                command.Transaction = transaction;
+                command.Parameters["_message_timestamp"].Value = message.Timestamp.ToDateTime();
+                command.Parameters["_message_id"].Value = message.Id;
+                command.Parameters["_chat_id"].Value = message.ChatId;
+                command.Parameters["_user_id"].Value = message.FromId != 0 ? message.FromId : DBNull.Value;
+                command.Parameters["_reply_to"].Value = message.ReplyTo != 0 ? message.ReplyTo : DBNull.Value;
+                command.Parameters["_thread_start"].Value = message.ThreadStart != 0 ? message.ThreadStart : DBNull.Value;
+                command.Parameters["_media_group_id"].Value = message.MediagroupId != 0 ? message.MediagroupId : DBNull.Value;
+                command.Parameters["_forward_from_id"].Value = message.ForwardFromId != 0 ? message.ForwardFromId : DBNull.Value;
+                command.Parameters["_forward_from_message_id"].Value = message.ForwardFromMessageId != 0 ? message.ForwardFromMessageId : DBNull.Value;
+                command.Parameters["_text"].Value = message.Text;
+                command.Parameters["_media"].Value = string.IsNullOrEmpty(message.Media)?DBNull.Value: message.Media;
+                command.Parameters["_formatting"].Value = message.Formating.Count == 0 || Formating.IsEmpty(message.Formating) ? 
+                    DBNull.Value: 
+                    "{\"formats\":"+ Newtonsoft.Json.JsonConvert.SerializeObject(message.Formating) + "}";
+                command.ExecuteNonQuery();
+                return;
             }
 
             Chat chat = data as Chat;
