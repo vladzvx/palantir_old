@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "TestApp": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ConnectionString": "User ID=postgres;Password=QW12cv9001Qw_;Host=45.132.17.172;Port=5432;Database=test_db;Pooling=true;"
+      }
+    }
+  }
+}

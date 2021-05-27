@@ -1,6 +1,8 @@
 ﻿using Common;
 using DataFair.Services;
+using DataFair.Services.DataBase.DataProcessing;
 using DataFair.Services.Interfaces;
+using DataFair.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -17,6 +19,7 @@ namespace DataFair
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddTransient<DataPreparator>();
             services.AddSingleton<State>();
 
             services.AddSingleton<ICommonWriter,CommonWriter>();
@@ -30,6 +33,7 @@ namespace DataFair
 
             services.AddHostedService<OrdersManager>();
             services.AddHostedService<CollectorsManager>();
+            services.AddHostedService<MediaAndFormattingProcessor>();
 
             services.AddGrpc();
             services.AddCors();

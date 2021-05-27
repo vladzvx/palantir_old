@@ -96,7 +96,7 @@ namespace DataFair.Services
                 command.Parameters["_media_group_id"].Value = message.MediagroupId != 0 ? message.MediagroupId : DBNull.Value;
                 command.Parameters["_forward_from_id"].Value = message.ForwardFromId != 0 ? message.ForwardFromId : DBNull.Value;
                 command.Parameters["_forward_from_message_id"].Value = message.ForwardFromMessageId != 0 ? message.ForwardFromMessageId : DBNull.Value;
-                command.Parameters["_text"].Value = message.Text;
+                command.Parameters["_text"].Value = !string.IsNullOrEmpty(message.Text)? message.Text:DBNull.Value;
                 command.Parameters["_media"].Value = string.IsNullOrEmpty(message.Media)?DBNull.Value: message.Media;
                 command.Parameters["_formatting"].Value = message.Formating.Count == 0 || Formating.IsEmpty(message.Formating) ? 
                     DBNull.Value: 

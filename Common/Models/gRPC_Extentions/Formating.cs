@@ -21,5 +21,19 @@ namespace Common
             }
             return false;
         }
+
+        public static bool TryGetNonEmpty(IEnumerable<Formating> formatings, out List<Formating> result)
+        {
+            result = new List<Formating>();
+            if (formatings == null) return false;
+            foreach (Formating formating in formatings)
+            {
+                if (!Formating.IsEmpty(formating))
+                {
+                    result.Add(formating);
+                }
+            }
+            return result.Count>0;
+        }
     }
 }

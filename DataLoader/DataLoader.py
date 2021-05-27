@@ -94,8 +94,12 @@ class TgDataGetter():
 		return self._loop.run_until_complete(self._get_full_channel(order))
 
 	def create_json(type,id,content):
-		result = '{"type":'+str(type)+',"id":'+str(id)+',"content":'+content+'}'
+		if content!="":
+			result = '{"type":'+str(type)+',"id":'+str(id)+',"content":'+content+'}'
+		else:
+			result = '{"type":'+str(type)+',"id":'+str(id)+'}'
 		return result;
+
 	def messages_iteration(messages):
 		for message in messages:
 			message_for_send = OrderBoard_pb2.Message()
@@ -120,9 +124,9 @@ class TgDataGetter():
 					if isinstance( message.media, telethon.types.MessageMediaPoll):
 						message_for_send.Media = TgDataGetter.create_json(1,message.media.poll.id,'"'+str(message.media)+'"')
 					elif isinstance( message.media, telethon.types.MessageMediaDocument):
-						message_for_send.Media = TgDataGetter.create_json(2,message.media.document.id,'{"dc_id":'+str(message.media.document.dc_id)+"}")
+						message_for_send.Media = TgDataGetter.create_json(2,message.media.document.id,'')
 					elif isinstance( message.media, telethon.types.MessageMediaPhoto):
-						message_for_send.Media = TgDataGetter.create_json(3,message.media.photo.id,'{"dc_id":'+str(message.media.photo.dc_id)+"}")
+						message_for_send.Media = TgDataGetter.create_json(3,message.media.photo.id,'')
 					elif isinstance( message.media, telethon.types.MessageMediaWebPage):
 						if isinstance( message.media.webpage, telethon.types.WebPage):
 							type = 4;
@@ -390,7 +394,7 @@ class TgDataGetter():
 
 
 time.sleep(2);
-grpc_host ="localhost:5005"# os.environ.get('grpc_host') 
+grpc_host =os.environ.get('grpc_host') 
 
 channel = grpc.insecure_channel(grpc_host)
 config_stub = Configurator_pb2_grpc.ConfiguratorStub(channel);
@@ -471,6 +475,11 @@ for cfg in config_stub.GetConfiguration(emp):
 						config.CollectorParams.ApiHash,
 						config.CollectorParams.Phone,connection_string)
 				getter.start();
+			elif "No user has" in e.args[0]:
+				entity22 = OrderBoard_pb2.Entity();
+				entity22.Id = order.Id
+				entity22.Type=3;
+				stub.PostEntity(entity22)
 			else:
 				logging.error(e.args[0])
 
