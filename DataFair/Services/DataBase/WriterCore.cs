@@ -16,6 +16,8 @@ namespace DataFair.Services
         private DbCommand AddChatCommand;
         private DbCommand BanChatCommand;
         private DbCommand AddUserCommand;
+        private DbCommand DelMessageCommand;
+
         public string ConnectionString => Options.ConnectionString;
 
         public int TrasactionSize => Options.WriterTransactionSize;
@@ -77,13 +79,20 @@ namespace DataFair.Services
                 BanChatCommand.Parameters.Add(new NpgsqlParameter("_id", NpgsqlTypes.NpgsqlDbType.Bigint));
                 return BanChatCommand;
             }
+            else if (dataType == typeof(Deleting))
+            {
+                DelMessageCommand = connection.CreateCommand();
+                DelMessageCommand.CommandType = System.Data.CommandType.Text;
+                DelMessageCommand.CommandText = "delete from messages where message_db_id=@_id;";
+                DelMessageCommand.Parameters.Add(new NpgsqlParameter("_id", NpgsqlTypes.NpgsqlDbType.Bigint));
+                return DelMessageCommand;
+            }
             else throw new InvalidCastException();
         }
 
         public void WriteSingleObject(object data,DbTransaction transaction)
         {
-            Message message = data as Message;
-            if (message != null && AddMessageCommand!=null)
+            if (data is Message message && AddMessageCommand != null)
             {
                 DbCommand command = AddMessageCommand;
                 command.Transaction = transaction;
@@ -96,17 +105,16 @@ namespace DataFair.Services
                 command.Parameters["_media_group_id"].Value = message.MediagroupId != 0 ? message.MediagroupId : DBNull.Value;
                 command.Parameters["_forward_from_id"].Value = message.ForwardFromId != 0 ? message.ForwardFromId : DBNull.Value;
                 command.Parameters["_forward_from_message_id"].Value = message.ForwardFromMessageId != 0 ? message.ForwardFromMessageId : DBNull.Value;
-                command.Parameters["_text"].Value = !string.IsNullOrEmpty(message.Text)? message.Text:DBNull.Value;
-                command.Parameters["_media"].Value = string.IsNullOrEmpty(message.Media)?DBNull.Value: message.Media;
-                command.Parameters["_formatting"].Value = message.Formating.Count == 0 || Formating.IsEmpty(message.Formating) ? 
-                    DBNull.Value: 
-                    "{\"formats\":"+ Newtonsoft.Json.JsonConvert.SerializeObject(message.Formating) + "}";
+                command.Parameters["_text"].Value = !string.IsNullOrEmpty(message.Text) ? message.Text : DBNull.Value;
+                command.Parameters["_media"].Value = string.IsNullOrEmpty(message.Media) ? DBNull.Value : message.Media;
+                command.Parameters["_formatting"].Value = message.Formating.Count == 0 || Formating.IsEmpty(message.Formating) ?
+                    DBNull.Value :
+                    "{\"formats\":" + Newtonsoft.Json.JsonConvert.SerializeObject(message.Formating) + "}";
                 command.ExecuteNonQuery();
                 return;
             }
 
-            Chat chat = data as Chat;
-            if (chat != null&&AddChatCommand!=null)
+            if (data is Chat chat && AddChatCommand != null)
             {
                 DbCommand command = AddChatCommand;
                 command.Transaction = transaction;
@@ -120,8 +128,7 @@ namespace DataFair.Services
                 return;
             }
 
-            User user = data as User;
-            if (user != null&&AddUserCommand!=null)
+            if (data is User user && AddUserCommand != null)
             {
                 DbCommand command = AddUserCommand;
                 command.Transaction = transaction;
@@ -134,13 +141,21 @@ namespace DataFair.Services
 
             }
 
-            Ban ban = data as Ban;
-            if (ban != null && BanChatCommand != null)
+            if (data is Ban ban && BanChatCommand != null)
             {
                 DbCommand command = BanChatCommand;
                 command.Transaction = transaction;
                 command.Parameters["_id"].Value = ban.Entity.Id;
                 command.ExecuteNonQuery();
+                return;
+            }
+
+            if (data is Deleting del && DelMessageCommand!=null)
+            {
+                DbCommand command = DelMessageCommand;
+                command.Transaction = transaction;
+                command.Parameters["_id"].Value = del.message_db_id;
+                int q  = command.ExecuteNonQuery();
                 return;
             }
         }
