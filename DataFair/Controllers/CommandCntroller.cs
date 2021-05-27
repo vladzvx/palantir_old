@@ -58,6 +58,15 @@ namespace DataFair.Controllers
 
         }
 
+        [HttpPost("GetHistory")]
+        [EnableCors()]
+        public string PostRequest3()
+        {
+            ordersGenerator.CreateHistoryLoadingOrders().Wait();
+            return "ok";
+
+        }
+
         [HttpPost("dvf")]
         [EnableCors()]
         public async Task<string> dvf(CancellationToken cancellationToken)

@@ -31,7 +31,7 @@ namespace DataFair.Services.DataBase.DataProcessing
             UpdateChat = connection.CreateCommand();
             UpdateChat.CommandType = System.Data.CommandType.Text;
             UpdateChat.Parameters.Add(new NpgsqlParameter("_id", NpgsqlTypes.NpgsqlDbType.Bigint));
-            UpdateChat.CommandText = "update chats set has_doubled=exists(select 1 from messages where chat_id=@_id group by chat_id,id having count(id) >1) where last_message_id !=1 and has_doubled is null;";
+            UpdateChat.CommandText = "update chats set has_doubled=exists(select 1 from messages where chat_id=@_id group by chat_id,id having count(id) >1) where last_message_id is not null and last_message_id !=1 and (has_doubled is null or not has_doubled);";
         }
 
         public async Task Find(CancellationToken ct)
@@ -47,11 +47,12 @@ namespace DataFair.Services.DataBase.DataProcessing
                         Ids.Add( reader.GetInt64(0));
                     }
                 }
-
+                int count = 0;
                 foreach (long id in Ids)
                 {
                     UpdateChat.Parameters["_id"].Value = id;
                     await UpdateChat.ExecuteNonQueryAsync(ct);
+                    count++;
                 }
 
             }

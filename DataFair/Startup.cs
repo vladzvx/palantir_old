@@ -33,9 +33,9 @@ namespace DataFair
             services.AddTransient<DoubledValuesKiller>();
 
 
-            services.AddHostedService<OrdersManager>();
-            services.AddHostedService<CollectorsManager>();
-            services.AddHostedService<MediaAndFormattingProcessor>();
+            //services.AddHostedService<OrdersManager>();
+            //services.AddHostedService<CollectorsManager>();
+            //services.AddHostedService<MediaAndFormattingProcessor>();
 
             services.AddGrpc();
             services.AddCors();

@@ -181,7 +181,7 @@ namespace DataFair.Services
                             string Username = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
                             string PairUsername = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
 
-                            Order order = new Order() { Id = ChatId, Link = Username, Offset = Offset, PairId = PairId, PairLink = PairUsername };
+                            Order order = new Order() { Id = ChatId, Link = Username, Offset = Offset, PairId = PairId, PairLink = PairUsername,Time=30 };
                             if (!PairChecked)
                             {
                                 if (!state.MaxPriorityOrders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.GetFullChannel; }))

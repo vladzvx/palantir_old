@@ -454,6 +454,7 @@ for cfg in config_stub.GetConfiguration(emp):
 					fch = getter.get_full_channel(order)
 					if fch is not None:
 						stub.PostEntity(fch)
+					time.sleep(order.Time)
 				else:
 					if order.RedirectCounter<3:
 						order.RedirectCounter+=1

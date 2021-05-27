@@ -36,7 +36,7 @@ namespace DataFair.Services
             {
                 try
                 {
-                    Task.WaitAll(ordersGenerator.CreateHistoryLoadingOrders());//, CreateGetFullChannelOrders());
+                    //Task.WaitAll(ordersGenerator.CreateHistoryLoadingOrders());//, CreateGetFullChannelOrders());
                 }
                 catch { }
                 Monitor.Exit(sync);
