@@ -41,7 +41,6 @@ namespace DataFair.Services
                 catch { }
                 Monitor.Exit(sync);
             }
-            //manager.AddValue();
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
