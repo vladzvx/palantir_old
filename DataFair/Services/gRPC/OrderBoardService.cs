@@ -98,7 +98,10 @@ namespace DataFair.Services
                 {
                     ordersStorage.MaxPriorityOrders.Enqueue(order);
                 }
-                ordersStorage.MiddlePriorityOrders.Enqueue(order);
+                else
+                {
+                    ordersStorage.MiddlePriorityOrders.Enqueue(order);
+                }
             }
             catch (Exception ex)
             {

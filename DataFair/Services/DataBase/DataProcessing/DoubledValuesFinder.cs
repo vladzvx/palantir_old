@@ -26,7 +26,7 @@ namespace DataFair.Services.DataBase.DataProcessing
             connection.Open();
             GetIdCommand = connection.CreateCommand();
             GetIdCommand.CommandType = System.Data.CommandType.Text;
-            GetIdCommand.CommandText = "select id from chats;";
+            GetIdCommand.CommandText = "select id from chats where has_doubled is null and last_message_id !=1;";
 
             UpdateChat = connection.CreateCommand();
             UpdateChat.CommandType = System.Data.CommandType.Text;
@@ -50,9 +50,18 @@ namespace DataFair.Services.DataBase.DataProcessing
                 int count = 0;
                 foreach (long id in Ids)
                 {
-                    UpdateChat.Parameters["_id"].Value = id;
-                    await UpdateChat.ExecuteNonQueryAsync(ct);
-                    count++;
+                    try
+                    {
+                        UpdateChat.Parameters["_id"].Value = id;
+                        await UpdateChat.ExecuteNonQueryAsync(ct);
+
+                    }
+                    catch (Exception ex)
+                    {
+                        count++;
+                        if (count > 10) return;
+                    }
+
                 }
 
             }
