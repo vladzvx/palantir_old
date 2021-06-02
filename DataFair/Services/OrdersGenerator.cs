@@ -17,7 +17,6 @@ namespace DataFair.Services
         {
             this.state = state;
         }
-
         private static NpgsqlCommand CreateAndConfigureCommand(NpgsqlConnection connection, DateTime BoundDateTime, string storedProcedureName)
         {
             NpgsqlCommand command = connection.CreateCommand();
@@ -72,7 +71,7 @@ namespace DataFair.Services
             }
 
         }
-        public async Task CreateHistoryLoadingOrders()
+        public async Task CreateHistoryLoadingOrders(int limit = -1)
         {
             try
             {
@@ -81,10 +80,12 @@ namespace DataFair.Services
                     await connection.OpenAsync(cts.Token);
                     using NpgsqlCommand command = CreateAndConfigureCommand(connection, DateTime.Now - Options.OrderGenerationTimeSpan, "get_chats_for_history");
                     using NpgsqlDataReader reader = await command.ExecuteReaderAsync(cts.Token);
+                    int count = 0;
                     while (!cts.IsCancellationRequested && await reader.ReadAsync(cts.Token))
                     {
                         try
                         {
+                            if (limit > 0 && count > limit) return;
                             long ChatId = reader.GetInt64(0);
                             long PairId = reader.IsDBNull(1) ? 0 : reader.GetInt64(1);
                             long Offset = reader.GetInt64(2);
@@ -105,6 +106,7 @@ namespace DataFair.Services
                                     Type = OrderType.History
                                 };
                                 state.Orders.Enqueue(order);
+                                count++;
                             }
                         }
                         catch (InvalidCastException ex) { logger.Warn(ex); }

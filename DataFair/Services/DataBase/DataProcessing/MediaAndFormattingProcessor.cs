@@ -73,10 +73,8 @@ namespace DataFair.Services.DataBase.DataProcessing
                     {
                         foreach (Record record in records)
                         {
-                            //Console.WriteLine(record.Id);
-                            
                             object form = dataPreparator.PreparateFormatting(record.formatting_costyl);
-                            object med = dataPreparator.PreparateFormatting(record.formatting_costyl);
+                            object med = dataPreparator.PreparateMedia(record.media_costyl);
                             list.Add(form);
                             list.Add(med);
                             WriteCommand.Transaction = transaction;

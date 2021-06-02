@@ -17,5 +17,7 @@ namespace DataFair.Services
         internal ConcurrentBag<Common.Collector> Collectors = new ConcurrentBag<Collector>();
         internal ConcurrentDictionary<string, Common.SessionSettings> AllSessions = new ConcurrentDictionary<string, SessionSettings>();
         internal ConcurrentDictionary<string, Common.Collector> AllCollectors = new ConcurrentDictionary<string, Collector>();
+
+
     }
 }

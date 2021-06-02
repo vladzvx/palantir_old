@@ -32,11 +32,11 @@ namespace DataFair.Services
 
         private void TimerAction(object sender,ElapsedEventArgs args)
         {   
-            if (GenerationOn&&state.Orders.Count==0&&Monitor.TryEnter(sync))
+            if (Monitor.TryEnter(sync)&&GenerationOn &&state.Orders.Count==0&& state.MiddlePriorityOrders.Count == 0 && state.MaxPriorityOrders.Count == 0 )
             {
                 try
                 {
-                    //Task.WaitAll(ordersGenerator.CreateHistoryLoadingOrders());//, CreateGetFullChannelOrders());
+                    Task.WaitAll(ordersGenerator.CreateUpdateOrders(),ordersGenerator.CreateGroupHistoryLoadingOrders());//, CreateGetFullChannelOrders());
                 }
                 catch { }
                 Monitor.Exit(sync);
