@@ -8,10 +8,12 @@ package orders;
 
 service OrderBoard {
   rpc GetOrder (google.protobuf.Empty) returns (Order);
+  rpc GetOrder2 (OrderRequest) returns (Order);
   rpc PostOrder (Order) returns (google.protobuf.Empty);
   rpc PostReport (Report) returns (google.protobuf.Empty);
   rpc PostEntity (Entity) returns (google.protobuf.Empty);
   rpc StreamMessages (stream Message) returns (google.protobuf.Empty);
+  rpc DownloadMessages (google.protobuf.Empty) returns (stream SavedMessage);
 }
 
 message Report{
@@ -28,6 +30,9 @@ enum ReportType {
 	GetOrder = 3;
 }
 
+message OrderRequest{
+	string Finder = 1;
+}
 
 message Entity{
 	int64 Id = 1;
@@ -38,6 +43,7 @@ message Entity{
 	string LastName = 6;
 	string Desc = 7;
 	EntityType Type = 8;
+	string Finder = 9;
 }
 
 enum EntityType{
@@ -47,6 +53,24 @@ enum EntityType{
 	Stop = 3;
 	
 }
+
+message SavedMessage{
+	google.protobuf.Timestamp Timestamp = 1;
+	string Text = 2;
+	string Media = 3;
+	int64 Id = 4;
+	int64 FromId = 5;
+	int64 ForwardFromId = 6;
+	int64 ForwardFromMessageId = 7;
+	int64 ChatId = 8;
+	int64 MediagroupId = 9;
+	int64 ReplyTo = 10;
+	int64 ThreadStart = 11;
+	bool FromExistingUser = 12;
+	string Formating = 13;
+	int64 MessageDBId = 14;
+}
+
 
 message Message{
 	google.protobuf.Timestamp Timestamp = 1;

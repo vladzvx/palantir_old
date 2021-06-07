@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace Common.Models
 {
-    public class OrderCreationRequest
+    public class Deleting
     {
-        public string Type { get; set; }
-
-        public int Number { get; set; }
+        public long message_db_id;
     }
 }

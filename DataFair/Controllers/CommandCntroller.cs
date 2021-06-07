@@ -1,5 +1,4 @@
 ﻿using Common;
-using Common.Models;
 using DataFair.Services;
 using DataFair.Services.DataBase.DataProcessing;
 using Microsoft.AspNetCore.Cors;

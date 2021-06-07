@@ -19,12 +19,13 @@ namespace DataFair
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddTransient<DataPreparator>();
+            
             services.AddSingleton<State>();
 
             services.AddSingleton<ICommonWriter,CommonWriter>();
             services.AddSingleton<LoadManager>();
 
+            services.AddTransient<DataPreparator>();
             services.AddTransient<IWriterCore,WriterCore>();
             services.AddTransient<StateReport>();
             services.AddTransient<SystemReport>();

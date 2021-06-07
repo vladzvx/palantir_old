@@ -5,8 +5,8 @@ EXPOSE 5555
 
 
 COPY ./DataLoader/requirements.txt requirements.txt
-COPY ./Common/Configurator.proto Configurator.proto
-COPY ./Common/OrderBoard.proto OrderBoard.proto
+COPY ./Common/Proto/Configurator.proto Configurator.proto
+COPY ./Common/Proto/OrderBoard.proto OrderBoard.proto
 
 RUN ls -l
 
