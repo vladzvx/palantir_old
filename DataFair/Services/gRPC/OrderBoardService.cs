@@ -13,6 +13,7 @@ using Timer = System.Timers.Timer;
 using System.Diagnostics;
 using System.IO;
 using DataFair.Services.Interfaces;
+using Common.Models;
 
 namespace DataFair.Services
 {

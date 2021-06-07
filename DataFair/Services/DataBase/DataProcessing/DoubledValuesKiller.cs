@@ -1,4 +1,5 @@
 ﻿using Common;
+using Common.Models;
 using DataFair.Services.Interfaces;
 using DataFair.Utils;
 using Microsoft.Extensions.Hosting;

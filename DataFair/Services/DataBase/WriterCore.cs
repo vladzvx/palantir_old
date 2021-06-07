@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using NLog;
 using System.Data.Common;
 using DataFair.Services.Interfaces;
+using Common.Models;
 
 namespace DataFair.Services
 {
