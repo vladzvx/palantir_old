@@ -3,13 +3,15 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>37bdc37e-c335-44a1-a31a-b1a88d3e88f1</ProjectGuid>
-    <ProjectHome>.</ProjectHome>
-    <StartupFile>DataLoader.py</StartupFile>
+    <ProjectHome>
+    </ProjectHome>
+    <StartupFile>
+    </StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
-    <Name>DataLoader</Name>
+    <Name>DataReaper</Name>
     <RootNamespace>DataLoader</RootNamespace>
     <InterpreterId>
     </InterpreterId>
@@ -29,10 +31,12 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="DataLoader.py" />
+    <Content Include="generateConfigurator.bat" />
+    <Content Include="generateOrderBoard.bat" />
+    <Content Include="requirements.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="requirements.txt" />
+    <Compile Include="DataReaper.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

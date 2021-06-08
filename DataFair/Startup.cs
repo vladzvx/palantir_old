@@ -1,7 +1,8 @@
 ﻿using Common;
-using DataFair.Services;
-using DataFair.Services.DataBase.DataProcessing;
-using DataFair.Services.Interfaces;
+using Common.Services;
+using Common.Services.DataBase.DataProcessing;
+using Common.Services.gRPC;
+using Common.Services.Interfaces;
 using DataFair.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

@@ -1,6 +1,6 @@
 ﻿using Common;
 using Common.Models;
-using DataFair.Services.Interfaces;
+using Common.Services.Interfaces;
 using DataFair.Utils;
 using Microsoft.Extensions.Hosting;
 using NLog;
@@ -11,7 +11,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DataFair.Services.DataBase.DataProcessing
+namespace Common.Services.DataBase.DataProcessing
 {
     public class DoubledValuesKiller
     {

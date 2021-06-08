@@ -14,6 +14,7 @@
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.35.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="NLog" Version="4.7.8" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.2" />
   </ItemGroup>
 
@@ -23,3 +24,4 @@
   </ItemGroup>
 
 </Project>
+

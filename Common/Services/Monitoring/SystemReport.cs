@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DataFair.Services
+namespace Common.Services
 {
     public class SystemReport
     {

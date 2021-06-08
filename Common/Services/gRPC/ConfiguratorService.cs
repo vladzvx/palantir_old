@@ -11,7 +11,7 @@ using System.Timers;
 using System.Threading;
 using Timer = System.Timers.Timer;
 
-namespace DataFair.Services
+namespace Common.Services.gRPC
 {
     public class ConfiguratorService :Common.Configurator.ConfiguratorBase
     {

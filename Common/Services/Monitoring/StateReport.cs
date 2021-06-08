@@ -1,5 +1,5 @@
 ﻿using Common;
-using DataFair.Services.Interfaces;
+using Common.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DataFair.Services
+namespace Common.Services
 {
     public class StateReport
     {

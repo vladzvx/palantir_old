@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataFair", "DataFair\DataFair.csproj", "{1BAADCFD-8D25-4864-9841-5467489E15E4}"
 EndProject
-Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "DataLoader", "DataLoader\DataLoader.pyproj", "{37BDC37E-C335-44A1-A31A-B1A88D3E88F1}"
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "DataReaper", "DataReaper\DataReaper.pyproj", "{37BDC37E-C335-44A1-A31A-B1A88D3E88F1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

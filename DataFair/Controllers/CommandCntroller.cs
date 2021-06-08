@@ -1,6 +1,6 @@
 ﻿using Common;
-using DataFair.Services;
-using DataFair.Services.DataBase.DataProcessing;
+using Common.Services;
+using Common.Services.DataBase.DataProcessing;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -16,7 +16,7 @@ namespace DataFair.Controllers
     public class CommandController
     {
         private readonly OrdersGenerator ordersGenerator;
-        private readonly State state;
+        public readonly State state;
         private readonly DoubledValuesFinder finder;
         private readonly DoubledValuesKiller killer;
         //private readonly CancellationToken token;

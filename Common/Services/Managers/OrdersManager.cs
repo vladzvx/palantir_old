@@ -1,5 +1,5 @@
 ﻿using Common;
-using DataFair.Services.Interfaces;
+using Common.Services.Interfaces;
 using Microsoft.Extensions.Hosting;
 using Npgsql;
 using System;
@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 
-namespace DataFair.Services
+namespace Common.Services
 {
     public class OrdersManager:IHostedService
     {

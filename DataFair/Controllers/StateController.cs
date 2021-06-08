@@ -1,5 +1,5 @@
 ﻿using Common;
-using DataFair.Services;
+using Common.Services;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -14,8 +14,8 @@ namespace DataFair.Controllers
     [Route("[controller]")]
     public class StateController
     {
-        private readonly Services.StateReport state;
-        public StateController(Services.StateReport state)
+        private readonly Common.Services.StateReport state;
+        public StateController(Common.Services.StateReport state)
         {
             this.state = state;
         }

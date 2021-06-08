@@ -1,5 +1,5 @@
 ﻿using Common;
-using DataFair.Services;
+using Common.Services;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -14,8 +14,8 @@ namespace DataFair.Controllers
     [Route("[controller]")]
     public class SystemStateController
     {
-        private readonly Services.SystemReport state;
-        public SystemStateController(Services.SystemReport state)
+        private readonly Common.Services.SystemReport state;
+        public SystemStateController(Common.Services.SystemReport state)
         {
             this.state = state;
         }

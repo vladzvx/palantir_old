@@ -1,5 +1,5 @@
 ﻿using Common;
-using DataFair.Services;
+using Common.Services;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Concurrent;
@@ -10,7 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 
-namespace DataFair.Services
+namespace Common.Services
 {
     public class CollectorsManager : IHostedService
     {

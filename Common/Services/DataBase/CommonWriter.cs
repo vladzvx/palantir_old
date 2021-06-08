@@ -1,6 +1,6 @@
 ﻿using Common;
 using Common.Models;
-using DataFair.Services.Interfaces;
+using Common.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using NLog;
 using Npgsql;
@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using Timer = System.Timers.Timer;
 
-namespace DataFair.Services
+namespace Common.Services
 {
     public class CommonWriter:ICommonWriter 
     {

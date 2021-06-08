@@ -12,10 +12,10 @@ using System.Threading;
 using Timer = System.Timers.Timer;
 using System.Diagnostics;
 using System.IO;
-using DataFair.Services.Interfaces;
+using Common.Services.Interfaces;
 using Common.Models;
 
-namespace DataFair.Services
+namespace Common.Services.gRPC
 {
     public class OrderBoardService : OrderBoard.OrderBoardBase
     {

@@ -6,10 +6,10 @@ using Common;
 using System.Threading.Tasks;
 using NLog;
 using System.Data.Common;
-using DataFair.Services.Interfaces;
+using Common.Services.Interfaces;
 using Common.Models;
 
-namespace DataFair.Services
+namespace Common.Services
 {
     public class WriterCore : IWriterCore
     {

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DataFair.Services.DataBase.DataProcessing
+namespace Common.Services.DataBase.DataProcessing
 {
     public class MediaAndFormattingProcessor: IHostedService
     {

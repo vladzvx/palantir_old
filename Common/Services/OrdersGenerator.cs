@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DataFair.Services
+namespace Common.Services
 {
     public class OrdersGenerator
     {
