@@ -35,7 +35,7 @@ namespace DataFair
 
             services.AddHostedService<OrdersManager>();
             services.AddHostedService<CollectorsManager>();
-           // services.AddHostedService<MediaAndFormattingProcessor>();
+            services.AddHostedService<MediaAndFormattingProcessor>();
 
             services.AddGrpc();
             services.AddCors();

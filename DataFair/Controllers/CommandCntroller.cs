@@ -17,16 +17,12 @@ namespace DataFair.Controllers
     {
         private readonly OrdersGenerator ordersGenerator;
         public readonly State state;
-        private readonly DoubledValuesFinder finder;
-        private readonly DoubledValuesKiller killer;
         //private readonly CancellationToken token;
 
-        public CommandController(OrdersGenerator ordersGenerator, State state, DoubledValuesFinder finder, DoubledValuesKiller killer)
+        public CommandController(OrdersGenerator ordersGenerator, State state)
         {
             this.ordersGenerator = ordersGenerator;
             this.state = state;
-            this.finder = finder;
-            this.killer = killer;
             //this.token = token;
         }
 
@@ -66,22 +62,5 @@ namespace DataFair.Controllers
 
         }
 
-        [HttpPost("dvf")]
-        [EnableCors()]
-        public async Task<string> dvf(CancellationToken cancellationToken)
-        {
-            await finder.Find(cancellationToken);
-            return "ok";
-
-        }
-
-        [HttpPost("killd")]
-        [EnableCors()]
-        public async Task<string> killd(CancellationToken cancellationToken)
-        {
-            await killer.Kill(cancellationToken);
-            return "ok";
-
-        }
     }
 }

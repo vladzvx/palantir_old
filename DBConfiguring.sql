@@ -356,6 +356,13 @@ $$
     end;
 $$LANGUAGE plpgsql;
 
+create  or replace function  get_last_message_id(_chat_id bigint) returns bigint as
+$$
+    begin
+        return (select max(id) from messages where chat_id=_chat_id);
+    end;
+$$LANGUAGE plpgsql;
+
 create  or replace function  get_groups_for_history(dt timestamp) returns table (_id bigint,
                                                                             _pair_id bigint,
                                                                             _last_message_id bigint,

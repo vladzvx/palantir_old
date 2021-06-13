@@ -119,6 +119,7 @@ message Order {
 	OrderType Type = 7;
 	int32 RedirectCounter = 8;
 	int32 Time = 9;
+	int64 PairOffset = 10;
 }
 
 enum OrderType{
@@ -126,4 +127,5 @@ enum OrderType{
 	History = 1;
 	GetFullChannel = 2;
 	Sleep = 3;
+	Pair =4;
 }
