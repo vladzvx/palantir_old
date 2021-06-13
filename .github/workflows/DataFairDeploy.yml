@@ -59,14 +59,14 @@ jobs:
         passphrase: ${{ secrets.MAIN_PWD}}
         port: ${{ secrets.MAIN_PORT }}
         script: |
-          mv /bin/DataFair/output/DataFair.service /etc/systemd/system/DataFair.service
-          mv /bin/DataFair/output/* /bin/DataFair/
-          rm /bin/DataFair/output/ -r
-          chmod u+x /bin/DataFair/DataFair
-          echo 'User ID=postgres;Password=${{ secrets.MAIN_PG_PWD }};Host=localhost;Port=5432;Database=test_db;Pooling=true'>>/bin/DataFair/settings.txt
-          systemctl daemon-reload
-          systemctl enable DataFair
-          systemctl start DataFair
+          sudo mv /bin/DataFair/output/DataFair.service /etc/systemd/system/DataFair.service
+          sudo mv /bin/DataFair/output/* /bin/DataFair/
+          sudo rm /bin/DataFair/output/ -r
+          sudo chmod u+x /bin/DataFair/DataFair
+          sudo echo 'User ID=postgres;Password=${{ secrets.MAIN_PG_PWD }};Host=localhost;Port=5432;Database=test_db;Pooling=true'>>/bin/DataFair/settings.txt
+          sudo systemctl daemon-reload
+          sudo systemctl enable DataFair
+          sudo systemctl start DataFair
       
         
         
