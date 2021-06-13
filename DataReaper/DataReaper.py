@@ -395,12 +395,14 @@ class TgDataGetter():
 
 time.sleep(2);
 grpc_host =os.environ.get('grpc_host') 
+collector_type =os.environ.get('type') 
 
 channel = grpc.insecure_channel(grpc_host)
 config_stub = Configurator_pb2_grpc.ConfiguratorStub(channel);
 
 
-emp = OrderBoard_pb2.google_dot_protobuf_dot_empty__pb2.Empty()
+emp = Configurator_pb2.ConfigurationRequest()
+emp.Group = collector_type;
 for cfg in config_stub.GetConfiguration(emp):
 	config = cfg
 

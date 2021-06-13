@@ -14,7 +14,7 @@ namespace Common.Services
         public ConcurrentQueue<Order> MiddlePriorityOrders = new ConcurrentQueue<Order>();
         public ConcurrentQueue<Order> Orders = new ConcurrentQueue<Order>();
         public ConcurrentBag<SessionSettings> SessionStorages = new ConcurrentBag<SessionSettings>();
-        public ConcurrentBag<Common.Collector> Collectors = new ConcurrentBag<Collector>();
+        public ConcurrentDictionary<string, ConcurrentBag<Common.Collector>> Collectors = new ConcurrentDictionary<string, ConcurrentBag<Collector>>();
         public ConcurrentDictionary<string, Common.SessionSettings> AllSessions = new ConcurrentDictionary<string, SessionSettings>();
         public ConcurrentDictionary<string, Common.Collector> AllCollectors = new ConcurrentDictionary<string, Collector>();
     }

@@ -20,7 +20,13 @@ namespace Common.Services
         public long FreeDisk;
         public StateReport(State state, ICommonWriter messagesWriter)
         {
-            Collectors = state.Collectors.Count;
+            foreach (string key in state.Collectors.Keys.ToArray())
+            {
+                if (state.Collectors.TryGetValue(key,out var val))
+                {
+                    Collectors += val.Count;
+                }
+            }
             SessionsAvaliable = state.SessionStorages.Count;
             Orders = state.Orders.Count;
             MaxPriorityOrders = state.MaxPriorityOrders.Count;

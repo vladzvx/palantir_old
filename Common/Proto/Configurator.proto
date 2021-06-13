@@ -6,7 +6,11 @@ import "google/protobuf/timestamp.proto";
 package snapshot;
 
 service Configurator {
-	rpc GetConfiguration (google.protobuf.Empty) returns (stream ConfigurationContainer);
+	rpc GetConfiguration (ConfigurationRequest) returns (stream ConfigurationContainer);
+}
+
+message ConfigurationRequest{
+	string Group = 1;
 }
 
 message ConfigurationContainer{
@@ -27,4 +31,5 @@ message Collector{
 	string ApiHash = 2;
 	string Phone = 3;
 	string SessionName = 4;
+	string Group = 5;
 }

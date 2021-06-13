@@ -43,7 +43,16 @@ namespace Common.Services
                     if (!state.AllCollectors.ContainsKey(collector.Phone))
                     {
                         state.AllCollectors.TryAdd(collector.Phone, collector);
-                        state.Collectors.Add(collector);
+                        if (state.Collectors.TryGetValue(collector.Group, out ConcurrentBag<Collector> Collectors))
+                        {
+                            if (Collectors == null) Collectors = new ConcurrentBag<Collector>();
+                            Collectors.Add(collector);
+                        }
+                        else
+                        {
+                            state.Collectors.TryAdd(collector.Group, new ConcurrentBag<Collector>() { collector });
+                        }
+                        
                     }
                 }
             }

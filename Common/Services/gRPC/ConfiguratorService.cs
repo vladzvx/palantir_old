@@ -20,12 +20,12 @@ namespace Common.Services.gRPC
         {
             this.state = state;
         }
-        public async override Task GetConfiguration(Empty req, IServerStreamWriter<ConfigurationContainer> serverStream, ServerCallContext context)
+        public async override Task GetConfiguration(ConfigurationRequest req, IServerStreamWriter<ConfigurationContainer> serverStream, ServerCallContext context)
         {
             SessionSettings session;
             Collector collector;
             if (state.SessionStorages.TryPeek(out session)&&
-                state.Collectors.TryTake(out collector))
+                state.Collectors.TryGetValue(req.Group, out ConcurrentBag<Collector> Collectors)&& Collectors.TryTake(out collector))
             {
                 ConfigurationContainer cont = new ConfigurationContainer()
                 {
@@ -38,7 +38,7 @@ namespace Common.Services.gRPC
                 }
                 catch (TaskCanceledException)
                 {
-                    state.Collectors.Add(collector);
+                    state.Collectors[req.Group].Add(collector);
                 }
             }
         }
