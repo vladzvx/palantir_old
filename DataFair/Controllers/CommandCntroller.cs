@@ -61,6 +61,13 @@ namespace DataFair.Controllers
             return "ok";
 
         }
+        [HttpPost("GetUpdates")]
+        [EnableCors()]
+        public string PostRequest4()
+        {
+            ordersGenerator.CreateUpdateOrders().Wait();
+            return "ok";
 
+        }
     }
 }
