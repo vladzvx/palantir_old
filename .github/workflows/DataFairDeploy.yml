@@ -13,12 +13,12 @@ jobs:
       with:
         host: ${{ secrets.MAIN_HOST }}
         username: ${{ secrets.MAIN_USERNAME }}
-        password: ${{ secrets.MAIN_PWD }}
+        key : ${{ secrets.MAIN_SSH_KEY }}
         port: ${{ secrets.MAIN_PORT }}
         script: |
           systemctl stop DataFair
-          cd /root
-          rm -r -f /root/DataFair
+          cd /bin
+          rm -r -f /bin/DataFair
           
           
   build-and-deploy:
@@ -47,20 +47,20 @@ jobs:
         password: ${{ secrets.MAIN_PWD }}
         port: ${{ secrets.MAIN_PORT }}
         source: "./output"
-        target: "/root/DataFair/"
+        target: "/bin/DataFair/"
     - name: server prepairing
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.MAIN_HOST }}
         username: ${{ secrets.MAIN_USERNAME }}
-        password: ${{ secrets.MAIN_PWD }}
+        key : ${{ secrets.MAIN_SSH_KEY }}
         port: ${{ secrets.MAIN_PORT }}
         script: |
-          mv /root/DataFair/output/DataFair.service /etc/systemd/system/DataFair.service
-          mv /root/DataFair/output/* /root/DataFair/
-          rm /root/DataFair/output/ -r
-          chmod u+x /root/DataFair/DataFair
-          echo 'User ID=postgres;Password=${{ secrets.MAIN_PG_PWD }};Host=localhost;Port=5432;Database=test_db;Pooling=true'>>/root/DataFair/settings.txt
+          mv /bin/DataFair/output/DataFair.service /etc/systemd/system/DataFair.service
+          mv /bin/DataFair/output/* /bin/DataFair/
+          rm /bin/DataFair/output/ -r
+          chmod u+x /bin/DataFair/DataFair
+          echo 'User ID=postgres;Password=${{ secrets.MAIN_PG_PWD }};Host=localhost;Port=5432;Database=test_db;Pooling=true'>>/bin/DataFair/settings.txt
           systemctl daemon-reload
           systemctl enable DataFair
           systemctl start DataFair
