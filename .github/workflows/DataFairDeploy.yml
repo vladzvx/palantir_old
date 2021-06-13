@@ -14,7 +14,7 @@ jobs:
         host: ${{ secrets.MAIN_HOST }}
         username: ${{ secrets.MAIN_USERNAME }}
         key : ${{ secrets.MAIN_SSH_KEY }}
-        passphrase: ${{ secrets.MAIN_PASSPHRASE}}
+        passphrase: ${{ secrets.MAIN_PWD}}
         port: ${{ secrets.MAIN_PORT }}
         script: |
           systemctl stop DataFair
@@ -55,7 +55,7 @@ jobs:
         host: ${{ secrets.MAIN_HOST }}
         username: ${{ secrets.MAIN_USERNAME }}
         key : ${{ secrets.MAIN_SSH_KEY }}
-        passphrase: ${{ secrets.MAIN_PASSPHRASE}}
+        passphrase: ${{ secrets.MAIN_PWD}}
         port: ${{ secrets.MAIN_PORT }}
         script: |
           mv /bin/DataFair/output/DataFair.service /etc/systemd/system/DataFair.service
