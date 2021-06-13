@@ -20,4 +20,4 @@ RUN python3 -m grpc_tools.protoc -I /app --python_out=/app --grpc_python_out=. /
 RUN ls -l
 
 
-CMD ["python3", "./DataLoader.py"]
+CMD ["python3", "./DataReaper.py"]
