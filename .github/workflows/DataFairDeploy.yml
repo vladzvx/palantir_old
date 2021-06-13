@@ -17,9 +17,9 @@ jobs:
         passphrase: ${{ secrets.MAIN_PWD}}
         port: ${{ secrets.MAIN_PORT }}
         script: |
-          systemctl stop DataFair
+          sudo systemctl stop DataFair
           cd /bin
-          rm -r -f /bin/DataFair
+          sudo rm -r -f /bin/DataFair
           
           
   build-and-deploy:
