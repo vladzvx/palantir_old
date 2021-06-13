@@ -36,7 +36,7 @@ namespace Common.Services
             {
                 try
                 {
-                    Task.WaitAll(ordersGenerator.CreateUpdateOrders(),ordersGenerator.CreateGroupHistoryLoadingOrders());//, CreateGetFullChannelOrders());
+                    Task.WaitAll(ordersGenerator.CreateGroupHistoryLoadingOrders());//, CreateGetFullChannelOrders());
                 }
                 catch { }
                 Monitor.Exit(sync);

@@ -69,6 +69,8 @@ message SavedMessage{
 	bool FromExistingUser = 12;
 	string Formating = 13;
 	int64 MessageDBId = 14;
+	string FormatingCostyl = 15;
+	string MediaCostyl = 16;
 }
 
 

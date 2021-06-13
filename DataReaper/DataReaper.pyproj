@@ -5,8 +5,7 @@
     <ProjectGuid>37bdc37e-c335-44a1-a31a-b1a88d3e88f1</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>
-    </StartupFile>
+    <StartupFile>DataReaper.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>

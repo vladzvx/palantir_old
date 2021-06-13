@@ -100,24 +100,27 @@ namespace Common.Services
                     using DbCommand BanChatCommand = writerSettings.CreateCommand(Connention, typeof(Ban));
                     using DbCommand DelMessageCommand = writerSettings.CreateCommand(Connention, typeof(Deleting));
                     {
-                        using (DbTransaction transaction = Connention.BeginTransaction())
+                        while (!DataQueue.IsEmpty)
                         {
-                            try
+                            using (DbTransaction transaction = Connention.BeginTransaction())
                             {
-                                for (int i = 0; i < Options.WriterTransactionSize && !DataQueue.IsEmpty; i++)
+                                try
                                 {
-                                    if (DataQueue.TryDequeue(out object message))
+                                    for (int i = 0; i < Options.WriterTransactionSize && !DataQueue.IsEmpty; i++)
                                     {
-                                        writerSettings.WriteSingleObject(message, transaction);
+                                        if (DataQueue.TryDequeue(out object message))
+                                        {
+                                            writerSettings.WriteSingleObject(message, transaction);
+                                        }
                                     }
+                                    transaction.Commit();
                                 }
-                                transaction.Commit();
-                            }
-                            catch (Exception ex)
-                            {
-                                logger.Error(ex, "Error while writing messages!");
-                                transaction.Rollback();
-                                throw ex;
+                                catch (Exception ex)
+                                {
+                                    logger.Error(ex, "Error while writing messages!");
+                                    transaction.Rollback();
+                                    throw ex;
+                                }
                             }
                         }
                     }

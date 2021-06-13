@@ -33,7 +33,7 @@ namespace Common.Services
 
         public async Task WaitIfNeed()
         {
-            if (cacheLock.TryEnterReadLock(Options.Pasue))
+            if (cacheLock.TryEnterReadLock(Options.Pause))
             {
                 if (!slowMode)
                 {
@@ -43,7 +43,7 @@ namespace Common.Services
                 else
                 {
                     cacheLock.ExitReadLock();
-                    await Task.Delay(Options.Pasue);
+                    await Task.Delay(Options.Pause);
                 }
                 
             }

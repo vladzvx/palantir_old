@@ -19,7 +19,7 @@ namespace Common
         internal static int EntityWriterTrasactiobSize = 25000;
         internal static int ReconnectionRepeatCount = 5;
         internal static int SleepModeStartCount = 80000;
-        internal static int Pasue = 1000;
+        internal static int Pause = 1000;
         internal static int SleepModeEndCount = SleepModeStartCount/2;
         internal static TimeSpan ReconnerctionPause = new TimeSpan(0,0,5);
     }

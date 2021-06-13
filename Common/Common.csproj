@@ -10,6 +10,11 @@
     <None Remove="Protobufs\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Proto\Configurator.proto" />
+    <None Remove="Proto\OrderBoard.proto" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.35.0" />
@@ -18,9 +23,10 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.2" />
   </ItemGroup>
 
+
   <ItemGroup>
-	  <Protobuf Include="Proto\Configurator.proto" GrpcServices="Both" />
-	  <Protobuf Include="Proto\OrderBoard.proto" GrpcServices="Both" />
+    <Protobuf Include="Proto\Configurator.proto" GrpcServices="Both" />
+    <Protobuf Include="Proto\OrderBoard.proto" GrpcServices="Both" />
   </ItemGroup>
 
 </Project>

@@ -31,13 +31,11 @@ namespace DataFair
             services.AddTransient<StateReport>();
             services.AddTransient<SystemReport>();
             services.AddTransient<OrdersGenerator>();
-            services.AddTransient<DoubledValuesFinder>();
-            services.AddTransient<DoubledValuesKiller>();
 
 
             services.AddHostedService<OrdersManager>();
             services.AddHostedService<CollectorsManager>();
-            services.AddHostedService<MediaAndFormattingProcessor>();
+           // services.AddHostedService<MediaAndFormattingProcessor>();
 
             services.AddGrpc();
             services.AddCors();
