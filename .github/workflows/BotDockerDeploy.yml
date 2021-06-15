@@ -8,7 +8,7 @@ env:
   IMAGE_NAME: test-image
       
 jobs:
-  build and push:
+  build:
     runs-on: ubuntu-18.04
     steps:
       - name: Check Out Repo 
