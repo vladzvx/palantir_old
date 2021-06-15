@@ -104,7 +104,7 @@ namespace Bot.Core.Services
         {
             try
             {
-                NpgsqlConnection Connection = new NpgsqlConnection(connectionString);
+                using NpgsqlConnection Connection = new NpgsqlConnection(connectionString);
                 await Connection.OpenAsync();
                 NpgsqlCommand SimpleSearchCommand = Connection.CreateCommand();
                 SimpleSearchCommand.CommandType = System.Data.CommandType.StoredProcedure;

@@ -19,7 +19,7 @@ namespace Common.Services.DataBase
         {
             try
             {
-                NpgsqlConnection Connection = new NpgsqlConnection(Options.ConnectionString);
+                using NpgsqlConnection Connection = new NpgsqlConnection(Options.ConnectionString);
                 await Connection.OpenAsync();
                 NpgsqlCommand SimpleSearchCommand = Connection.CreateCommand();
                 SimpleSearchCommand.CommandType = System.Data.CommandType.StoredProcedure;
