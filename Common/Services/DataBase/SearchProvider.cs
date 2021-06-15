@@ -15,7 +15,7 @@ namespace Common.Services.DataBase
 
         }
 
-        public async Task<List<string>> SimpleSearch(string text, int limit)
+        public static async Task<List<string>> SimpleSearch(string text, int limit)
         {
             try
             {
@@ -33,7 +33,8 @@ namespace Common.Services.DataBase
                 List<string> result = new List<string>();
                 while (await reader.ReadAsync())
                 {
-                    result.Add(reader.GetString(0));
+                    if(!reader.IsDBNull(0))
+                        result.Add(reader.GetString(0));
                 }
                 return result;
             }

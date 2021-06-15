@@ -11,24 +11,24 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DataFair.Controllers
+namespace Bot.Service.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class SearchController
+    public class CommandController
     {
-        private readonly SearchProvider searchProvider;
-
-        public SearchController(SearchProvider searchProvider)
+        private readonly CancellationTokenSource cancellationTokenSource;
+        public CommandController(CancellationTokenSource cancellationTokenSource)
         {
-            this.searchProvider = searchProvider;
+            this.cancellationTokenSource = cancellationTokenSource;
         }
 
-        [HttpPost("simple")]
+        [HttpPost("kill")]
         [EnableCors()]
-        public async Task<string> simple_search(SimpleSearchRequest req)
+        public string kill()
         {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(await SearchProvider.SimpleSearch(req.Text, req.Limit));
+            cancellationTokenSource.Cancel();
+            return "ok";
         }
 
 

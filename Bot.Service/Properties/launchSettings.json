@@ -1,0 +1,29 @@
+{
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:42740",
+      "sslPort": 0
+    }
+  },
+  "profiles": {
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "Bot.Service": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ConnectionString": "User ID=postgres;Password=QW12cv9001Qw_;Host=84.201.164.97;Port=5432;Database=test_db;Pooling=true;",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "Token": "1879635077:AAF0VwZBYJ-OLAkuNdXhZvGLCiHD0E2Yfek"
+      },
+      "dotnetRunMessages": "true",
+      "applicationUrl": "http://localhost:5000"
+    }
+  }
+}
