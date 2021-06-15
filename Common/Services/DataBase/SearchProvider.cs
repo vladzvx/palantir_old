@@ -15,7 +15,7 @@ namespace Common.Services.DataBase
 
         }
 
-        public static async Task<List<string>> SimpleSearch(string text, int limit)
+        public async Task<List<string>> SimpleSearch(string text, int limit)
         {
             try
             {

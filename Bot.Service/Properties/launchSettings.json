@@ -18,8 +18,13 @@
     "Bot.Service": {
       "commandName": "Project",
       "environmentVariables": {
+        "DBHost": "84.201.164.97",
+        "DBPwd": "QW12cv9001Qw_",
         "ConnectionString": "User ID=postgres;Password=QW12cv9001Qw_;Host=84.201.164.97;Port=5432;Database=test_db;Pooling=true;",
+        "DBUser": "postgres",
+        "DBName": "test_db",
         "ASPNETCORE_ENVIRONMENT": "Development",
+        "DBPost": "5432",
         "Token": "1879635077:AAF0VwZBYJ-OLAkuNdXhZvGLCiHD0E2Yfek"
       },
       "dotnetRunMessages": "true",

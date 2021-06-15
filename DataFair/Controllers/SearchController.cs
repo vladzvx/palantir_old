@@ -28,7 +28,7 @@ namespace DataFair.Controllers
         [EnableCors()]
         public async Task<string> simple_search(SimpleSearchRequest req)
         {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(await SearchProvider.SimpleSearch(req.Text, req.Limit));
+            return Newtonsoft.Json.JsonConvert.SerializeObject(await searchProvider.SimpleSearch(req.Text, req.Limit));
         }
 
 
