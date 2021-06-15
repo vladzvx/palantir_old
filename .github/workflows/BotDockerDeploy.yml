@@ -33,9 +33,6 @@ jobs:
           push: true
           tags: vladzvx/tg-data-miner:data-fair-bot
           
-  deploy:
-      runs-on: ubuntu-18.04
-      steps:
       - name: deploy
         uses: appleboy/ssh-action@master
         with:
