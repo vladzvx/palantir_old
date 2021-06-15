@@ -42,7 +42,10 @@ jobs:
           port: 22
           script: |
             docker stop search_bot
+            docker stop search_bot2
             docker rm search_bot
+            docker rm search_bot2
             docker login -u ${{ secrets.DOCKER_HUB_LOGIN }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
             docker pull vladzvx/tg-data-miner:data-fair-bot
             docker run --name search_bot -d -p 5003:5003 --env ConnectionString=qqq --env DBUser=postgres --env DBPwd=${{ secrets.MAIN_PG_PWD }} --env DBHost=${{ secrets.MAIN_HOST }} --env DBPort=5432 --env DBName=test_db --env Token=${{ secrets.PROD_SEARCH_BOT_TOKEN }} vladzvx/tg-data-miner:data-fair-bot
+            docker run --name search_bot2 -d -p 5004:5003 --env ConnectionString=qqq --env DBUser=postgres --env DBPwd=${{ secrets.MAIN_PG_PWD }} --env DBHost=${{ secrets.MAIN_HOST }} --env DBPort=5432 --env Selective=[1052645483] --env DBName=test_db --env Token=${{ secrets.PROD_SEARCH_BOT_TOKEN2 }} vladzvx/tg-data-miner:data-fair-bot
