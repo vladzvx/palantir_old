@@ -59,6 +59,7 @@ namespace Bot.Core.Services
                                 {
                                     await botClient.SendTextMessageAsync(update.Message.Chat.Id, replyMessage);
                                     await Task.Delay(1000);
+                                    replyMessage = string.Empty;
                                 }
                             }
                             await botClient.SendTextMessageAsync(update.Message.Chat.Id, replyMessage);
