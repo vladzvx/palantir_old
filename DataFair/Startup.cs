@@ -1,5 +1,6 @@
 ﻿using Common;
 using Common.Services;
+using Common.Services.DataBase;
 using Common.Services.DataBase.DataProcessing;
 using Common.Services.gRPC;
 using Common.Services.Interfaces;
@@ -31,6 +32,7 @@ namespace DataFair
             services.AddTransient<StateReport>();
             services.AddTransient<SystemReport>();
             services.AddTransient<OrdersGenerator>();
+            services.AddScoped<SearchProvider>();
 
 
             services.AddHostedService<OrdersManager>();

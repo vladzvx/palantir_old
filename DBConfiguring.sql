@@ -452,3 +452,30 @@ insert into chats (id,username,is_channel) values (1264079104, 'ssleg', true);
 
 create index messages_user_id_index on messages (user_id);
 create index messages_chat_id_index on messages (chat_id);
+
+
+
+create table search_tests(
+    username text,
+    id bigint,
+    chat_id bigint,
+    text text,
+    vectorised_text tsvector
+);
+
+create or replace function vect() returns void as
+$$
+    begin
+        update search_tests set vectorised_text=to_tsvector('russian',text) where vectorised_text is null;
+    end;
+$$ LANGUAGE plpgsql;
+
+
+create or replace function simple_search(request text, lim int) returns table (link text) as
+$$
+    begin
+        return query SELECT 'https://t.me/'||COALESCE(username,'c/'||(chat_id::text))||'/'||id::text from search_tests
+        WHERE to_tsquery('russian',request)::tsquery @@ vectorised_text
+        LIMIT lim;
+    end;
+$$ LANGUAGE plpgsql;
