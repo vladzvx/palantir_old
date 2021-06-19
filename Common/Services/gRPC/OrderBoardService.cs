@@ -22,28 +22,33 @@ namespace Common.Services.gRPC
         private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
         private static Order EmptyOrder = new Order() { Type = OrderType.Empty};
         private readonly State ordersStorage;
-        private readonly ICommonWriter messagesWriter;
+        private readonly ICommonWriter commonWriter;
+        private readonly ICommonWriter<Message> messagesWriter;
+        private readonly ICommonWriter<Entity> entitiesWriter;
         private readonly LoadManager loadManager;
-        public OrderBoardService(State ordersStorage, ICommonWriter messagesWriter, LoadManager loadManager)
+        public OrderBoardService(State ordersStorage, ICommonWriter commonWriter, ICommonWriter<Message> messagesWriter,
+            ICommonWriter<Entity> entitiesWriter, LoadManager loadManager)
         {
             this.ordersStorage = ordersStorage;
+            this.commonWriter = commonWriter;
+            this.entitiesWriter = entitiesWriter;
             this.messagesWriter = messagesWriter;
             this.loadManager = loadManager;
         }
         public override Task<Empty> PostEntity(Entity entity, ServerCallContext context)
         {
             logger.Trace("New entity Id: {0}; username: {1}; name: {2}; type: {3};", entity.Id, entity.Link,entity.LastName,entity.Type.ToString());
-            if (User.TryCast(entity,out User user))
+            if (entity.Type==EntityType.Channel|| entity.Type == EntityType.Group)
             {
-                messagesWriter.PutData(user);
+                entitiesWriter.PutData(entity);
             }
-            else if (Chat.TryCast(entity,out Chat chat))
+            else if (User.TryCast(entity,out User user))
             {
-                messagesWriter.PutData(chat);
+                commonWriter.PutData(user);
             }
             else if (Ban.TryCast(entity, out Ban ban))
             {
-                messagesWriter.PutData(ban);
+                commonWriter.PutData(ban);
             }
             return Task.FromResult(new Empty());
         }
@@ -51,13 +56,18 @@ namespace Common.Services.gRPC
         {
             try
             {
+                long maxId = 0;
+                long chatId = 0;
                 while (await requestStream.MoveNext())
                 {
                     messagesWriter.PutData(requestStream.Current);
-                    await loadManager.WaitIfNeed();
+                    //await loadManager.WaitIfNeed();
+                    if (requestStream.Current.Id > maxId) maxId = requestStream.Current.Id;
+                    chatId = requestStream.Current.ChatId;
                     //Message message = requestStream.Current;
                     //logger.Trace("Message. DateTime: {0}; FromId: {1}; Text: {2}; Media: {3};", message.Timestamp, message.FromId, message.Text, message.Media);
                 }
+                await entitiesWriter.ExecuteAdditionalAction(new Order() { Id = chatId, Offset = maxId });
             }
             catch (Exception ex)
             {

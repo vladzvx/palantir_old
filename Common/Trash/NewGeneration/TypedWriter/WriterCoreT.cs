@@ -15,7 +15,13 @@ namespace Common.Services
     public class WriterCore<T> : IWriterCore<T>
     {
         private DbCommand Command;
-        public DbCommand CreateCommand(DbConnection connection)
+
+        public Task AdditionaAcion(object data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public DbCommand CreateMainCommand(DbConnection connection)
         {
             if (typeof(T) == typeof(Message))
             {
@@ -146,4 +152,5 @@ namespace Common.Services
             }
         }
     }
+
 }

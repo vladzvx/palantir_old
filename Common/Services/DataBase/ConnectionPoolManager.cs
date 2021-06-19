@@ -15,7 +15,7 @@ namespace Common.Services.DataBase
         private readonly System.Timers.Timer timer = new System.Timers.Timer();
         private readonly IDataBaseSettings settings;
         public readonly ConcurrentBag<ConnectionWrapper> Pool = new ConcurrentBag<ConnectionWrapper>();
-        private readonly ConcurrentDictionary<int, ConnectionWrapper> PoolRepo = new ConcurrentDictionary<int, ConnectionWrapper>();
+        internal readonly ConcurrentDictionary<Guid, ConnectionWrapper> PoolRepo = new ConcurrentDictionary<Guid, ConnectionWrapper>();
         private readonly object locker = new object();
         public ConnectionPoolManager(IDataBaseSettings settings)
         {
@@ -32,8 +32,13 @@ namespace Common.Services.DataBase
                 Pool.TryTake(out ConnectionWrapper connection) &&
                 PoolRepo.TryRemove(connection.Id, out _))
             {
-                connection.Connection.Close();
-                connection.Connection.Dispose();
+                try
+                {
+                    connection.Connection.Close();
+                    connection.Connection.Dispose();
+                }
+                catch { }
+
             }
         }
 
@@ -44,13 +49,22 @@ namespace Common.Services.DataBase
             {
                 if (Pool.TryTake(out connection))
                 {
-                    return connection;
+                    if (connection.Connection.FullState == System.Data.ConnectionState.Open)
+                        return connection;
+                    else if (connection.Connection.FullState == System.Data.ConnectionState.Connecting)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        PoolRepo.TryRemove(connection.Id, out var _);
+                    }
                 }
                 else if (PoolRepo.Count < this.settings.ConnectionPoolMaxSize && Monitor.TryEnter(locker))
                 {
                     try
                     {
-                        connection = new ConnectionWrapper(settings.ConnectionString, PoolRepo.Keys.Count>0? PoolRepo.Keys.Max()+1:0, this);
+                        connection = new ConnectionWrapper(settings.ConnectionString, this);
                         await connection.Connection.OpenAsync();
                         PoolRepo.TryAdd(connection.Id, connection);
                         return connection;
@@ -61,7 +75,7 @@ namespace Common.Services.DataBase
                     }
                     Monitor.Exit(locker);
                 }
-                else await Task.Delay(100, token);
+                await Task.Delay(100, token);
             }
             return connection;
         }
