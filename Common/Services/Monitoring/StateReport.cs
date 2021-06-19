@@ -18,7 +18,7 @@ namespace Common.Services
         public int MiddlePriorityOrders;
         public int Messages;
         public long FreeDisk;
-        public StateReport(State state, ICommonWriter messagesWriter)
+        public StateReport(State state, ICommonWriter messagesWriter, ICommonWriter<Message> commonWriter, ICommonWriter<Entity> commonWriter2)
         {
             foreach (string key in state.Collectors.Keys.ToArray())
             {
@@ -31,7 +31,7 @@ namespace Common.Services
             Orders = state.Orders.Count;
             MaxPriorityOrders = state.MaxPriorityOrders.Count;
             MiddlePriorityOrders = state.MiddlePriorityOrders.Count;
-            Messages = messagesWriter.GetQueueCount();
+            Messages = messagesWriter.GetQueueCount() + commonWriter.GetQueueCount()+ commonWriter2.GetQueueCount();
 
             DriveInfo[] allDrives = DriveInfo.GetDrives();
             long disk = 0;
