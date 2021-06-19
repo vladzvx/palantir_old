@@ -479,3 +479,92 @@ $$
         LIMIT lim;
     end;
 $$ LANGUAGE plpgsql;
+
+create or replace function simple_search_selective(request text, lim int,chats bigint[]) returns table (link text) as
+$$
+    begin
+        return query SELECT 'https://t.me/'||COALESCE(username,'c/'||(chat_id::text))||'/'||id::text from search_tests
+        WHERE to_tsquery('russian',request)::tsquery @@ vectorised_text and array_position(chats, chat_id)
+        LIMIT lim;
+    end;
+$$ LANGUAGE plpgsql;
+
+
+
+create extension rum;
+create extension rusmorph;
+create extension hunspell_ru_ru_aot;
+
+
+
+
+
+CREATE TEXT SEARCH CONFIGURATION public.my_default ( COPY = pg_catalog.russian );
+ALTER TEXT SEARCH CONFIGURATION public.my_default
+    DROP MAPPING FOR email, url,host, url_path, sfloat, float, int,uint;
+
+CREATE TEXT SEARCH CONFIGURATION public.combo ( COPY = pg_catalog.russian );
+alter text search configuration public.combo alter mapping for word with rusmorph, russian_aot_hunspell;
+ALTER TEXT SEARCH CONFIGURATION public.combo
+    DROP MAPPING FOR email, url,host, url_path, sfloat, float, int,uint;
+
+alter table messages add column parsed bool default false;
+alter table messages add column vectorised_text_combo tsvector;
+alter table messages add column vectorised_text_my_default tsvector;
+
+
+CREATE OR REPLACE FUNCTION create_fulltext_data(count int) RETURNS void as
+$$
+    declare
+        min_id bigint;
+    begin
+        min_id = (select min(message_db_id) from messages where not parsed);
+        update messages set vectorised_text_combo=parse_combo(replace(text)),
+                            vectorised_text_my_default=parse_default(replace(text)),
+                            parsed=true where not parsed and message_db_id>=min_id and message_db_id<min_id+count;
+    end;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION force_parse() RETURNS void as
+$$
+    declare
+        min_id bigint;
+    begin
+        min_id = (select min(message_db_id) from messages where not parsed);
+        update messages set vectorised_text_combo='', vectorised_text_my_default=parse_default(replace(text)),
+                            parsed=true where not parsed and message_db_id=min_id;
+    end;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION parse_combo(text text) RETURNS tsvector as
+$$
+    begin
+        return to_tsvector('combo', text);
+    end;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION parse_default(text text) RETURNS tsvector as
+$$
+    begin
+        return to_tsvector('my_default', text);
+    end;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION replace(text text) RETURNS text as
+$$
+    declare
+        pattern text;
+    begin
+        pattern = '[^0-9абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ ,abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\.:/?\^\\=-_%\$#@!\n"]*';
+        return regexp_replace(text, pattern, '','g');
+    end;
+$$ LANGUAGE plpgsql;
+
+drop trigger on_insert_to_messages ON messages;
+
+CREATE OR REPLACE FUNCTION update_last_message(_chat_id bigint,_last_message_id bigint) RETURNS void as
+$$
+    begin
+        update chats set getting_last_message_timestamp=CURRENT_TIMESTAMP, last_message_id=_last_message_id where id=_chat_id;
+    end;
+$$ LANGUAGE plpgsql;
