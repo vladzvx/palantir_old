@@ -31,7 +31,7 @@ namespace Common.Services
             Orders = state.Orders.Count;
             MaxPriorityOrders = state.MaxPriorityOrders.Count;
             MiddlePriorityOrders = state.MiddlePriorityOrders.Count;
-            Messages = messagesWriter.GetQueueCount() + commonWriter.GetQueueCount()+ commonWriter2.GetQueueCount();
+            Messages = commonWriter.GetQueueCount();
 
             DriveInfo[] allDrives = DriveInfo.GetDrives();
             long disk = 0;
