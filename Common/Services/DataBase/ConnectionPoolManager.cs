@@ -24,6 +24,16 @@ namespace Common.Services.DataBase
             timer.Elapsed += TimerAction;
             timer.AutoReset = true;
             timer.Start();
+
+            ConnectionWrapper connection = new ConnectionWrapper(settings.ConnectionString, this);
+            connection.Connection.Open();
+            PoolRepo.TryAdd(connection.Id, connection);
+            Pool.Add(connection);
+
+            ConnectionWrapper connection2 = new ConnectionWrapper(settings.ConnectionString, this);
+            connection2.Connection.Open();
+            PoolRepo.TryAdd(connection2.Id, connection2);
+            Pool.Add(connection2);
         }
 
         private void TimerAction(object sender, System.Timers.ElapsedEventArgs args)

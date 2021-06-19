@@ -24,7 +24,6 @@ namespace DataFair
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            
             services.AddSingleton<CancellationTokenSource>();
             services.AddSingleton<State>();
             services.AddSingleton<IDataBaseSettings, DataBaseSettings>();

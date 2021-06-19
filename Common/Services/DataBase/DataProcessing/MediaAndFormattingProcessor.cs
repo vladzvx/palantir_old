@@ -18,18 +18,24 @@ namespace Common.Services.DataBase.DataProcessing
             public string formatting_costyl;
         }
         private CancellationTokenSource cts = new CancellationTokenSource();
-        private NpgsqlConnection connection = new NpgsqlConnection(Options.ConnectionString);
+        private NpgsqlConnection connection;
         private NpgsqlCommand WriteCommand;
         private NpgsqlCommand ReadCommand;
         private readonly DataPreparator dataPreparator;
-        public MediaAndFormattingProcessor(DataPreparator dataPreparator)
+        private readonly ConnectionPoolManager connectionPoolManager;
+        public MediaAndFormattingProcessor(DataPreparator dataPreparator, ConnectionPoolManager connectionPoolManager)
         {
             this.dataPreparator = dataPreparator;
+            this.connectionPoolManager = connectionPoolManager;
         }
-
-        private void DBInit()
+        private async Task action(object cancellationToken)
         {
-            connection.Open();
+            if (!(cancellationToken is CancellationToken)) return;
+            CancellationToken ct = (CancellationToken)cancellationToken;
+
+            using ConnectionWrapper connectionWrapper = await connectionPoolManager.GetConnection(ct);
+
+            connection = connectionWrapper.Connection;
             WriteCommand = connection.CreateCommand();
             WriteCommand.CommandType = System.Data.CommandType.Text;
             WriteCommand.CommandText = "update messages SET formatting_costyl = null, media_costyl = null, formatting = @_formatting, media = @_media where message_db_id = @_id";
@@ -41,12 +47,7 @@ namespace Common.Services.DataBase.DataProcessing
             ReadCommand = connection.CreateCommand();
             ReadCommand.CommandType = System.Data.CommandType.Text;
             ReadCommand.CommandText = "select message_db_id,media_costyl,formatting_costyl from messages where (media_costyl is not null and media_costyl!='') or formatting_costyl is not null limit 10000";
-        }
 
-        private void action(object cancellationToken)
-        {
-            if (!(cancellationToken is CancellationToken)) return;
-            CancellationToken ct = (CancellationToken)cancellationToken;
             while (!ct.IsCancellationRequested)
             {
                 try
@@ -99,7 +100,6 @@ namespace Common.Services.DataBase.DataProcessing
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            DBInit();
             Task.Factory.StartNew(action, cts.Token);
             return Task.CompletedTask;
         }
