@@ -3,6 +3,7 @@ using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -16,6 +17,7 @@ namespace Bot.Core.Services
 {
     public class BotMessageHandler : IUpdateHandler
     {
+        public static HttpClient httpClient;
         private static string ConnectionString;
         private static long[] Selective;
         static BotMessageHandler()

@@ -3,25 +3,25 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Common.Services.DataBase
 {
     public class SearchProvider
     {
-        public SearchProvider()
+        public readonly ConnectionPoolManager connectionPoolManager;
+        public SearchProvider(ConnectionPoolManager connectionPoolManager)
         {
-
-
+            this.connectionPoolManager = connectionPoolManager;
         }
 
-        public async Task<List<string>> SimpleSearch(string text, int limit)
+        public async Task<List<string>> SimpleSearch(string text, int limit,CancellationToken token)
         {
             try
             {
-                using NpgsqlConnection Connection = new NpgsqlConnection(Options.ConnectionString);
-                await Connection.OpenAsync();
-                NpgsqlCommand SimpleSearchCommand = Connection.CreateCommand();
+                using ConnectionWrapper connectionWrapper = await connectionPoolManager.GetConnection(token);
+                NpgsqlCommand SimpleSearchCommand = connectionWrapper.Connection.CreateCommand();
                 SimpleSearchCommand.CommandType = System.Data.CommandType.StoredProcedure;
                 SimpleSearchCommand.Parameters.Add(new NpgsqlParameter("request", NpgsqlTypes.NpgsqlDbType.Text));
                 SimpleSearchCommand.Parameters.Add(new NpgsqlParameter("lim", NpgsqlTypes.NpgsqlDbType.Integer));
