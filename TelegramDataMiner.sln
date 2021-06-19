@@ -9,9 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataFair", "DataFair\DataFa
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "DataReaper", "DataReaper\DataReaper.pyproj", "{37BDC37E-C335-44A1-A31A-B1A88D3E88F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bot.Core", "Bot.Core\Bot.Core.csproj", "{70E95916-55E5-4A49-8EB1-1411B9DE4414}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bot.Core", "Bot.Core\Bot.Core.csproj", "{70E95916-55E5-4A49-8EB1-1411B9DE4414}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bot.Service", "Bot.Service\Bot.Service.csproj", "{D613D811-914D-43C9-A79A-00B440E3E2F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bot.Service", "Bot.Service\Bot.Service.csproj", "{D613D811-914D-43C9-A79A-00B440E3E2F3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

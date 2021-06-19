@@ -58,7 +58,7 @@ namespace Common.Services
             {
                 AdditionalCommand.Parameters["_chat_id"].Value = order.Id;
                 AdditionalCommand.Parameters["_last_message_id"].Value = order.Offset;
-                await Command.ExecuteNonQueryAsync();
+                await AdditionalCommand.ExecuteNonQueryAsync();
             }
         }
     }

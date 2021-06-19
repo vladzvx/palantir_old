@@ -23,6 +23,7 @@ namespace Common.Services
 
         public DbCommand CreateMainCommand(DbConnection connection)
         {
+            Command = connection.CreateCommand();
             Command.CommandType = System.Data.CommandType.StoredProcedure;
             Command.CommandText = "add_message";
             Command.Parameters.Add(new NpgsqlParameter("_message_timestamp", NpgsqlTypes.NpgsqlDbType.Timestamp));

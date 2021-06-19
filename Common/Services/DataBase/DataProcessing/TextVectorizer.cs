@@ -35,14 +35,17 @@ namespace Common.Services.DataBase.DataProcessing
                 }
                 catch (Exception ex)
                 {
-                    count /= 10;
-                    if (count > 1)
-                        await act(mainCommand, additionalCommand, count, token);
-                    else
+                    if (ex.Message.Contains("memory alloc"))
                     {
-                        await additionalCommand.ExecuteNonQueryAsync(token);
-                        return;
+                        count /= 10;
+                        if (count > 1)
+                            await act(mainCommand, additionalCommand, count, token);
+                        else
+                        {
+                            await additionalCommand.ExecuteNonQueryAsync(token);
+                        }
                     }
+                    return;
                 }
             }
         }
