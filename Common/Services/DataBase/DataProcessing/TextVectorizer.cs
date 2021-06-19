@@ -77,7 +77,7 @@ namespace Common.Services.DataBase.DataProcessing
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            mainTask = action(globalCts.Token);
+            action(globalCts.Token).Wait();
             return Task.CompletedTask;
         }
 
