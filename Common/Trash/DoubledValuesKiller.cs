@@ -80,7 +80,7 @@ namespace Common.Services.DataBase.DataProcessing
                             if (Ids.Contains(id))
                             {
                                 //Console.WriteLine(string.Format("Deleting. ChatId: {0}; MessageId: {1}; message_db_id: {2}",chat_id,id,message_db_id));
-                                await loadManager.WaitIfNeed();
+                                //await loadManager.WaitIfNeed();
                                 writer.PutData(new Deleting() { message_db_id= message_db_id });
                             }
                             else

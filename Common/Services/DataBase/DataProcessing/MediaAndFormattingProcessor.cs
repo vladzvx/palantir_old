@@ -22,8 +22,8 @@ namespace Common.Services.DataBase.DataProcessing
         private NpgsqlCommand WriteCommand;
         private NpgsqlCommand ReadCommand;
         private readonly DataPreparator dataPreparator;
-        private readonly ConnectionPoolManager connectionPoolManager;
-        public MediaAndFormattingProcessor(DataPreparator dataPreparator, ConnectionPoolManager connectionPoolManager)
+        private readonly ConnectionsFactory connectionPoolManager;
+        public MediaAndFormattingProcessor(DataPreparator dataPreparator, ConnectionsFactory connectionPoolManager)
         {
             this.dataPreparator = dataPreparator;
             this.connectionPoolManager = connectionPoolManager;
@@ -33,69 +33,72 @@ namespace Common.Services.DataBase.DataProcessing
             if (!(cancellationToken is CancellationToken)) return;
             CancellationToken ct = (CancellationToken)cancellationToken;
 
-            using ConnectionWrapper connectionWrapper = await connectionPoolManager.GetConnection(ct);
-
-            connection = connectionWrapper.Connection;
-            WriteCommand = connection.CreateCommand();
-            WriteCommand.CommandType = System.Data.CommandType.Text;
-            WriteCommand.CommandText = "update messages SET formatting_costyl = null, media_costyl = null, formatting = @_formatting, media = @_media where message_db_id = @_id";
-            WriteCommand.Parameters.Add(new NpgsqlParameter("_formatting", NpgsqlTypes.NpgsqlDbType.Jsonb));
-            WriteCommand.Parameters.Add(new NpgsqlParameter("_media", NpgsqlTypes.NpgsqlDbType.Jsonb));
-            WriteCommand.Parameters.Add(new NpgsqlParameter("_id", NpgsqlTypes.NpgsqlDbType.Bigint));
-
-
-            ReadCommand = connection.CreateCommand();
-            ReadCommand.CommandType = System.Data.CommandType.Text;
-            ReadCommand.CommandText = "select message_db_id,media_costyl,formatting_costyl from messages where (media_costyl is not null and media_costyl!='') or formatting_costyl is not null limit 10000";
-
-            while (!ct.IsCancellationRequested)
+            using (ConnectionWrapper connectionWrapper = connectionPoolManager.GetConnection(ct))
             {
-                try
-                {
-                    List<Record> records = new List<Record>();
-                    using (NpgsqlDataReader reader = ReadCommand.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            Record record = new Record()
-                            {
-                                Id = reader.GetInt64(0),
-                                media_costyl = !reader.IsDBNull(1) ? reader.GetString(1) : null,
-                                formatting_costyl = !reader.IsDBNull(2) ? reader.GetString(2) : null,
-                            };
-                            records.Add(record);
-                        }
-                    }
+                connection = connectionWrapper.Connection;
+                WriteCommand = connection.CreateCommand();
+                WriteCommand.CommandType = System.Data.CommandType.Text;
+                WriteCommand.CommandText = "update messages SET formatting_costyl = null, media_costyl = null, formatting = @_formatting, media = @_media where message_db_id = @_id";
+                WriteCommand.Parameters.Add(new NpgsqlParameter("_formatting", NpgsqlTypes.NpgsqlDbType.Jsonb));
+                WriteCommand.Parameters.Add(new NpgsqlParameter("_media", NpgsqlTypes.NpgsqlDbType.Jsonb));
+                WriteCommand.Parameters.Add(new NpgsqlParameter("_id", NpgsqlTypes.NpgsqlDbType.Bigint));
 
-                    if (records.Count == 0) return;
-                    List<object> list = new List<object>();
-                    using NpgsqlTransaction transaction = connection.BeginTransaction();
+
+                ReadCommand = connection.CreateCommand();
+                ReadCommand.CommandType = System.Data.CommandType.Text;
+                ReadCommand.CommandText = "select message_db_id,media_costyl,formatting_costyl from messages where (media_costyl is not null and media_costyl!='') or formatting_costyl is not null limit 10000";
+
+                while (!ct.IsCancellationRequested)
+                {
                     try
                     {
-                        foreach (Record record in records)
+                        List<Record> records = new List<Record>();
+                        using (NpgsqlDataReader reader = ReadCommand.ExecuteReader())
                         {
-                            object form = dataPreparator.PreparateFormatting(record.formatting_costyl);
-                            object med = dataPreparator.PreparateMedia(record.media_costyl);
-                            list.Add(form);
-                            list.Add(med);
-                            WriteCommand.Transaction = transaction;
-                            WriteCommand.Parameters["_formatting"].Value = form;
-                            WriteCommand.Parameters["_media"].Value = med;
-                            WriteCommand.Parameters["_id"].Value = record.Id;
-                            WriteCommand.ExecuteNonQuery();
+                            while (reader.Read())
+                            {
+                                Record record = new Record()
+                                {
+                                    Id = reader.GetInt64(0),
+                                    media_costyl = !reader.IsDBNull(1) ? reader.GetString(1) : null,
+                                    formatting_costyl = !reader.IsDBNull(2) ? reader.GetString(2) : null,
+                                };
+                                records.Add(record);
+                            }
                         }
-                        transaction.Commit();
+
+                        if (records.Count == 0) return;
+                        List<object> list = new List<object>();
+                        using NpgsqlTransaction transaction = connection.BeginTransaction();
+                        try
+                        {
+                            foreach (Record record in records)
+                            {
+                                object form = dataPreparator.PreparateFormatting(record.formatting_costyl);
+                                object med = dataPreparator.PreparateMedia(record.media_costyl);
+                                list.Add(form);
+                                list.Add(med);
+                                WriteCommand.Transaction = transaction;
+                                WriteCommand.Parameters["_formatting"].Value = form;
+                                WriteCommand.Parameters["_media"].Value = med;
+                                WriteCommand.Parameters["_id"].Value = record.Id;
+                                WriteCommand.ExecuteNonQuery();
+                            }
+                            transaction.Commit();
+                        }
+                        catch (Exception ex)
+                        {
+                            transaction.Rollback();
+                        }
                     }
                     catch (Exception ex)
                     {
-                        transaction.Rollback();
+
                     }
                 }
-                catch (Exception ex)
-                {
-    
-                }
             }
+
+
         }
 
         public Task StartAsync(CancellationToken cancellationToken)

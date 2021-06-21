@@ -10,30 +10,21 @@ using System.Threading.Tasks;
 
 namespace Common.Services.DataBase
 {
-    public class ConnectionPoolManager
+    public class ConnectionsFactory
     {
         private readonly System.Timers.Timer timer = new System.Timers.Timer();
         private readonly IDataBaseSettings settings;
         public readonly ConcurrentBag<ConnectionWrapper> Pool = new ConcurrentBag<ConnectionWrapper>();
         internal readonly ConcurrentDictionary<Guid, ConnectionWrapper> PoolRepo = new ConcurrentDictionary<Guid, ConnectionWrapper>();
         private readonly object locker = new object();
-        public ConnectionPoolManager(IDataBaseSettings settings)
+        public ConnectionsFactory(IDataBaseSettings settings)
         {
             this.settings = settings;
             timer.Interval = settings.PoolingTimeout;
+            TimerAction(null, null);
             timer.Elapsed += TimerAction;
             timer.AutoReset = true;
             timer.Start();
-
-            //ConnectionWrapper connection = new ConnectionWrapper(settings.ConnectionString, this);
-            //connection.Connection.Open();
-            //PoolRepo.TryAdd(connection.Id, connection);
-            //Pool.Add(connection);
-
-            //ConnectionWrapper connection2 = new ConnectionWrapper(settings.ConnectionString, this);
-            //connection2.Connection.Open();
-            //PoolRepo.TryAdd(connection2.Id, connection2);
-            //Pool.Add(connection2);
         }
 
         private void TimerAction(object sender, System.Timers.ElapsedEventArgs args)
@@ -48,11 +39,28 @@ namespace Common.Services.DataBase
                     connection.Connection.Dispose();
                 }
                 catch { }
+            }
 
+            while (Pool.Count < settings.ConnectionPoolHotReserve && PoolRepo.Count <settings.ConnectionPoolMaxSize)
+            {
+                try
+                {
+                    Task<ConnectionWrapper> t = CreateConnectionAsync(CancellationToken.None);
+                    Pool.Add(t.Result);
+                    PoolRepo.TryAdd(t.Result.Id, t.Result);
+                }
+                catch { }
             }
         }
 
-        public async Task<ConnectionWrapper> GetConnection(CancellationToken token)
+        private async Task<ConnectionWrapper> CreateConnectionAsync(CancellationToken token)
+        {
+            ConnectionWrapper connection = new ConnectionWrapper(settings.ConnectionString, this);
+            await connection.Connection.OpenAsync(token);
+            PoolRepo.TryAdd(connection.Id, connection);
+            return connection;
+        }
+        public async Task<ConnectionWrapper> GetConnectionAsync(CancellationToken token)
         {
             ConnectionWrapper connection = null;
             while (!token.IsCancellationRequested)
@@ -70,22 +78,65 @@ namespace Common.Services.DataBase
                         PoolRepo.TryRemove(connection.Id, out var _);
                     }
                 }
-                else if (PoolRepo.Count < this.settings.ConnectionPoolMaxSize && Monitor.TryEnter(locker))
+                else if (PoolRepo.Count < this.settings.ConnectionPoolMaxSize)
                 {
-                    try
+                    if (Monitor.TryEnter(locker))
                     {
-                        connection = new ConnectionWrapper(settings.ConnectionString, this);
-                        await connection.Connection.OpenAsync();
-                        PoolRepo.TryAdd(connection.Id, connection);
+                        try
+                        {
+                            return await CreateConnectionAsync(token);
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                        finally
+                        {
+                            Monitor.Exit(locker);
+                        }
+                    }
+                }
+                else await Task.Delay(100, token);
+            }
+            throw new OperationCanceledException();
+        }
+        public ConnectionWrapper GetConnection(CancellationToken token)
+        {
+            ConnectionWrapper connection = null;
+            while (!token.IsCancellationRequested)
+            {
+                if (Pool.TryTake(out connection))
+                {
+                    if (connection.Connection.FullState == System.Data.ConnectionState.Open)
+                        return connection;
+                    else if (connection.Connection.FullState == System.Data.ConnectionState.Connecting)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        PoolRepo.TryRemove(connection.Id, out var _);
+                    }
+                }
+                else if (PoolRepo.Count < this.settings.ConnectionPoolMaxSize)
+                {
+                    if (Monitor.TryEnter(locker))
+                    {
+                        try
+                        {
+                            connection = new ConnectionWrapper(settings.ConnectionString, this);
+                            connection.Connection.Open();
+                            PoolRepo.TryAdd(connection.Id, connection);
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                        Monitor.Exit(locker);
                         return connection;
                     }
-                    catch (Exception ex)
-                    {
-
-                    }
-                    Monitor.Exit(locker);
                 }
-                await Task.Delay(100, token);
+                Task.Delay(100, token).Wait();
             }
             return connection;
         }

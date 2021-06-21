@@ -19,8 +19,8 @@ namespace Common.Services.DataBase.DataProcessing
         internal Logger logger = NLog.LogManager.GetCurrentClassLogger();
         private readonly ICommonProcessor<T> commonProcessor;
         private readonly IReaderCore<T> readerCore;
-        private readonly ConnectionPoolManager connectionPoolManager;
-        public Reader(ICommonProcessor<T> commonProcessor, IReaderCore<T> readerCore, ConnectionPoolManager connectionPoolManager)
+        private readonly ConnectionsFactory connectionPoolManager;
+        public Reader(ICommonProcessor<T> commonProcessor, IReaderCore<T> readerCore, ConnectionsFactory connectionPoolManager)
         {
             this.commonProcessor = commonProcessor;
             this.readerCore = readerCore;
@@ -31,7 +31,7 @@ namespace Common.Services.DataBase.DataProcessing
         {
             try
             {
-                using ConnectionWrapper connectionWrapper = await connectionPoolManager.GetConnection(ct);
+                using ConnectionWrapper connectionWrapper = connectionPoolManager.GetConnection(ct);
                 using NpgsqlCommand DataGetterCommand = readerCore.CreateCommand(connectionWrapper.Connection);
  
                 using (NpgsqlDataReader reader = await DataGetterCommand.ExecuteReaderAsync(ct))

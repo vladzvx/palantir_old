@@ -13,7 +13,6 @@ namespace Common.Services
 {
     public class OrdersManager:IHostedService
     {
-        
         private System.Timers.Timer timer = new System.Timers.Timer(Options.OrderGenerationTimerPeriod);
         private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
         private readonly State state;

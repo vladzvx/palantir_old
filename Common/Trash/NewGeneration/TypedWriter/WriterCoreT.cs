@@ -14,18 +14,21 @@ namespace Common.Services
 {
     public class WriterCore<T> : IWriterCore<T>
     {
-        private DbCommand Command;
-
-        public Task AdditionaAcion(object data)
+        public Task ExecuteAdditionaAcion(DbCommand command, object data, CancellationToken token)
+        {
+            throw new NotImplementedException();
+        }
+        public Task ExecuteAdditionaAcion(object data)
         {
             throw new NotImplementedException();
         }
 
         public DbCommand CreateMainCommand(DbConnection connection)
         {
+            DbCommand Command = null;
             if (typeof(T) == typeof(Message))
             {
-
+                
                 Command.CommandType = System.Data.CommandType.StoredProcedure;
                 Command.CommandText = "add_message";
                 Command.Parameters.Add(new NpgsqlParameter("_message_timestamp", NpgsqlTypes.NpgsqlDbType.Timestamp));
@@ -81,7 +84,7 @@ namespace Common.Services
             return Command;
         }
 
-        public async Task Write(T data, CancellationToken token)
+        public async Task ExecuteWriting(DbCommand Command, T data, CancellationToken token)
         {
             if (Command == null) throw new MissingFieldException("Command was not created! Please use CreateCommand method");
             if (data is Message message && Command != null)
@@ -151,6 +154,8 @@ namespace Common.Services
                 return;
             }
         }
+
+
     }
 
 }

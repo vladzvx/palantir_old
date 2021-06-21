@@ -29,7 +29,7 @@ namespace DataFair
             services.AddSingleton<IDataBaseSettings, DataBaseSettings>();
             services.AddSingleton<ICommonWriter,CommonWriter>();
             services.AddSingleton<LoadManager>();
-            services.AddSingleton<ConnectionPoolManager>();
+            services.AddSingleton<ConnectionsFactory>();
 
             services.AddSingleton<ICommonWriter<Entity>, CommonWriter<Entity>>();
             services.AddSingleton<ICommonWriter<Message>, CommonWriter<Message>>();
@@ -47,9 +47,9 @@ namespace DataFair
             services.AddScoped<SearchProvider>();
 
 
-            services.AddHostedService<OrdersManager>();
+            //services.AddHostedService<OrdersManager>();
             services.AddHostedService<CollectorsManager>();
-            services.AddHostedService<MediaAndFormattingProcessor>();
+            //services.AddHostedService<MediaAndFormattingProcessor>();
             services.AddHostedService<TextVectorizer>();
 
             services.AddGrpc();

@@ -10,9 +10,9 @@ namespace Common.Services.DataBase
     public class ConnectionWrapper : IDisposable
     {
         public readonly NpgsqlConnection Connection;
-        public readonly ConnectionPoolManager connectionPoolManager;
+        public readonly ConnectionsFactory connectionPoolManager;
         public readonly Guid Id;
-        internal ConnectionWrapper(string ConnectionString, ConnectionPoolManager connectionPoolManager)
+        internal ConnectionWrapper(string ConnectionString, ConnectionsFactory connectionPoolManager)
         {
             this.connectionPoolManager = connectionPoolManager;
             this.Connection = new NpgsqlConnection(ConnectionString);

@@ -63,11 +63,10 @@ namespace DataFair.Controllers
         }
         [HttpPost("GetUpdates")]
         [EnableCors()]
-        public string PostRequest4()
+        public async Task<string> PostRequest4(CancellationToken token)
         {
-            ordersGenerator.CreateUpdateOrders().Wait();
+            await ordersGenerator.CreateUpdateOrders(token);
             return "ok";
-
         }
     }
 }

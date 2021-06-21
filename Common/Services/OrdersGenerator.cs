@@ -1,4 +1,5 @@
 ﻿using Common;
+using Common.Services.DataBase;
 using Npgsql;
 using System;
 using System.Collections.Generic;
@@ -13,9 +14,11 @@ namespace Common.Services
         private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
         private readonly State state;
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
-        public OrdersGenerator(State state)
+        private readonly ConnectionsFactory connectionsFactory;
+        public OrdersGenerator(State state, ConnectionsFactory connectionsFactory)
         {
             this.state = state;
+            this.connectionsFactory = connectionsFactory;
         }
         private static NpgsqlCommand CreateAndConfigureCommand(NpgsqlConnection connection, DateTime BoundDateTime, string storedProcedureName)
         {
@@ -71,6 +74,52 @@ namespace Common.Services
             }
 
         }
+
+        public async Task CreateUpdateOrders(CancellationToken token)
+        {
+            try
+            {
+                using (ConnectionWrapper connection = await connectionsFactory.GetConnectionAsync(token))
+                {
+                    using NpgsqlCommand command = CreateAndConfigureCommand(connection.Connection, DateTime.Now + Options.OrderGenerationTimeSpan, "get_unupdated_chats");
+                    using NpgsqlDataReader reader = await command.ExecuteReaderAsync(cts.Token);
+                    while (!token.IsCancellationRequested && await reader.ReadAsync(cts.Token))
+                    {
+                        try
+                        {
+                            long ChatId = reader.GetInt64(0);
+                            long PairId = reader.IsDBNull(1) ? 0 : reader.GetInt64(1);
+                            long Offset = reader.GetInt64(2);
+                            DateTime LastUpdate = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3);
+                            bool PairChecked = reader.IsDBNull(4) ? true : reader.GetBoolean(4);
+                            string Username = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
+                            string PairUsername = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
+
+                            if (!state.Orders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.History; }))
+                            {
+                                Order order = new Order()
+                                {
+                                    Id = ChatId,
+                                    Link = Username,
+                                    Offset = Offset,
+                                    PairId = PairId,
+                                    PairLink = PairUsername,
+                                    Type = OrderType.History
+                                };
+                                state.Orders.Enqueue(order);
+                            }
+                        }
+                        catch (InvalidCastException ex) { logger.Warn(ex); }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Error while UpdateOrdersCreation");
+            }
+
+        }
+
         public async Task CreateHistoryLoadingOrders(int limit = -1)
         {
             try

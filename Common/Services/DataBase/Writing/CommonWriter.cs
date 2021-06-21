@@ -40,7 +40,7 @@ namespace Common.Services
 
         private void TryStartWriting(object sender, ElapsedEventArgs args)
         {
-            loadManager.AddValue(DataQueue.Count);
+            //loadManager.AddValue(DataQueue.Count);
             if (Monitor.TryEnter(sync))
             {
                 if (DataQueue.Count > 0 && (WritingTask == null || WritingTask.IsCompleted)) 

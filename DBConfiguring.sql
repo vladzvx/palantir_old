@@ -561,7 +561,7 @@ $$
     declare
         pattern text;
     begin
-        pattern = '[^0-9абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ ,abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\.:/?\^\\=-_%\$#@!\n"]*';
+        pattern = '[^0-9абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ ,abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\.:/?\^\\=\-_%\$#@!\n"]*';
         return regexp_replace(text, pattern, '','g');
     end;
 $$ LANGUAGE plpgsql;

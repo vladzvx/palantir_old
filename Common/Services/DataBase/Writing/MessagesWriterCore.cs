@@ -14,36 +14,38 @@ namespace Common.Services
 {
     public class MessagesWriterCore : IWriterCore<Message>
     {
-        private DbCommand Command;
-
-        public Task AdditionaAcion(object data)
+        public Task ExecuteAdditionaAcion(DbCommand command, object data, CancellationToken token)
         {
             throw new NotImplementedException();
         }
-
+        public Task ExecuteAdditionaAcion(object data)
+        {
+            throw new NotImplementedException();
+        }
         public DbCommand CreateMainCommand(DbConnection connection)
         {
-            Command = connection.CreateCommand();
-            Command.CommandType = System.Data.CommandType.StoredProcedure;
-            Command.CommandText = "add_message";
-            Command.Parameters.Add(new NpgsqlParameter("_message_timestamp", NpgsqlTypes.NpgsqlDbType.Timestamp));
-            Command.Parameters.Add(new NpgsqlParameter("_message_id", NpgsqlTypes.NpgsqlDbType.Bigint));
-            Command.Parameters.Add(new NpgsqlParameter("_chat_id", NpgsqlTypes.NpgsqlDbType.Bigint));
-            Command.Parameters.Add(new NpgsqlParameter("_user_id", NpgsqlTypes.NpgsqlDbType.Bigint));
-            Command.Parameters.Add(new NpgsqlParameter("_reply_to", NpgsqlTypes.NpgsqlDbType.Bigint));
-            Command.Parameters.Add(new NpgsqlParameter("_thread_start", NpgsqlTypes.NpgsqlDbType.Bigint));
-            Command.Parameters.Add(new NpgsqlParameter("_media_group_id", NpgsqlTypes.NpgsqlDbType.Bigint));
-            Command.Parameters.Add(new NpgsqlParameter("_forward_from_id", NpgsqlTypes.NpgsqlDbType.Bigint));
-            Command.Parameters.Add(new NpgsqlParameter("_forward_from_message_id", NpgsqlTypes.NpgsqlDbType.Bigint));
-            Command.Parameters.Add(new NpgsqlParameter("_text", NpgsqlTypes.NpgsqlDbType.Text));
-            Command.Parameters.Add(new NpgsqlParameter("_media", NpgsqlTypes.NpgsqlDbType.Jsonb));
-            Command.Parameters.Add(new NpgsqlParameter("_formatting", NpgsqlTypes.NpgsqlDbType.Jsonb));
-            return Command;
+            DbCommand command = connection.CreateCommand();
+            command.CommandType = System.Data.CommandType.StoredProcedure;
+            command.CommandText = "add_message";
+            command.Parameters.Add(new NpgsqlParameter("_message_timestamp", NpgsqlTypes.NpgsqlDbType.Timestamp));
+            command.Parameters.Add(new NpgsqlParameter("_message_id", NpgsqlTypes.NpgsqlDbType.Bigint));
+            command.Parameters.Add(new NpgsqlParameter("_chat_id", NpgsqlTypes.NpgsqlDbType.Bigint));
+            command.Parameters.Add(new NpgsqlParameter("_user_id", NpgsqlTypes.NpgsqlDbType.Bigint));
+            command.Parameters.Add(new NpgsqlParameter("_reply_to", NpgsqlTypes.NpgsqlDbType.Bigint));
+            command.Parameters.Add(new NpgsqlParameter("_thread_start", NpgsqlTypes.NpgsqlDbType.Bigint));
+            command.Parameters.Add(new NpgsqlParameter("_media_group_id", NpgsqlTypes.NpgsqlDbType.Bigint));
+            command.Parameters.Add(new NpgsqlParameter("_forward_from_id", NpgsqlTypes.NpgsqlDbType.Bigint));
+            command.Parameters.Add(new NpgsqlParameter("_forward_from_message_id", NpgsqlTypes.NpgsqlDbType.Bigint));
+            command.Parameters.Add(new NpgsqlParameter("_text", NpgsqlTypes.NpgsqlDbType.Text));
+            command.Parameters.Add(new NpgsqlParameter("_media", NpgsqlTypes.NpgsqlDbType.Jsonb));
+            command.Parameters.Add(new NpgsqlParameter("_formatting", NpgsqlTypes.NpgsqlDbType.Jsonb));
+            return command;
         }
 
-        public async Task Write(Message message, CancellationToken token)
+        public async Task ExecuteWriting(DbCommand command, Message message, CancellationToken token)
         {
-                DbCommand command = Command;
+            try
+            {
                 //command.Transaction = transaction;
                 command.Parameters["_message_timestamp"].Value = message.Timestamp.ToDateTime();
                 command.Parameters["_message_id"].Value = message.Id;
@@ -61,6 +63,12 @@ namespace Common.Services
                     "{\"formats\":" + Newtonsoft.Json.JsonConvert.SerializeObject(message.Formating) + "}";
                 await command.ExecuteNonQueryAsync(token);
                 return;
+            }
+            catch(Exception ex)
+            {
+                int q = 0;
+            }
+
         }
     }
 }

@@ -14,9 +14,7 @@ namespace Common.Services.Interfaces
         {
             return null;
         }
-        public Task AdditionaAcion(object data);
-        public Task Write(T data, CancellationToken token);
-
-
+        public Task ExecuteAdditionaAcion(DbCommand command, object data, CancellationToken token);
+        public Task ExecuteWriting(DbCommand command, T data, CancellationToken token);
     }
 }
