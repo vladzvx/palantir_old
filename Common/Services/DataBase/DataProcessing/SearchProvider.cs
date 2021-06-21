@@ -20,7 +20,7 @@ namespace Common.Services.DataBase
         {
             try
             {
-                using (ConnectionWrapper connectionWrapper = connectionPoolManager.GetConnection(token))
+                using (ConnectionWrapper connectionWrapper = await connectionPoolManager.GetConnectionAsync(token))
                 {
                     NpgsqlCommand SimpleSearchCommand = connectionWrapper.Connection.CreateCommand();
                     SimpleSearchCommand.CommandType = System.Data.CommandType.StoredProcedure;

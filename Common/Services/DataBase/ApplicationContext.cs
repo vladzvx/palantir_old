@@ -26,8 +26,8 @@ namespace Common
         {
             try
             {
-               var databaseCreator = (Database.GetService<IDatabaseCreator>() as RelationalDatabaseCreator);
-                databaseCreator.CreateTables();
+               //var databaseCreator = (Database.GetService<IDatabaseCreator>() as RelationalDatabaseCreator);
+               // databaseCreator.CreateTables();
             }
             catch (Exception ex)
             {

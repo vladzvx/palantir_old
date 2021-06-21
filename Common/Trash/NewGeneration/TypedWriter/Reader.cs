@@ -31,7 +31,7 @@ namespace Common.Services.DataBase.DataProcessing
         {
             try
             {
-                using ConnectionWrapper connectionWrapper = connectionPoolManager.GetConnection(ct);
+                using ConnectionWrapper connectionWrapper = await connectionPoolManager.GetConnectionAsync(ct);
                 using NpgsqlCommand DataGetterCommand = readerCore.CreateCommand(connectionWrapper.Connection);
  
                 using (NpgsqlDataReader reader = await DataGetterCommand.ExecuteReaderAsync(ct))

@@ -47,7 +47,7 @@ namespace Common.Services.DataBase.DataProcessing
                 int count = settings.StartVectorizerCount;
                 while (!token.IsCancellationRequested)
                 {
-                    using (ConnectionWrapper connection = connectionPoolManager.GetConnection(token))
+                    using (ConnectionWrapper connection =await connectionPoolManager.GetConnectionAsync(token))
                     {
                         try
                         {

@@ -12,47 +12,24 @@ using Timer = System.Timers.Timer;
 
 namespace Common.Services
 {
-    public class CommonWriter<T>: ICommonWriter<T> where T: class
+    public class CommonWriter<T>: ActionPeriodicExecutor, ICommonWriter<T> where T: class
     {
         internal Logger logger = NLog.LogManager.GetCurrentClassLogger();
         private readonly ConcurrentQueue<T> DataQueue = new ConcurrentQueue<T>();
         private readonly IWriterCore<T> writerCore;
         private readonly ConnectionsFactory manager;
         private readonly IDataBaseSettings settings;
-        private readonly CancellationTokenSource globaCts;
-        private readonly System.Timers.Timer Timer;
-        private readonly object locker = new object();
-        private Task WritingTask;
-        public CommonWriter(IWriterCore<T> writerCore, IDataBaseSettings settings, ConnectionsFactory manager, CancellationTokenSource globaCts)
+
+        public CommonWriter(IWriterCore<T> writerCore, IDataBaseSettings settings, ConnectionsFactory manager, CancellationTokenSource globaCts):
+            base(settings.StartWritingInterval, globaCts)
         {
             this.writerCore = writerCore;
             this.manager = manager;
             this.settings = settings;
-            this.globaCts = globaCts;
-            this.WritingTask = Task.Factory.StartNew(WritingAction, TaskCreationOptions.LongRunning);
-
-            Timer = new Timer();
-            Timer.Interval = settings.StartWritingInterval;
-            Timer.Elapsed += ManageWriting;
-            Timer.AutoReset = true;
-            Timer.Start();
+            this.SetAction(WritingActionWrapper);
+            Start();
         }
-        private void ManageWriting(object sender, ElapsedEventArgs args)
-        {
-            if (Monitor.TryEnter(locker))
-            {
-                if (DataQueue.Count > settings.CriticalQueueSize)
-                {
-                    Task.Factory.StartNew(WritingAction, globaCts.Token, TaskCreationOptions.LongRunning);
-                }
 
-                if (DataQueue.Count > 0 && (WritingTask == null || WritingTask.IsCompleted))
-                {
-                    WritingTask = Task.Factory.StartNew(WritingAction, globaCts.Token, TaskCreationOptions.LongRunning);
-                }
-                Monitor.Exit(locker);
-            }
-        }
         public void PutData(T data)
         {
             DataQueue.Enqueue(data);
@@ -61,10 +38,14 @@ namespace Common.Services
         {
             return DataQueue.Count;
         }
-        private async Task WritingAction(object CancellationToken)
+
+        private void WritingActionWrapper(object CancellationToken)
         {
             if (CancellationToken is not CancellationToken forceStopToken) return;
-
+            WritingAction(forceStopToken).Wait();
+        }
+        private async Task WritingAction(CancellationToken forceStopToken)
+        {
             using (ConnectionWrapper connectionWrapper = await manager.GetConnectionAsync(forceStopToken))
             {
                 DbCommand command = writerCore.CreateMainCommand(connectionWrapper.Connection);
@@ -92,16 +73,15 @@ namespace Common.Services
                     await Task.Delay(100);
                 }
             }
-            
         }
         public async Task ExecuteAdditionalAction(object data)
         {
             try
             {
-                using (ConnectionWrapper connectionWrapper = await manager.GetConnectionAsync(globaCts.Token))
+                using (ConnectionWrapper connectionWrapper = await manager.GetConnectionAsync(cancellationTokenSource.Token))
                 {
                     DbCommand command = writerCore.CreateAdditionalCommand(connectionWrapper.Connection);
-                    await writerCore.ExecuteAdditionaAcion(command, data, globaCts.Token);
+                    await writerCore.ExecuteAdditionaAcion(command, data, cancellationTokenSource.Token);
                 }
             }
             catch (Exception ex)

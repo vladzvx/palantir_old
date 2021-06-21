@@ -33,7 +33,7 @@ namespace Common.Services.DataBase.DataProcessing
             if (!(cancellationToken is CancellationToken)) return;
             CancellationToken ct = (CancellationToken)cancellationToken;
 
-            using (ConnectionWrapper connectionWrapper = connectionPoolManager.GetConnection(ct))
+            using (ConnectionWrapper connectionWrapper = await connectionPoolManager.GetConnectionAsync(ct))
             {
                 connection = connectionWrapper.Connection;
                 WriteCommand = connection.CreateCommand();

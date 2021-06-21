@@ -13,7 +13,7 @@ namespace Common.Services
     {
         private readonly Timer timer;
         private Task workingTask;
-        private readonly CancellationTokenSource cancellationTokenSource;
+        protected readonly CancellationTokenSource cancellationTokenSource;
         private readonly object locker = new object();
 
         internal Action<object?> ExecutingAction { get; private set; }

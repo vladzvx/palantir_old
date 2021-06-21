@@ -1,6 +1,7 @@
 ﻿using Common;
 using Common.Services;
 using Common.Services.DataBase.DataProcessing;
+using DataFair.Models;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -40,6 +41,15 @@ namespace DataFair.Controllers
         public string PostEmptyOrder()
         {
             state.Orders.Enqueue(new Order() { Type = OrderType.Empty });
+            return "ok";
+
+        }
+
+        [HttpPost("PostOrder")]
+        [EnableCors()]
+        public string PostEmptyOrder(OrderMoq order)
+        {
+            state.MaxPriorityOrders.Enqueue(order);
             return "ok";
 
         }
