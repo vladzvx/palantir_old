@@ -36,7 +36,8 @@ namespace Common.Services
             this.manager = manager;
             this.settings = settings;
             this.globaCts = globaCts;
-            this.WritingTask = StartWriting(globaCts.Token, localCts.Token);
+            this.WritingTask = Task.Factory.StartNew(startWrapper,TaskCreationOptions.LongRunning);
+
             Timer = new Timer();
             Timer.Interval = settings.StartWritingInterval;
             Timer.Elapsed += TryStartWriting;
@@ -49,7 +50,7 @@ namespace Common.Services
             if (Monitor.TryEnter(locker))
             {
                 if (DataQueue.Count > settings.CriticalQueueSize)
-                    StartWriting(globaCts.Token, localCts.Token);
+                    Task.Factory.StartNew(startWrapper, TaskCreationOptions.LongRunning);
                 if (DataQueue.Count > 0 && (WritingTask == null || WritingTask.IsCompleted))
                 {
                     WritingTask = StartWriting(globaCts.Token, localCts.Token);
@@ -67,6 +68,10 @@ namespace Common.Services
             return DataQueue.Count;
         }
 
+        private void startWrapper()
+        {
+            StartWriting(globaCts.Token, localCts.Token).Wait();
+        }
         private async Task StartWriting(CancellationToken forceStopToken, CancellationToken? softStopToken=null)
         {
             using ConnectionWrapper connectionWrapper = await manager.GetConnection(forceStopToken);

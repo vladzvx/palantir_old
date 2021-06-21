@@ -496,7 +496,10 @@ create extension rusmorph;
 create extension hunspell_ru_ru_aot;
 
 
-
+create table temp(
+    id bigint,
+    data1 bigint
+);
 
 
 CREATE TEXT SEARCH CONFIGURATION public.my_default ( COPY = pg_catalog.russian );
@@ -518,10 +521,11 @@ $$
     declare
         min_id bigint;
     begin
-        min_id = (select min(message_db_id) from messages where not parsed);
+        min_id = (select min(data1) from temp where id=0);
         update messages set vectorised_text_combo=parse_combo(replace(text)),
                             vectorised_text_my_default=parse_default(replace(text)),
                             parsed=true where not parsed and message_db_id>=min_id and message_db_id<min_id+count;
+        update temp set data1=min_id+count where id=0;
     end;
 $$ LANGUAGE plpgsql;
 
@@ -530,11 +534,13 @@ $$
     declare
         min_id bigint;
     begin
-        min_id = (select min(message_db_id) from messages where not parsed);
+        min_id = (select min(data1) from temp where id=0);
         update messages set vectorised_text_combo='', vectorised_text_my_default=parse_default(replace(text)),
                             parsed=true where not parsed and message_db_id=min_id;
+        update temp set data1=min_id+1 where id=0;
     end;
 $$ LANGUAGE plpgsql;
+
 
 CREATE OR REPLACE FUNCTION parse_combo(text text) RETURNS tsvector as
 $$

@@ -18,7 +18,7 @@ namespace Common.Services
         public int MiddlePriorityOrders;
         public int Messages;
         public long FreeDisk;
-        public StateReport(State state, ICommonWriter messagesWriter, ICommonWriter<Message> commonWriter, ICommonWriter<Entity> commonWriter2)
+        public StateReport(State state, ICommonWriter<Message> commonWriter, ICommonWriter<Entity> commonWriter2)
         {
             foreach (string key in state.Collectors.Keys.ToArray())
             {
