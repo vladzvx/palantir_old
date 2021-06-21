@@ -15,18 +15,16 @@ namespace Common.Services.DataBase.DataProcessing
 
     public class TextVectorizer : ActionPeriodicExecutor, IHostedService
     {
-
         private readonly ConnectionsFactory connectionPoolManager;
         private readonly CancellationTokenSource globalCts;
         private readonly IDataBaseSettings settings;
-        private Task mainTask;
         public TextVectorizer(ConnectionsFactory connectionPoolManager, CancellationTokenSource globalCts, IDataBaseSettings settings):
             base(settings.StartWritingInterval, globalCts)
         {
             this.connectionPoolManager = connectionPoolManager;
             this.globalCts = globalCts;
             this.settings = settings;
-            SetAction(action);
+            SetAction(ActionWrapper);
         }
 
         private static async Task act(NpgsqlCommand mainCommand, CancellationToken token)
@@ -37,10 +35,13 @@ namespace Common.Services.DataBase.DataProcessing
             }
         }
 
-        private async void action(object CancellationToken)
+        private void ActionWrapper(object CancellationToken)
         {
             if (CancellationToken is not CancellationToken token) return;
-
+            action(token).Wait();
+        }
+        private async Task action(CancellationToken token)
+        {
             while (!token.IsCancellationRequested)
             {
                 int count = settings.StartVectorizerCount;
