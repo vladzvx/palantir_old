@@ -273,7 +273,7 @@ namespace Common.Services
                 {
                     using NpgsqlCommand command = connection.Connection.CreateCommand();
                     command.CommandType = System.Data.CommandType.Text;
-                    command.CommandText = "select id,username,last_message_id,finders from chats where is_channel and not pair_id_checked and (has_actual_order is null or not has_actual_order) and not banned limit 1;";
+                    command.CommandText = "select id,username,last_message_id,finders from chats where is_channel and not pair_id_checked and (has_actual_order is null or not has_actual_order) and not banned;";
                     using NpgsqlDataReader reader = await command.ExecuteReaderAsync(token);
                     while (!token.IsCancellationRequested && await reader.ReadAsync(token))
                     {
