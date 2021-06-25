@@ -2,6 +2,7 @@
 using Common.Services.DataBase;
 using Npgsql;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -120,6 +121,203 @@ namespace Common.Services
 
         }
 
+        public async Task CreatePairOrders(CancellationToken token)
+        {
+            try
+            {
+                using (ConnectionWrapper connection = await connectionsFactory.GetConnectionAsync(token))
+                {
+                    using NpgsqlCommand command = connection.Connection.CreateCommand();
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    command.CommandText = "get_chats";
+                    using NpgsqlDataReader reader = await command.ExecuteReaderAsync(cts.Token);
+                    while (!token.IsCancellationRequested && await reader.ReadAsync(cts.Token))
+                    {
+                        try
+                        {
+                            long ChatId = reader.GetInt64(0);
+                            long PairId = reader.IsDBNull(1) ? 0 : reader.GetInt64(1);
+                            long Offset = reader.GetInt64(2);
+                            long PairOffset = reader.IsDBNull(3) ? 1 : reader.GetInt64(3);
+                            DateTime LastUpdate = reader.IsDBNull(4) ? DateTime.MinValue : reader.GetDateTime(4);
+                            bool PairChecked = reader.IsDBNull(5) ? true : reader.GetBoolean(5);
+                            string Username = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
+                            if (string.IsNullOrEmpty(Username)) continue;
+                            string PairUsername = reader.IsDBNull(7) ? string.Empty : reader.GetString(7);
+
+                            if (!state.Orders.Any((order) => { return order.Id == ChatId 
+                                || order.PairId == PairId 
+                                || order.PairId == ChatId
+                                || order.Id == PairId; }))
+                            {
+                                Order order = new Order()
+                                {
+                                    Id = ChatId,
+                                    Link = Username,
+                                    Offset = Offset,
+                                    PairOffset = PairOffset,
+                                    PairId = PairId,
+                                    PairLink = PairUsername,
+                                    Type = OrderType.Pair
+                                };
+                                state.Orders.Enqueue(order);
+                            }
+                        }
+                        catch (InvalidCastException ex) { logger.Warn(ex); }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Error while UpdateOrdersCreation");
+            }
+
+        }
+        public async Task<ConcurrentQueue<Order>> CreatePairUpdatesOrders(CancellationToken token)
+        {
+            try
+            {
+                ConcurrentQueue<Order> PairQueue = new ConcurrentQueue<Order>();
+                using (ConnectionWrapper connection = await connectionsFactory.GetConnectionAsync(token))
+                {
+                    using NpgsqlCommand command = connection.Connection.CreateCommand();
+                    command.CommandType = System.Data.CommandType.Text;
+                    command.CommandText = "select c1.id,c1.pair_id,c1.username,c2.username,c1.last_message_id,c2.last_message_id,c2.finders from chats c1 inner join chats c2 on c1.id=c2.pair_id where (c1.has_actual_order is null or not c1.has_actual_order) and not c1.banned and c2.is_group;";
+                    using NpgsqlDataReader reader = await command.ExecuteReaderAsync(token);
+                    while (!token.IsCancellationRequested && await reader.ReadAsync(token))
+                    {
+                        long ChatId = reader.GetInt64(0);
+                        long PairId = reader.IsDBNull(1) ? 0 : reader.GetInt64(1);
+                        string Username = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
+                        string PairUsername = reader.IsDBNull(3) ? string.Empty : reader.GetString(3);
+
+                        long Offset = reader.IsDBNull(4) ? 1 : reader.GetInt64(4);
+                        long PairOffset = reader.IsDBNull(5) ? 1 : reader.GetInt64(5);
+                        string[] Finders = reader.IsDBNull(6) ? new string[0] : (string[])reader.GetValue(6);
+                            
+                        if (string.IsNullOrEmpty(Username)) continue;
+                        Order order = new Order()
+                        {
+                            Id = ChatId,
+                            Link = Username,
+                            Offset = Offset,
+                            PairOffset = PairOffset,
+                            PairId = PairId,
+                            PairLink = PairUsername,
+                            Type = OrderType.Pair,
+                                
+                        };
+                        foreach (string finder in Finders)
+                        {
+                            order.Finders.Add(finder);
+                        }
+                        state.Orders.Enqueue(order);
+                    }
+                }
+                return PairQueue;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Error while UpdateOrdersCreation");
+                throw ex;
+            }
+        }
+        public async Task<ConcurrentQueue<Order>> CreateSingleUpdatesOrders(CancellationToken token)
+        {
+            try
+            {
+                ConcurrentQueue<Order> SingleUpdatesQueue = new ConcurrentQueue<Order>();
+                using (ConnectionWrapper connection = await connectionsFactory.GetConnectionAsync(token))
+                {
+                    using NpgsqlCommand command = connection.Connection.CreateCommand();
+                    command.CommandType = System.Data.CommandType.Text;
+                    command.CommandText = "select id,username,last_message_id,finders from chats where pair_id is null and is_channel and pair_id_checked and (has_actual_order is null or not has_actual_order) and not banned;";
+                    using NpgsqlDataReader reader = await command.ExecuteReaderAsync(token);
+                    while (!token.IsCancellationRequested && await reader.ReadAsync(token))
+                    {
+                        long ChatId = reader.GetInt64(0);
+                        string Username = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
+                        long Offset = reader.IsDBNull(2) ? 1 : reader.GetInt64(2);
+                        string[] Finders = reader.IsDBNull(6) ? new string[0] : (string[])reader.GetValue(6);
+
+                        if (string.IsNullOrEmpty(Username)) continue;
+                        Order order = new Order()
+                        {
+                            Id = ChatId,
+                            Link = Username,
+                            Offset = Offset,
+                            Type = OrderType.History,
+                        };
+                        foreach (string finder in Finders)
+                        {
+                            order.Finders.Add(finder);
+                        }
+                        state.Orders.Enqueue(order);
+                        
+                    }
+                }
+                return SingleUpdatesQueue;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Error while UpdateOrdersCreation");
+                throw ex;
+            }
+        }
+        public async Task<ConcurrentQueue<Order>> CreatePairForRequestsOrders(CancellationToken token)
+        {
+            try
+            {
+                ConcurrentQueue<Order> PairForRequestsQueue = new ConcurrentQueue<Order>();
+                using (ConnectionWrapper connection = await connectionsFactory.GetConnectionAsync(token))
+                {
+                    using NpgsqlCommand command = connection.Connection.CreateCommand();
+                    command.CommandType = System.Data.CommandType.Text;
+                    command.CommandText = "select id,username,last_message_id,finders from chats where is_channel and not pair_id_checked and (has_actual_order is null or not has_actual_order) and not banned limit 1;";
+                    using NpgsqlDataReader reader = await command.ExecuteReaderAsync(token);
+                    while (!token.IsCancellationRequested && await reader.ReadAsync(token))
+                    {
+                        long ChatId = reader.GetInt64(0);
+                        string Username = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
+                        long Offset = reader.IsDBNull(2) ? 1 : reader.GetInt64(2);
+
+                        if (string.IsNullOrEmpty(Username)) continue;
+                        Order order = new Order()
+                        {
+                            Id = ChatId,
+                            Link = Username,
+                            Offset = Offset,
+                            Type = OrderType.Pair,
+                        };
+                        state.Orders.Enqueue(order);
+                    }
+                }
+                return PairForRequestsQueue;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Error while UpdateOrdersCreation");
+                throw ex;
+            }
+        }
+        public async Task SetOrderGeneratedStatus(CancellationToken token)
+        {
+            using (ConnectionWrapper connection = await connectionsFactory.GetConnectionAsync(token))
+            {
+                using NpgsqlCommand command = connection.Connection.CreateCommand();
+                command.CommandType = System.Data.CommandType.Text;
+                command.CommandText = "update chats set last_time_checked = current_timestamp, has_actual_order=true where has_actual_order is null or not has_actual_order;";
+                await command.ExecuteNonQueryAsync(token);
+            }
+        }
+
+        public async Task CreateOrdersV2(CancellationToken token)
+        {
+            //ConcurrentQueue<Order> PairUpdatesOrders = await CreatePairUpdatesOrders(token);
+            //ConcurrentQueue<Order> SingleUpdatesOrders = await CreateSingleUpdatesOrders(token);
+            ConcurrentQueue<Order> PairForRequestsOrders = await CreatePairForRequestsOrders(token);
+            await SetOrderGeneratedStatus(CancellationToken.None);
+        }
         public async Task CreateHistoryLoadingOrders(int limit = -1)
         {
             try

@@ -52,9 +52,14 @@ create table public.messages(
     media_costyl text,
     formatting_costyl text,
     primary key (message_db_id, message_timestamp),
-    foreign key (chat_id) references chats (id)
 )  PARTITION BY RANGE (message_timestamp);
 
+create table chats_buffer(
+    id bigint,
+    getting_last_message_timestamp timestamp, 
+    last_message_id bigint,
+    primary key (id)
+)
 
 CREATE TABLE messages_2014_m01 PARTITION OF messages FOR VALUES FROM ('2014-01-01') TO ('2014-02-01');
 CREATE TABLE messages_2014_m02 PARTITION OF messages FOR VALUES FROM ('2014-02-01') TO ('2014-03-01');
@@ -288,10 +293,10 @@ $$
     end;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION add_chat(_chat_id bigint,_title text,_username text, pair_chat_id bigint,_is_group bool,_is_channel bool) RETURNS void as
+CREATE OR REPLACE FUNCTION add_chat(_chat_id bigint,_title text,_username text, pair_chat_id bigint,_is_group bool,_is_channel bool,_finder text) RETURNS void as
 $$
     begin
-            insert into chats (id, name , username, pair_id, is_group,is_channel) values (_chat_id,_title,_username,pair_chat_id,_is_group,_is_channel);
+            insert into chats (id, name , username, pair_id, is_group,is_channel, finders) values (_chat_id,_title,_username,pair_chat_id,_is_group,_is_channel, ARRAY[_finder]);
     end;
 $$ LANGUAGE plpgsql;
 
@@ -437,6 +442,7 @@ $$
             if new.id=0 THEN
                 update public.chats set pair_id_checked=true where id = new.pair_id;
             end if;
+			update chats set finders=finders||new.finders where id = new.id and not new.finders[0]='' and not new.finders[0] = ANY (finders);
             return null;
         end if;
     end;
@@ -571,6 +577,63 @@ drop trigger on_insert_to_messages ON messages;
 CREATE OR REPLACE FUNCTION update_last_message(_chat_id bigint,_last_message_id bigint) RETURNS void as
 $$
     begin
-        update chats set getting_last_message_timestamp=CURRENT_TIMESTAMP, last_message_id=_last_message_id where id=_chat_id;
+        if exists(select id from chats where id=_chat_id) then
+            update chats_buffer set getting_last_message_timestamp=CURRENT_TIMESTAMP, last_message_id=_last_message_id where id=_chat_id;
+        else
+            insert into chats_buffer (id,getting_last_message_timestamp,last_message_id) values (_chat_id,CURRENT_TIMESTAMP,_last_message_id);
+        end if;
+
     end;
 $$ LANGUAGE plpgsql;
+create  or replace function  ban() returns void as
+$$
+    declare
+        _id bigint;
+        pattern text;
+    begin
+        pattern='[абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ]';
+        _id = (select id from chats where banchecked is null limit 1);
+        update chats set banchecked = true where id=_id;
+        if  exists(select 1 from messages where chat_id=_id) and not exists(select 1 from messages where chat_id=_id and text ~ pattern) then
+            update chats set banned = true where id=_id;
+        end if;
+
+        return null;
+    end;
+$$LANGUAGE plpgsql;
+
+alter table chats add column banchecked bool default null;
+
+CREATE OR REPLACE FUNCTION order_executed(_chat_id bigint,_finder text) RETURNS void as
+$$
+    begin
+        update chats set has_actual_order=false where id=_chat_id ;
+        update chats set finders=finders||array[_finder] where
+                                       id=_chat_id and not _finder=ANY(finders) and not _finder='';
+    end;
+$$ LANGUAGE plpgsql;
+
+
+create  or replace function  get_chats() returns table (_id bigint,
+                                                                            _pair_id bigint,
+                                                                            _last_message_id bigint,
+                                                                            _pair_last_message_id bigint,
+                                                                            _getting_last_message_timestamp timestamp,
+                                                                            _pair_id_checked bool,
+                                                                            _username text,
+                                                                            _pair_username text) as
+$$
+    begin
+        return query update chats set last_time_checked = current_timestamp, has_actual_order=true where has_actual_order is null or not has_actual_order
+                returning id,
+                pair_id,
+                last_message_id,
+                (select last_message_id from chats where id=pair_id),
+                getting_last_message_timestamp,
+                pair_id_checked,
+                username,
+                pair_username;
+    end;
+$$LANGUAGE plpgsql;
+
+alter table chats add column finders text[]

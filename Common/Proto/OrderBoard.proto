@@ -7,9 +7,10 @@ import "google/protobuf/timestamp.proto";
 package orders;
 
 service OrderBoard {
-  rpc GetOrder (google.protobuf.Empty) returns (Order);
+  rpc GetOrder (OrderRequest) returns (Order);
   rpc GetOrder2 (OrderRequest) returns (Order);
   rpc PostOrder (Order) returns (google.protobuf.Empty);
+  rpc GetChatInfo (ChatInfoRequest) returns (ChatInfo);
   rpc PostReport (Report) returns (google.protobuf.Empty);
   rpc PostEntity (Entity) returns (google.protobuf.Empty);
   rpc StreamMessages (stream Message) returns (google.protobuf.Empty);
@@ -51,7 +52,15 @@ enum EntityType{
 	Channel = 1;
 	Group = 2;
 	Stop = 3;
-	
+}
+
+message ChatInfo{
+	int64 Id = 1;
+	int64 Offset = 2;
+}
+
+message ChatInfoRequest{
+	int64 Id = 1;
 }
 
 message SavedMessage{
@@ -120,6 +129,7 @@ message Order {
 	int32 RedirectCounter = 8;
 	int32 Time = 9;
 	int64 PairOffset = 10;
+	repeated string Finders = 11;
 }
 
 enum OrderType{
@@ -127,5 +137,7 @@ enum OrderType{
 	History = 1;
 	GetFullChannel = 2;
 	Sleep = 3;
-	Pair =4;
+	Pair = 4;
+	Executed = 5;
+	Container = 6;
 }

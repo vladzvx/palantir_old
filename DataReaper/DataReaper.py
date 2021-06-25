@@ -63,6 +63,7 @@ class TgDataGetter():
 
 	async def _get_full_channel(self,order):
 		try:
+			global phone
 			client = self._client;
 			loop  = self._loop;
 			res = await self._get_full_channel_request(order)
@@ -77,11 +78,14 @@ class TgDataGetter():
 				result.FirstName = chat.title;
 				result.PairLink = order.Link;
 				result.PairId = order.Id;
+				result.Finder =phone;
+				order.PairId =  chat.id;
 				result.Type = OrderBoard_pb2.EntityType.Value=2;
 				return result
 			elif len(res.chats)==1:
 				result = OrderBoard_pb2.Entity();
 				result.Id = 0;
+				result.Finder =phone;
 				result.PairLink = order.Link;
 				result.PairId = order.Id;
 				result.Type = OrderBoard_pb2.EntityType.Value=2;
@@ -227,6 +231,7 @@ class TgDataGetter():
 		global stub;
 		global users;
 		global chats;
+		global phone;
 		if isinstance(from_id, telethon.tl.types.PeerUser):
 			if users.get(from_id.user_id) is None:
 				entity = OrderBoard_pb2.Entity();
@@ -254,6 +259,7 @@ class TgDataGetter():
 					entity.Link = tg_entity.username
 				if tg_entity.title is not None:
 					entity.FirstName = tg_entity.title
+				entity.Finder=phone;
 				stub.PostEntity(entity)
 				chats[from_id.channel_id] = 0;
 		return False;
@@ -261,6 +267,7 @@ class TgDataGetter():
 	def hascyr(self,s):
 		lower = set('абвгдеёжзийклмнопрстуфхцчшщъыьэюя')
 		return lower.intersection(s.lower()) != set()
+
 
 	async def _get_history(self,order):
 		offset = order.Offset
@@ -278,7 +285,8 @@ class TgDataGetter():
 				logging.debug("Failed.")
 				if ResolveUsernameRequestBan:
 					order.RedirectCounter+=1;
-					stub.PostOrder(order);
+					if order.Type!=4:
+						stub.PostOrder(order);
 					return;
 
 				if order.Link!="":
@@ -392,6 +400,64 @@ class TgDataGetter():
 		loop  = self._loop;
 		loop.run_until_complete(self._get_history(order))
 
+	async def _read_pair(self,order):
+		offset = order.Offset
+		client = self._client;
+		global stub;
+		global GetFullChannelCounter
+		global GetFullChannelCounterLimit
+		global ResolveUsernameRequestBan
+		global last_expensive_operation_time
+		global phone
+		try:
+			need_request_full_channel = False;
+			entity1 = await client.get_entity(order.Id)
+			if order.PairId!=0:
+				entity2 = await client.get_entity(order.PairId)
+			else:
+				need_request_full_channel=True;
+		except ValueError as e:
+			if "Could not find the input entity for" in e.args[0]:
+				if ResolveUsernameRequestBan:
+					order.RedirectCounter+=1;
+					stub.PostOrder(order);
+					return;
+				if order.Link=="":
+					return;
+				need_request_full_channel=True;
+
+		if need_request_full_channel:
+			temp_entity = await self._get_full_channel(order)
+			if temp_entity is not None:
+				stub.PostEntity(temp_entity)
+			#entity1 = await client.get_entity(order.Id)
+			#entity2 = await client.get_entity(order.PairId)
+
+		order2 = OrderBoard_pb2.Order();
+		order2.Id = order.PairId;
+		order2.PairId = order.Id;
+		order2.Link = order.PairLink;
+		order2.PairLink = order.Link;
+		order2.Offset = order.PairOffset;
+		order2.Type = 4;
+		await self._get_history(order)
+		order.Type = 5;
+		order.Finders.append(phone)
+		stub.PostOrder(order);
+		try:
+			entity2 = await client.get_entity(order.PairId)
+			await self._get_history(order2)
+			order2.Type = 5;
+			order2.Finders.append(phone)
+			stub.PostOrder(order2);
+		except ValueError as e:
+			pass
+
+
+	def get_pair_history(self,order):
+		loop  = self._loop;
+		loop.run_until_complete(self._read_pair(order))
+
 
 time.sleep(2);
 grpc_host =os.environ.get('grpc_host') 
@@ -415,7 +481,7 @@ for cfg in config_stub.GetConfiguration(emp):
 						  config.CollectorParams.ApiHash,
 						  config.CollectorParams.Phone,connection_string)
 	getter.start();
-
+	phone = config.CollectorParams.Phone;
 	stub = OrderBoard_pb2_grpc.OrderBoardStub(channel)
 	GetFullChannelCounter = 0;
 	GetFullChannelCounterLimit=180
@@ -429,10 +495,9 @@ for cfg in config_stub.GetConfiguration(emp):
 	
 	while True:
 		try:
-
 			if 	ResolveUsernameRequestBan:
 				delta_timeRes =(datetime.datetime.utcnow()-ResolveUsernameRequestTime) 
-				if delta_timeRes.seconds>=3600:
+				if delta_timeRes.seconds>=86400:
 					ResolveUsernameRequestBan=False;
 					
 			delta_time =(datetime.datetime.utcnow()-timestamp) 
@@ -441,7 +506,13 @@ for cfg in config_stub.GetConfiguration(emp):
 				timestamp=datetime.datetime.utcnow()
 				logging.debug("Reset daily limits.")
 			logging.debug("Getting order...")
-			order  = stub.GetOrder(OrderBoard_pb2.google_dot_protobuf_dot_empty__pb2.Empty())
+			req = OrderBoard_pb2.OrderRequest();
+			if ResolveUsernameRequestBan:
+				req.Finder = config.CollectorParams.Phone;
+			else:
+				req.Finder = ""
+
+			order  = stub.GetOrder(req)
 			logging.debug("Ok! Order.Id: {0}; Order.Type: {1}; Order.Link: {2}; Order.PairId: {3}; Order.PairLink: {4};".format(order.Id,
 																															 order.Type,
 																															 order.Link,
@@ -461,6 +532,8 @@ for cfg in config_stub.GetConfiguration(emp):
 					if order.RedirectCounter<3:
 						order.RedirectCounter+=1
 						stub.PostOrder(order);
+			elif order.Type==4:
+				getter.get_pair_history(order)
 			elif order.Type==0:
 				q=0;
 			elif order.Type==3:

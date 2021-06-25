@@ -17,17 +17,16 @@ namespace Common.Services.DataBase
             this.connectionPoolManager = connectionPoolManager;
             this.Connection = new NpgsqlConnection(ConnectionString);
             this.Connection.Disposed += Connection_Disposed1;
-            Id = new Guid();
+            Id = Guid.NewGuid();
         }
 
         private void Connection_Disposed1(object sender, EventArgs e)
-        {
+        {           
             connectionPoolManager.PoolRepo.TryRemove(Id, out var _);
         }
-
         public void Dispose()
         {
             connectionPoolManager.Pool.Add(this);
         }
-    }
-}
+    }                                             
+}                                                          

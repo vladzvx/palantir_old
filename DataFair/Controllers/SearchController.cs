@@ -30,7 +30,5 @@ namespace DataFair.Controllers
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(await searchProvider.SimpleSearch(req.Text, req.Limit, token));
         }
-
-
     }
 }

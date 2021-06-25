@@ -42,7 +42,6 @@ namespace DataFair.Controllers
         {
             state.Orders.Enqueue(new Order() { Type = OrderType.Empty });
             return "ok";
-
         }
 
         [HttpPost("PostOrder")]
@@ -76,6 +75,14 @@ namespace DataFair.Controllers
         public async Task<string> PostRequest4(CancellationToken token)
         {
             await ordersGenerator.CreateUpdateOrders(token);
+            return "ok";
+        }
+
+        [HttpPost("CreatePairOrders")]
+        [EnableCors()]
+        public async Task<string> PostRequest5(CancellationToken token)
+        {
+            await ordersGenerator.CreateOrdersV2(token);
             return "ok";
         }
     }

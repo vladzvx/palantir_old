@@ -1,4 +1,5 @@
 ﻿using Common;
+using Common.Services.DataBase;
 using Common.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -17,8 +18,10 @@ namespace Common.Services
         public int MaxPriorityOrders;
         public int MiddlePriorityOrders;
         public int Messages;
+        public int TotalConnections;
+        public int ConnectionsHotReserve;
         public long FreeDisk;
-        public StateReport(State state, ICommonWriter<Message> commonWriter, ICommonWriter<Entity> commonWriter2)
+        public StateReport(State state, ICommonWriter<Message> commonWriter, ICommonWriter<Entity> commonWriter2, ConnectionsFactory connectionsFactory)
         {
             foreach (string key in state.Collectors.Keys.ToArray())
             {
@@ -32,7 +35,8 @@ namespace Common.Services
             MaxPriorityOrders = state.MaxPriorityOrders.Count;
             MiddlePriorityOrders = state.MiddlePriorityOrders.Count;
             Messages = commonWriter.GetQueueCount();
-
+            TotalConnections = connectionsFactory.TotalConnections;
+            ConnectionsHotReserve = connectionsFactory.HotReserve;
             DriveInfo[] allDrives = DriveInfo.GetDrives();
             long disk = 0;
             foreach (DriveInfo d in allDrives)

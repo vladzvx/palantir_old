@@ -70,5 +70,10 @@ namespace Common.Services
             }
 
         }
+
+        public Task ExecuteAdditionaAcion(DbConnection connection, object data, CancellationToken token)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

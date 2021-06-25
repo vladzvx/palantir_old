@@ -40,6 +40,7 @@ namespace DataFair
             services.AddTransient<IWriterCore<Message>,MessagesWriterCore>();
             services.AddTransient<IWriterCore<Entity>,EntityWriterCore>();
             services.AddTransient<IWriterCore,WriterCore>();
+            services.AddTransient<ICommonReader<ChatInfo>,ChatInfoReader>();
             
             services.AddTransient<StateReport>();
             services.AddTransient<SystemReport>();
@@ -50,8 +51,8 @@ namespace DataFair
             //services.AddHostedService<OrdersManager>();
             services.AddHostedService<CollectorsManager>();
             //services.AddHostedService<MediaAndFormattingProcessor>();
-            services.AddHostedService<TextVectorizer>();
-
+            //services.AddHostedService<TextVectorizer>();
+            //services.AddHostedService<StoredProcedureExecutor>();
             services.AddGrpc();
             services.AddCors();
             services.AddControllers();

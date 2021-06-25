@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.IO;
 using Common.Services.Interfaces;
 using Common.Models;
+using Common.Services.DataBase.Interfaces;
 
 namespace Common.Services.gRPC
 {
@@ -21,19 +22,27 @@ namespace Common.Services.gRPC
     {
         private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
         private static Order EmptyOrder = new Order() { Type = OrderType.Empty};
+        private static Order Sleep = new Order() { Type = OrderType.Sleep,Time=120};
         private readonly State ordersStorage;
         private readonly ICommonWriter commonWriter;
         private readonly ICommonWriter<Message> messagesWriter;
         private readonly ICommonWriter<Entity> entitiesWriter;
         private readonly LoadManager loadManager;
+        private readonly ICommonReader<ChatInfo> commonReader;
         public OrderBoardService(State ordersStorage, ICommonWriter commonWriter, ICommonWriter<Message> messagesWriter,
-            ICommonWriter<Entity> entitiesWriter, LoadManager loadManager)
+            ICommonWriter<Entity> entitiesWriter, LoadManager loadManager, ICommonReader<ChatInfo> commonReader)
         {
             this.ordersStorage = ordersStorage;
             this.commonWriter = commonWriter;
             this.entitiesWriter = entitiesWriter;
             this.messagesWriter = messagesWriter;
             this.loadManager = loadManager;
+            this.commonReader = commonReader;
+        }
+
+        public async override Task<ChatInfo> GetChatInfo(ChatInfoRequest request, ServerCallContext context)
+        {
+            return await commonReader.ReadAsync(request, CancellationToken.None);
         }
         public override Task<Empty> PostEntity(Entity entity, ServerCallContext context)
         {
@@ -67,7 +76,8 @@ namespace Common.Services.gRPC
                     //Message message = requestStream.Current;
                     //logger.Trace("Message. DateTime: {0}; FromId: {1}; Text: {2}; Media: {3};", message.Timestamp, message.FromId, message.Text, message.Media);
                 }
-                await entitiesWriter.ExecuteAdditionalAction(new Order() { Id = chatId, Offset = maxId });
+                if (maxId!=0)
+                    await entitiesWriter.ExecuteAdditionalAction(new Order() { Id = chatId, Offset = maxId,Type=OrderType.Container });
             }
             catch (Exception ex)
             {
@@ -75,24 +85,45 @@ namespace Common.Services.gRPC
             }
             return new Empty();
         }
-        public override Task<Order> GetOrder(Empty empty, ServerCallContext context)
+        public override Task<Order> GetOrder(OrderRequest req, ServerCallContext context)
         {
             try
             {
-                Order order = EmptyOrder;
-                if (ordersStorage.MaxPriorityOrders.TryDequeue(out Order order1))
+                if (string.IsNullOrEmpty(req.Finder))
                 {
-                    order = order1;
+                    Order order = EmptyOrder;
+                    if (ordersStorage.MaxPriorityOrders.TryDequeue(out Order order1))
+                    {
+                        order = order1;
+                    }
+                    else if (ordersStorage.MiddlePriorityOrders.TryDequeue(out Order order2))
+                    {
+                        order = order2;
+                    }
+                    else if (ordersStorage.Orders.TryDequeue(out Order order3))
+                    {
+                        order = order3;
+                    }
+                    return Task.FromResult(order);
                 }
-                else if (ordersStorage.MiddlePriorityOrders.TryDequeue(out Order order2))
+                else
                 {
-                    order = order2;
+                    for (int i = 0; i < 100; i++)
+                    {
+                        if (ordersStorage.Orders.TryDequeue(out Order order))
+                        {
+                            if (order.Finders.Contains(req.Finder))
+                            {
+                                return Task.FromResult(order);
+                            }
+                            else
+                            {
+                                ordersStorage.Orders.Enqueue(order);
+                            }
+                        }
+                    }
+                    return Task.FromResult(Sleep);
                 }
-                else if (ordersStorage.Orders.TryDequeue(out Order order3))
-                {
-                    order = order3;
-                }
-                return Task.FromResult(order);
             }
             catch (Exception ex )
             {
@@ -100,7 +131,7 @@ namespace Common.Services.gRPC
                 return Task.FromResult(EmptyOrder);
             }
         }
-        public override Task<Empty> PostOrder(Order order, ServerCallContext context)
+        public async override Task<Empty> PostOrder(Order order, ServerCallContext context)
         {
             try
             {
@@ -108,6 +139,10 @@ namespace Common.Services.gRPC
                 if (order.Type == OrderType.GetFullChannel)
                 {
                     ordersStorage.MaxPriorityOrders.Enqueue(order);
+                }
+                else if (order.Type == OrderType.Executed)
+                {
+                    await entitiesWriter.ExecuteAdditionalAction(order);
                 }
                 else
                 {
@@ -118,7 +153,7 @@ namespace Common.Services.gRPC
             {
                 logger.Error(ex, "Error while PostOrder execution!");
             }
-            return Task.FromResult(new Empty());
+            return new Empty();
         }
         public override Task<Empty> PostReport(Report report, ServerCallContext context)
         {

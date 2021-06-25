@@ -18,9 +18,9 @@ namespace Common.Services.DataBase.DataProcessing
     {
         internal Logger logger = NLog.LogManager.GetCurrentClassLogger();
         private readonly ICommonProcessor<T> commonProcessor;
-        private readonly IReaderCore<T> readerCore;
+        private readonly IReaderCore1<T> readerCore;
         private readonly ConnectionsFactory connectionPoolManager;
-        public Reader(ICommonProcessor<T> commonProcessor, IReaderCore<T> readerCore, ConnectionsFactory connectionPoolManager)
+        public Reader(ICommonProcessor<T> commonProcessor, IReaderCore1<T> readerCore, ConnectionsFactory connectionPoolManager)
         {
             this.commonProcessor = commonProcessor;
             this.readerCore = readerCore;

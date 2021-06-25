@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Common.Services.DataBase
 {
-    public class SMReaderCore : IReaderCore<SavedMessage>
+    public class SMReaderCore : IReaderCore1<SavedMessage>
     {
         public bool TryRead(NpgsqlDataReader reader, out SavedMessage data)
         {

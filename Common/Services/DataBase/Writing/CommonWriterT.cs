@@ -80,8 +80,7 @@ namespace Common.Services
             {
                 using (ConnectionWrapper connectionWrapper = await manager.GetConnectionAsync(cancellationTokenSource.Token))
                 {
-                    DbCommand command = writerCore.CreateAdditionalCommand(connectionWrapper.Connection);
-                    await writerCore.ExecuteAdditionaAcion(command, data, cancellationTokenSource.Token);
+                        await writerCore.ExecuteAdditionaAcion(connectionWrapper.Connection, data, cancellationTokenSource.Token);
                 }
             }
             catch (Exception ex)

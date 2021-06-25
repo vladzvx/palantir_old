@@ -155,7 +155,15 @@ namespace Common.Services
             }
         }
 
+        public Task ExecuteAdditionaAcion(object data, CancellationToken token)
+        {
+            throw new NotImplementedException();
+        }
 
+        public Task ExecuteAdditionaAcion(DbConnection dbConnection, object data, CancellationToken token)
+        {
+            throw new NotImplementedException();
+        }
     }
 
 }
