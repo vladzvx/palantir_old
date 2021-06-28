@@ -321,23 +321,29 @@ $$
     end;
 $$ LANGUAGE plpgsql;
 
-create  or replace function  get_unupdated_chats(dt timestamp) returns table (_id bigint,
+create  or replace function  get_unupdated_chats() returns table (_id bigint,
                                                                             _pair_id bigint,
                                                                             _last_message_id bigint,
                                                                             _getting_last_message_timestamp timestamp,
                                                                             _pair_id_checked bool,
                                                                             _username text,
-                                                                            _pair_username text) as
+                                                                            _pair_username text,
+                                                                            _finders text[]) as
 $$
     begin
-        return query update chats set last_time_checked = current_timestamp  where (getting_last_message_timestamp<dt) and (last_time_checked is null or last_time_checked <dt) and not banned
+        return query update chats set last_time_checked = current_timestamp, has_actual_order=true where
+            (has_actual_order is null or not has_actual_order)
+                and finders is not null
+                and (is_group or (is_channel and pair_id_checked))
+                and not banned
                 returning id,
                 pair_id,
                 last_message_id,
                 getting_last_message_timestamp,
                 pair_id_checked,
                 username,
-                pair_username;
+                pair_username,
+                    finders;
     end;
 $$LANGUAGE plpgsql;
 
@@ -447,6 +453,7 @@ $$
         end if;
     end;
 $$ LANGUAGE plpgsql;
+
 
 
 CREATE TRIGGER on_insert_to_messages after INSERT on public.messages FOR EACH ROW execute PROCEDURE message_protect();

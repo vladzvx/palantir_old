@@ -95,18 +95,20 @@ namespace Common.Services.gRPC
                     if (ordersStorage.MaxPriorityOrders.TryDequeue(out Order order1))
                     {
                         order = order1;
+                        return Task.FromResult(order);
                     }
                     else if (ordersStorage.MiddlePriorityOrders.TryDequeue(out Order order2))
                     {
                         order = order2;
+                        return Task.FromResult(order);
                     }
                     else if (ordersStorage.Orders.TryDequeue(out Order order3))
                     {
                         order = order3;
+                        return Task.FromResult(order);
                     }
-                    return Task.FromResult(order);
                 }
-                else
+                if (!string.IsNullOrEmpty(req.Finder))
                 {
                     for (int i = 0; i < 100; i++)
                     {
@@ -122,8 +124,9 @@ namespace Common.Services.gRPC
                             }
                         }
                     }
-                    return Task.FromResult(Sleep);
                 }
+
+                return Task.FromResult(Sleep);
             }
             catch (Exception ex )
             {

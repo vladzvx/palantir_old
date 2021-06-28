@@ -51,8 +51,8 @@ namespace DataFair
             //services.AddHostedService<OrdersManager>();
             services.AddHostedService<CollectorsManager>();
             //services.AddHostedService<MediaAndFormattingProcessor>();
-            services.AddHostedService<TextVectorizer>();
-            services.AddHostedService<StoredProcedureExecutor>();
+            //services.AddHostedService<TextVectorizer>();
+            //services.AddHostedService<StoredProcedureExecutor>();
             services.AddGrpc();
             services.AddCors();
             services.AddControllers();

@@ -497,11 +497,11 @@ for cfg in config_stub.GetConfiguration(emp):
 		try:
 			if 	ResolveUsernameRequestBan:
 				delta_timeRes =(datetime.datetime.utcnow()-ResolveUsernameRequestTime) 
-				if delta_timeRes.seconds>=86400:
+				if delta_timeRes.seconds>=1.2*86400:
 					ResolveUsernameRequestBan=False;
 					
 			delta_time =(datetime.datetime.utcnow()-timestamp) 
-			if delta_time.seconds>=86400:
+			if delta_time.seconds>=1.2*86400:
 				GetFullChannelCounter=0
 				timestamp=datetime.datetime.utcnow()
 				logging.debug("Reset daily limits.")

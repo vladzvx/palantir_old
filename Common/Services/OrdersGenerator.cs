@@ -82,7 +82,9 @@ namespace Common.Services
             {
                 using (ConnectionWrapper connection = await connectionsFactory.GetConnectionAsync(token))
                 {
-                    using NpgsqlCommand command = CreateAndConfigureCommand(connection.Connection, DateTime.Now + Options.OrderGenerationTimeSpan, "get_unupdated_chats");
+                    using NpgsqlCommand command = connection.Connection.CreateCommand();
+                         command.CommandType = System.Data.CommandType.StoredProcedure;
+                    command.CommandText = "get_unupdated_chats";
                     using NpgsqlDataReader reader = await command.ExecuteReaderAsync(cts.Token);
                     while (!token.IsCancellationRequested && await reader.ReadAsync(cts.Token))
                     {
@@ -95,6 +97,7 @@ namespace Common.Services
                             bool PairChecked = reader.IsDBNull(4) ? true : reader.GetBoolean(4);
                             string Username = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
                             string PairUsername = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
+                            string[] Finders = (string[]) reader.GetValue(7);
 
                             if (!state.Orders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.History; }))
                             {
@@ -105,8 +108,13 @@ namespace Common.Services
                                     Offset = Offset,
                                     PairId = PairId,
                                     PairLink = PairUsername,
-                                    Type = OrderType.History
+                                    Type = OrderType.History,
                                 };
+
+                                foreach (string finder in Finders)
+                                {
+                                    order.Finders.Add(finder);
+                                }
                                 state.Orders.Enqueue(order);
                             }
                         }
@@ -310,7 +318,6 @@ namespace Common.Services
                 await command.ExecuteNonQueryAsync(token);
             }
         }
-
         public async Task CreateOrdersV2(CancellationToken token)
         {
             //ConcurrentQueue<Order> PairUpdatesOrders = await CreatePairUpdatesOrders(token);
