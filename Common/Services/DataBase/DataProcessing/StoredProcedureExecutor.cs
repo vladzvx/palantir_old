@@ -36,7 +36,6 @@ namespace Common.Services.DataBase.DataProcessing
         {
             while (!token.IsCancellationRequested)
             {
-                int count = settings.StartVectorizerCount;
                 while (!token.IsCancellationRequested)
                 {
                     using (ConnectionWrapper connection =await connectionPoolManager.GetConnectionAsync(token))
@@ -46,13 +45,21 @@ namespace Common.Services.DataBase.DataProcessing
                             NpgsqlCommand mainCommand = connection.Connection.CreateCommand();
                             mainCommand.CommandType = System.Data.CommandType.StoredProcedure;
                             mainCommand.CommandText = "ban";
-                            await mainCommand.ExecuteNonQueryAsync(token);
+                            bool continuation = true;
+                            while (continuation)
+                            {
+                                using NpgsqlDataReader reader = await mainCommand.ExecuteReaderAsync(token);
+                                while (await reader.ReadAsync(token))
+                                {
+                                    continuation = reader.GetBoolean(0);
+                                }
+                            }
                         }
                         catch (Exception ex)
                         {
 
                         }
-                        await Task.Delay(100, token);
+                        await Task.Delay((int)settings.StartWritingInterval, token);
                     }
                 }
 

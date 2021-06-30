@@ -1,5 +1,6 @@
 ﻿using Common;
 using Common.Services;
+using Common.Services.DataBase;
 using Common.Services.DataBase.DataProcessing;
 using DataFair.Models;
 using Microsoft.AspNetCore.Cors;
@@ -27,23 +28,6 @@ namespace DataFair.Controllers
             //this.token = token;
         }
 
-        [HttpPost("GetFullChannel")]
-        [EnableCors()]
-        public string PostRequest()
-        {
-            ordersGenerator.CreateGetFullChannelOrders(800).Wait();
-            return "ok";
-            
-        }
-
-        [HttpPost("PostEmptyOrder")]
-        [EnableCors()]
-        public string PostEmptyOrder()
-        {
-            state.Orders.Enqueue(new Order() { Type = OrderType.Empty });
-            return "ok";
-        }
-
         [HttpPost("PostOrder")]
         [EnableCors()]
         public string PostEmptyOrder(OrderMoq order)
@@ -53,23 +37,16 @@ namespace DataFair.Controllers
 
         }
 
-        [HttpPost("GetGroupsHistory")]
-        [EnableCors()]
-        public string PostRequest2()
-        {
-            ordersGenerator.CreateGroupHistoryLoadingOrders().Wait();
-            return "ok";
-
-        }
 
         [HttpPost("GetHistory")]
         [EnableCors()]
         public string PostRequest3()
         {
-            ordersGenerator.CreateHistoryLoadingOrders().Wait();
+            //ordersGenerator.CreateHistoryLoadingOrders().Wait();
             return "ok";
 
         }
+
         [HttpPost("GetUpdates")]
         [EnableCors()]
         public async Task<string> PostRequest4(CancellationToken token)
@@ -78,11 +55,31 @@ namespace DataFair.Controllers
             return "ok";
         }
 
-        [HttpPost("CreatePairOrders")]
+        [HttpPost("GetNewGroups")]
         [EnableCors()]
         public async Task<string> PostRequest5(CancellationToken token)
         {
             await ordersGenerator.CreateOrdersV2(token);
+            return "ok";
+        }
+
+        [HttpPost("ClearOrders")]
+        [EnableCors()]
+        public async Task<string> PostRequest6(CancellationToken token)
+        {
+            state.ClearOrders();
+            return "ok";
+        }
+
+
+        [HttpPost("restore")]
+        [EnableCors()]
+        public async Task<string> PostRequest7(CancellationToken token)
+        {
+            state.ClearOrders();
+            await ordersGenerator.SetOrderUnGeneratedStatus(token);
+            await ordersGenerator.RestoreLostGroups(token);
+            await ordersGenerator.RestoreLostGroupsSetStatus(token);
             return "ok";
         }
     }

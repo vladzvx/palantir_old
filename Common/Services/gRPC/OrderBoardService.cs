@@ -22,7 +22,7 @@ namespace Common.Services.gRPC
     {
         private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
         private static Order EmptyOrder = new Order() { Type = OrderType.Empty};
-        private static Order Sleep = new Order() { Type = OrderType.Sleep,Time=120};
+        private static Order Sleep = new Order() { Type = OrderType.Sleep,Time=10};
         private readonly State ordersStorage;
         private readonly ICommonWriter commonWriter;
         private readonly ICommonWriter<Message> messagesWriter;

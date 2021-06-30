@@ -521,6 +521,8 @@ for cfg in config_stub.GetConfiguration(emp):
 			if order.Type==1:
 					logging.debug("History reading...")
 					getter.get_history(order)
+					order.Type=5;
+					stub.PostOrder(order);
 
 			elif order.Type==2:
 				if not ResolveUsernameRequestBan:

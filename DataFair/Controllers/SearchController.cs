@@ -24,11 +24,19 @@ namespace DataFair.Controllers
             this.searchProvider = searchProvider;
         }
 
-        [HttpPost("simple")]
+        [HttpPost()]
         [EnableCors()]
-        public async Task<string> simple_search(SimpleSearchRequest req,CancellationToken token)
+        public async Task<string> SimpleSearch(SearchRequest req,CancellationToken token)
         {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(await searchProvider.SimpleSearch(req.Text, req.Limit, token));
+            return Newtonsoft.Json.JsonConvert.SerializeObject(await searchProvider.CommonSearch(req.searchType,
+                req.Request,req.startDT,req.endDT,req.Limit,req.isChannel, req.isGroup,token,req.ChatIds));
+        }
+
+        [HttpPost("person")]
+        [EnableCors()]
+        public async Task<string> GetPersonMessages(PersonSearchRequest req, CancellationToken token)
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(await searchProvider.PersonSearch(req.Limit,req.Id,token));
         }
     }
 }

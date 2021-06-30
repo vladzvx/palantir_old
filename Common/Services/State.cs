@@ -17,5 +17,12 @@ namespace Common.Services
         public ConcurrentDictionary<string, ConcurrentBag<Common.Collector>> Collectors = new ConcurrentDictionary<string, ConcurrentBag<Collector>>();
         public ConcurrentDictionary<string, Common.SessionSettings> AllSessions = new ConcurrentDictionary<string, SessionSettings>();
         public ConcurrentDictionary<string, Common.Collector> AllCollectors = new ConcurrentDictionary<string, Collector>();
+
+        public void ClearOrders()
+        {
+            Orders.Clear();
+            MiddlePriorityOrders.Clear();
+            MaxPriorityOrders.Clear();            
+        }
     }
 }

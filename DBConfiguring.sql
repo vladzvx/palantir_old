@@ -529,18 +529,31 @@ alter table messages add column vectorised_text_combo tsvector;
 alter table messages add column vectorised_text_my_default tsvector;
 
 
-CREATE OR REPLACE FUNCTION create_fulltext_data(count int) RETURNS void as
+
+CREATE OR REPLACE FUNCTION create_fulltext_data(count int) RETURNS bool as
 $$
     declare
         min_id bigint;
+        value bigint;
+        value2 bigint;
+        result bool;
     begin
         min_id = (select min(data1) from temp where id=0);
+        value=min_id+count;
         update messages set vectorised_text_combo=parse_combo(replace(text)),
                             vectorised_text_my_default=parse_default(replace(text)),
-                            parsed=true where not parsed and message_db_id>=min_id and message_db_id<min_id+count;
-        update temp set data1=min_id+count where id=0;
+                            parsed=true where not parsed and message_db_id>=min_id and message_db_id<value;
+        value2 = (select max(message_db_id) from  messages);
+        result = true;
+        if value>(value2) then
+            value = value2;
+            result = false;
+        end if;
+        update temp set data1=value where id=0;
+        return  result;
     end;
 $$ LANGUAGE plpgsql;
+
 
 CREATE OR REPLACE FUNCTION force_parse() RETURNS void as
 $$
@@ -592,20 +605,26 @@ $$
 
     end;
 $$ LANGUAGE plpgsql;
-create  or replace function  ban() returns void as
+
+
+create  or replace function  ban() returns bool as
 $$
     declare
+        result bool;
         _id bigint;
         pattern text;
     begin
         pattern='[абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ]';
         _id = (select id from chats where banchecked is null limit 1);
-        update chats set banchecked = true where id=_id;
-        if  exists(select 1 from messages where chat_id=_id) and not exists(select 1 from messages where chat_id=_id and text ~ pattern) then
-            update chats set banned = true where id=_id;
+        if _id is not null THEN
+            update chats set banchecked = true where id=_id;
+            if  exists(select 1 from messages where chat_id=_id) and not exists(select 1 from messages where chat_id=_id and text ~ pattern) then
+                update chats set banned = true where id=_id;
+            end if;
+            return true;
+        else
+            return false;
         end if;
-
-        return null;
     end;
 $$LANGUAGE plpgsql;
 
@@ -644,3 +663,47 @@ $$
 $$LANGUAGE plpgsql;
 
 alter table chats add column finders text[]
+
+
+create or replace function search_period(request text,dt1 timestamp,dt2 timestamp, lim int, _is_group bool, _is_channel bool) returns table (link text, text text) as
+$$
+    begin
+        return query SELECT ('https://t.me/'||COALESCE(username,'c/'||(chat_id::text))||'/'||messages.id)::text, messages.text from messages inner join chats c on c.id = messages.chat_id
+        WHERE to_tsquery('combo',replace(request))::tsquery @@ vectorised_text_combo and message_timestamp>=dt1 and message_timestamp<dt2 and c.is_channel=_is_channel and c.is_group=_is_group
+        LIMIT lim;
+    end;
+$$ LANGUAGE plpgsql;
+
+
+create or replace function search_name_period(request text,dt1 timestamp,dt2 timestamp, lim int, _is_group bool, _is_channel bool) returns table (link text, text text) as
+$$
+    begin
+        return query SELECT ('https://t.me/'||COALESCE(username,'c/'||(chat_id::text))||'/'||messages.id)::text, messages.text from messages inner join chats c on c.id = messages.chat_id
+        WHERE to_tsquery('my_default',replace(request))::tsquery @@ vectorised_text_my_default and message_timestamp>=dt1 and message_timestamp<dt2 and c.is_channel=_is_channel and c.is_group=_is_group
+        LIMIT lim;
+    end;
+$$ LANGUAGE plpgsql;
+
+create or replace function search_in_channel(request text,dt1 timestamp,dt2 timestamp, lim int, _is_group bool, _is_channel bool, ids bigint[] ) returns table (link text, text text) as
+$$
+    begin
+        return query SELECT ('https://t.me/'||COALESCE(username,'c/'||(chat_id::text))||'/'||messages.id)::text, messages.text from messages inner join chats c on c.id = messages.chat_id
+        WHERE to_tsquery('combo',request)::tsquery @@ vectorised_text_combo and message_timestamp>=dt1 and message_timestamp<dt2 and c.is_channel=_is_channel and c.is_group=_is_group and chat_id=ANY(ids)
+        LIMIT lim;
+    end;
+$$ LANGUAGE plpgsql;
+
+create or replace function get_user_messages(_user_id bigint, lim int) returns table (link text, text text) as
+$$
+    begin
+        return query SELECT ('https://t.me/'||COALESCE(username,'c/'||(chat_id::text))||'/'||messages.id)::text, messages.text from messages inner join chats c on c.id = messages.chat_id
+        WHERE user_id=_user_id LIMIT lim;
+    end;
+$$ LANGUAGE plpgsql;
+
+create index mess_combo_index ON messages  using rum(vectorised_text_combo);
+create index mess_my_default_index ON messages  using rum(vectorised_text_my_default);
+create index chats_is_group on chats (is_group);
+create index chats_is_channel on chats (is_channel);
+
+

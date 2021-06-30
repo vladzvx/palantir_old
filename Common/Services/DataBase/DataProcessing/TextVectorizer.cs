@@ -56,7 +56,17 @@ namespace Common.Services.DataBase.DataProcessing
                             mainCommand.CommandText = "create_fulltext_data";
                             mainCommand.Parameters.Add(new NpgsqlParameter("count", NpgsqlTypes.NpgsqlDbType.Integer));
                             mainCommand.Parameters["count"].Value = count;
-                            await act(mainCommand, token);
+                            bool continuation = true;
+                            while (continuation)
+                            {
+                                using NpgsqlDataReader reader = await mainCommand.ExecuteReaderAsync(token);
+                                while (await reader.ReadAsync(token))
+                                {
+                                    continuation = reader.GetBoolean(0);
+                                }
+                            }
+
+                            //await act(mainCommand, token);
                         }
                         catch (Exception ex)
                         {
@@ -75,7 +85,7 @@ namespace Common.Services.DataBase.DataProcessing
                                 break;
                             }
                         }
-                        await Task.Delay(100, token);
+                        await Task.Delay((int)settings.StartWritingInterval, token);
                     }
                 }
 
