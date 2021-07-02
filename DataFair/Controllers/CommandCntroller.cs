@@ -40,37 +40,35 @@ namespace DataFair.Controllers
 
         [HttpPost("GetHistory")]
         [EnableCors()]
-        public string PostRequest3()
+        public async Task<string> PostRequest3(CancellationToken token)
         {
-            //ordersGenerator.CreateHistoryLoadingOrders().Wait();
+            state.ClearOrders();
+            await ordersGenerator.SetOrderUnGeneratedStatus(token);
+            await ordersGenerator.GetHistoryOrders(token);
             return "ok";
 
-        }
-
-        [HttpPost("GetUpdates")]
-        [EnableCors()]
-        public async Task<string> PostRequest4(CancellationToken token)
-        {
-            await ordersGenerator.CreateUpdateOrders(token);
-            return "ok";
         }
 
         [HttpPost("GetNewGroups")]
         [EnableCors()]
         public async Task<string> PostRequest5(CancellationToken token)
         {
-            await ordersGenerator.CreateOrdersV2(token);
+            state.ClearOrders();
+            await ordersGenerator.SetOrderUnGeneratedStatus(token);
+            await ordersGenerator.GetNewGroupsOrders(token);
             return "ok";
         }
 
-        [HttpPost("ClearOrders")]
+        [HttpPost("create_orders")]
         [EnableCors()]
         public async Task<string> PostRequest6(CancellationToken token)
         {
             state.ClearOrders();
+            await ordersGenerator.SetOrderUnGeneratedStatus(token);
+            await ordersGenerator.GetNewGroupsOrders(token);
+            await ordersGenerator.GetHistoryOrders(token);
             return "ok";
         }
-
 
         [HttpPost("restore")]
         [EnableCors()]

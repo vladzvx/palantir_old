@@ -449,6 +449,7 @@ $$
                 update public.chats set pair_id_checked=true where id = new.pair_id;
             end if;
 			update chats set finders=finders||new.finders where id = new.id and not new.finders[0]='' and not new.finders[0] = ANY (finders);
+			update chats set finders=new.finders where id = new.id and (finders is null or not array_length(finders,1)>0);
             return null;
         end if;
     end;
