@@ -68,7 +68,8 @@ namespace Common.Services
                         {
                             order.Finders.Add(finder);
                         }
-                        state.Orders.Enqueue(order);
+                        state.AddOrder(order);
+                        //state.Orders.Enqueue(order);
 
                     }
                 }

@@ -64,6 +64,8 @@ class TgDataGetter():
 	async def _get_full_channel(self,order):
 		try:
 			global phone
+			global GetFullChannelCounter;
+			GetFullChannelCounter+=1
 			client = self._client;
 			loop  = self._loop;
 			res = await self._get_full_channel_request(order)
@@ -498,6 +500,7 @@ for cfg in config_stub.GetConfiguration(emp):
 	users = {}
 	chats = {}
 	ResolveUsernameRequestBan = False;
+	GetFullChannelCounter = 0;
 	ResolveUsernameRequestTime = datetime.datetime.utcnow();
 
 	logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',level=logging.DEBUG,filename='app.log',datefmt='%Y-%m-%d %H:%M:%S')
@@ -508,6 +511,7 @@ for cfg in config_stub.GetConfiguration(emp):
 				delta_timeRes =(datetime.datetime.utcnow()-ResolveUsernameRequestTime) 
 				if delta_timeRes.seconds>=1.2*86400:
 					ResolveUsernameRequestBan=False;
+					GetFullChannelCounter=0
 					
 			delta_time =(datetime.datetime.utcnow()-timestamp) 
 			if delta_time.seconds>=1.2*86400:
@@ -516,11 +520,9 @@ for cfg in config_stub.GetConfiguration(emp):
 				logging.debug("Reset daily limits.")
 			logging.debug("Getting order...")
 			req = OrderBoard_pb2.OrderRequest();
-			if ResolveUsernameRequestBan:
-				req.Finder = config.CollectorParams.Phone;
-			else:
-				req.Finder = ""
-
+			req.Finder = config.CollectorParams.Phone;
+			req.Banned  = ResolveUsernameRequestBan;
+			req.HeavyRequestsCounter = GetFullChannelCounter;
 			order  = stub.GetOrder(req)
 			logging.debug("Ok! Order.Id: {0}; Order.Type: {1}; Order.Link: {2}; Order.PairId: {3}; Order.PairLink: {4};".format(order.Id,
 																															 order.Type,

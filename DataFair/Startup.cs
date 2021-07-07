@@ -43,7 +43,7 @@ namespace DataFair
             services.AddTransient<ICommonReader<ChatInfo>,ChatInfoReader>();
             
             services.AddTransient<StateReport>();
-            services.AddTransient<SystemReport>();
+            //services.AddTransient<SystemReport>();
             services.AddTransient<OrdersGenerator>();
             services.AddScoped<SearchProvider>();
 

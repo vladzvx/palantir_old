@@ -17,6 +17,7 @@ namespace Common.Services
         public int Orders;
         public int MaxPriorityOrders;
         public int MiddlePriorityOrders;
+        public int TargetOrders;
         public int Messages;
         public int TotalConnections;
         public int ConnectionsHotReserve;
@@ -37,6 +38,14 @@ namespace Common.Services
             Messages = commonWriter.GetQueueCount();
             TotalConnections = connectionsFactory.TotalConnections;
             ConnectionsHotReserve = connectionsFactory.HotReserve;
+            TargetOrders = 0;
+            foreach (string finder in state.TargetedOrders.Keys)
+            {
+                if (state.TargetedOrders.TryGetValue(finder, out var que))
+                {
+                    TargetOrders += que.Count;
+                }
+            }
             DriveInfo[] allDrives = DriveInfo.GetDrives();
             long disk = 0;
             foreach (DriveInfo d in allDrives)

@@ -52,11 +52,29 @@ namespace Common.Services
             }
         }
 
-        public bool TryGetOrder(string finder, out Order order)
+        public bool TryGetOrder(OrderRequest req, out Order order)
         {
             order = empty;
-            if (string.IsNullOrEmpty(finder))
+            if (!req.Banned)
             {
+                while (MaxPriorityOrders.TryDequeue(out Order temp))
+                {
+                    if (temp.status == Order.Status.Created)
+                    {
+                        order = temp;
+                        temp.status = Order.Status.Getted;
+                        return true;
+                    }
+                }
+                while (MiddlePriorityOrders.TryDequeue(out Order temp))
+                {
+                    if (temp.status == Order.Status.Created)
+                    {
+                        order = temp;
+                        temp.status = Order.Status.Getted;
+                        return true;
+                    }
+                }
                 while (Orders.TryDequeue(out Order temp))
                 {
                     if (temp.status == Order.Status.Created)
@@ -67,9 +85,9 @@ namespace Common.Services
                     }
                 }
             }
-            else
+            if (!string.IsNullOrEmpty(req.Finder))
             {
-                while (TargetedOrders.ContainsKey(finder) && TargetedOrders[finder].TryDequeue(out order))
+                while (TargetedOrders.ContainsKey(req.Finder) && TargetedOrders[req.Finder].TryDequeue(out order))
                 {
                     if (order.status == Order.Status.Created)
                     {
@@ -78,7 +96,6 @@ namespace Common.Services
                     }
                 }
             }
-
             return false;
         }
     }

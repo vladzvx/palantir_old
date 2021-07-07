@@ -33,6 +33,8 @@ enum ReportType {
 
 message OrderRequest{
 	string Finder = 1;
+	bool Banned = 2;
+	int32 HeavyRequestsCounter = 3;
 }
 
 message Entity{
