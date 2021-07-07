@@ -9,6 +9,7 @@ using System.Data.Common;
 using Common.Services.Interfaces;
 using Common.Models;
 using Common.Services.DataBase;
+using System.Collections.Generic;
 
 namespace Common.Services
 {
@@ -44,8 +45,8 @@ namespace Common.Services
 
         public async Task ExecuteWriting(DbCommand command, Message message, CancellationToken token)
         {
-            try
-            {
+            //try
+            //{
                 //command.Transaction = transaction;
                 command.Parameters["_message_timestamp"].Value = message.Timestamp.ToDateTime();
                 command.Parameters["_message_id"].Value = message.Id;
@@ -58,16 +59,20 @@ namespace Common.Services
                 command.Parameters["_forward_from_message_id"].Value = message.ForwardFromMessageId != 0 ? message.ForwardFromMessageId : DBNull.Value;
                 command.Parameters["_text"].Value = !string.IsNullOrEmpty(message.Text) ? message.Text : DBNull.Value;
                 command.Parameters["_media"].Value = string.IsNullOrEmpty(message.Media) ? DBNull.Value : message.Media;
-                command.Parameters["_formatting"].Value = message.Formating.Count == 0 || Formating.IsEmpty(message.Formating) ?
+
+            bool has_form = Formating.ClearEmpty(message.Formating, out List<Formating> res);
+            object forms = !has_form ?
                     DBNull.Value :
-                    "{\"formats\":" + Newtonsoft.Json.JsonConvert.SerializeObject(message.Formating) + "}";
+                    "{\"formats\":" + Newtonsoft.Json.JsonConvert.SerializeObject(res) + "}";
+
+            command.Parameters["_formatting"].Value = forms;
                 await command.ExecuteNonQueryAsync(token);
                 return;
-            }
-            catch(Exception ex)
-            {
-                int q = 0;
-            }
+            //}
+            //catch(Exception ex)
+            //{
+            //    int q = 0;
+            //}
 
         }
 

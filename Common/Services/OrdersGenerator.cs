@@ -212,20 +212,20 @@ namespace Common.Services
         #endregion
 
 
-        #region trash
+        //#region trash
 
 
 
-        public async Task SetOrderGeneratedStatusRequest22(CancellationToken token)
-        {
-            using (ConnectionWrapper connection = await connectionsFactory.GetConnectionAsync(token))
-            {
-                using NpgsqlCommand command = connection.Connection.CreateCommand();
-                command.CommandType = System.Data.CommandType.Text;
-                command.CommandText = "update chats set last_time_checked = current_timestamp, has_actual_order=true where is_channel and not pair_id_checked and (has_actual_order is null or not has_actual_order) and not banned;";
-                await command.ExecuteNonQueryAsync(token);
-            }
-        }
+        //public async Task SetOrderGeneratedStatusRequest22(CancellationToken token)
+        //{
+        //    using (ConnectionWrapper connection = await connectionsFactory.GetConnectionAsync(token))
+        //    {
+        //        using NpgsqlCommand command = connection.Connection.CreateCommand();
+        //        command.CommandType = System.Data.CommandType.Text;
+        //        command.CommandText = "update chats set last_time_checked = current_timestamp, has_actual_order=true where is_channel and not pair_id_checked and (has_actual_order is null or not has_actual_order) and not banned;";
+        //        await command.ExecuteNonQueryAsync(token);
+        //    }
+        //}
 
         public async Task SetOrderUnGeneratedStatus(CancellationToken token)
         {
@@ -238,140 +238,140 @@ namespace Common.Services
             }
         }
 
-        public async Task CreateHistoryLoadingOrders(int limit = -1)
-        {
-            try
-            {
-                using (NpgsqlConnection connection = new NpgsqlConnection(Options.ConnectionString))
-                {
-                    await connection.OpenAsync(cts.Token);
-                    using NpgsqlCommand command = CreateAndConfigureCommand(connection, DateTime.Now - Options.OrderGenerationTimeSpan, "get_chats_for_history");
-                    using NpgsqlDataReader reader = await command.ExecuteReaderAsync(cts.Token);
-                    int count = 0;
-                    while (!cts.IsCancellationRequested && await reader.ReadAsync(cts.Token))
-                    {
-                        try
-                        {
-                            if (limit > 0 && count > limit) return;
-                            long ChatId = reader.GetInt64(0);
-                            long PairId = reader.IsDBNull(1) ? 0 : reader.GetInt64(1);
-                            long Offset = reader.GetInt64(2);
-                            DateTime LastUpdate = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3);
-                            bool PairChecked = reader.IsDBNull(4) ? true : reader.GetBoolean(4);
-                            string Username = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
-                            string PairUsername = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
+        //public async Task CreateHistoryLoadingOrders(int limit = -1)
+        //{
+        //    try
+        //    {
+        //        using (NpgsqlConnection connection = new NpgsqlConnection(Options.ConnectionString))
+        //        {
+        //            await connection.OpenAsync(cts.Token);
+        //            using NpgsqlCommand command = CreateAndConfigureCommand(connection, DateTime.Now - Options.OrderGenerationTimeSpan, "get_chats_for_history");
+        //            using NpgsqlDataReader reader = await command.ExecuteReaderAsync(cts.Token);
+        //            int count = 0;
+        //            while (!cts.IsCancellationRequested && await reader.ReadAsync(cts.Token))
+        //            {
+        //                try
+        //                {
+        //                    if (limit > 0 && count > limit) return;
+        //                    long ChatId = reader.GetInt64(0);
+        //                    long PairId = reader.IsDBNull(1) ? 0 : reader.GetInt64(1);
+        //                    long Offset = reader.GetInt64(2);
+        //                    DateTime LastUpdate = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3);
+        //                    bool PairChecked = reader.IsDBNull(4) ? true : reader.GetBoolean(4);
+        //                    string Username = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
+        //                    string PairUsername = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
 
-                            if (!state.Orders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.History; }))
-                            {
-                                Order order = new Order()
-                                {
-                                    Id = ChatId,
-                                    Link = Username,
-                                    Offset = Offset,
-                                    PairId = PairId,
-                                    PairLink = PairUsername,
-                                    Type = OrderType.History
-                                };
-                                state.Orders.Enqueue(order);
-                                count++;
-                            }
-                        }
-                        catch (InvalidCastException ex) { logger.Warn(ex); }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex, "Error while UpdateOrdersCreation");
-            }
+        //                    if (!state.Orders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.History; }))
+        //                    {
+        //                        Order order = new Order()
+        //                        {
+        //                            Id = ChatId,
+        //                            Link = Username,
+        //                            Offset = Offset,
+        //                            PairId = PairId,
+        //                            PairLink = PairUsername,
+        //                            Type = OrderType.History
+        //                        };
+        //                        state.Orders.Enqueue(order);
+        //                        count++;
+        //                    }
+        //                }
+        //                catch (InvalidCastException ex) { logger.Warn(ex); }
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        logger.Error(ex, "Error while UpdateOrdersCreation");
+        //    }
 
-        }
-        public async Task CreateGroupHistoryLoadingOrders()
-        {
-            try
-            {
-                using (NpgsqlConnection connection = new NpgsqlConnection(Options.ConnectionString))
-                {
-                    await connection.OpenAsync(cts.Token);
-                    using NpgsqlCommand command = CreateAndConfigureCommand(connection, DateTime.Now - Options.OrderGenerationTimeSpan, "get_groups_for_history");
-                    using NpgsqlDataReader reader = await command.ExecuteReaderAsync(cts.Token);
-                    while (!cts.IsCancellationRequested && await reader.ReadAsync(cts.Token))
-                    {
-                        try
-                        {
-                            long ChatId = reader.GetInt64(0);
-                            long PairId = reader.IsDBNull(1) ? 0 : reader.GetInt64(1);
-                            long Offset = reader.GetInt64(2);
-                            DateTime LastUpdate = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3);
-                            bool PairChecked = reader.IsDBNull(4) ? true : reader.GetBoolean(4);
-                            string Username = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
-                            string PairUsername = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
-                            Order order = new Order()
-                            {
-                                Id = ChatId,
-                                Link = Username,
-                                Offset = Offset,
-                                PairId = PairId,
-                                PairLink = PairUsername,
-                                Type = OrderType.History
-                            };
-                            state.MaxPriorityOrders.Enqueue(order);
-                        }
-                        catch (InvalidCastException ex) { logger.Warn(ex); }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex, "Error while UpdateOrdersCreation");
-            }
+        //}
+        //public async Task CreateGroupHistoryLoadingOrders()
+        //{
+        //    try
+        //    {
+        //        using (NpgsqlConnection connection = new NpgsqlConnection(Options.ConnectionString))
+        //        {
+        //            await connection.OpenAsync(cts.Token);
+        //            using NpgsqlCommand command = CreateAndConfigureCommand(connection, DateTime.Now - Options.OrderGenerationTimeSpan, "get_groups_for_history");
+        //            using NpgsqlDataReader reader = await command.ExecuteReaderAsync(cts.Token);
+        //            while (!cts.IsCancellationRequested && await reader.ReadAsync(cts.Token))
+        //            {
+        //                try
+        //                {
+        //                    long ChatId = reader.GetInt64(0);
+        //                    long PairId = reader.IsDBNull(1) ? 0 : reader.GetInt64(1);
+        //                    long Offset = reader.GetInt64(2);
+        //                    DateTime LastUpdate = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3);
+        //                    bool PairChecked = reader.IsDBNull(4) ? true : reader.GetBoolean(4);
+        //                    string Username = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
+        //                    string PairUsername = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
+        //                    Order order = new Order()
+        //                    {
+        //                        Id = ChatId,
+        //                        Link = Username,
+        //                        Offset = Offset,
+        //                        PairId = PairId,
+        //                        PairLink = PairUsername,
+        //                        Type = OrderType.History
+        //                    };
+        //                    state.MaxPriorityOrders.Enqueue(order);
+        //                }
+        //                catch (InvalidCastException ex) { logger.Warn(ex); }
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        logger.Error(ex, "Error while UpdateOrdersCreation");
+        //    }
 
-        }
-        public async Task CreateGetFullChannelOrders(int limit = -1)
-        {
-            try
-            {
-                using (NpgsqlConnection connection = new NpgsqlConnection(Options.ConnectionString))
-                {
-                    await connection.OpenAsync(cts.Token);
-                    using NpgsqlCommand command = CreateAndConfigureCommand(connection, DateTime.Now, "get_unrequested_channels");
-                    using NpgsqlDataReader reader = await command.ExecuteReaderAsync(cts.Token);
-                    int count = 0;
-                    while (!cts.IsCancellationRequested && await reader.ReadAsync(cts.Token))
-                    {
-                        if (limit > 0 && count > limit) return;
-                        try
-                        {
-                            long ChatId = reader.GetInt64(0);
-                            long PairId = reader.IsDBNull(1) ? 0 : reader.GetInt64(1);
-                            long Offset = reader.GetInt64(2);
-                            DateTime LastUpdate = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3);
-                            bool PairChecked = reader.IsDBNull(4) ? true : reader.GetBoolean(4);
-                            string Username = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
-                            string PairUsername = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
+        //}
+        //public async Task CreateGetFullChannelOrders(int limit = -1)
+        //{
+        //    try
+        //    {
+        //        using (NpgsqlConnection connection = new NpgsqlConnection(Options.ConnectionString))
+        //        {
+        //            await connection.OpenAsync(cts.Token);
+        //            using NpgsqlCommand command = CreateAndConfigureCommand(connection, DateTime.Now, "get_unrequested_channels");
+        //            using NpgsqlDataReader reader = await command.ExecuteReaderAsync(cts.Token);
+        //            int count = 0;
+        //            while (!cts.IsCancellationRequested && await reader.ReadAsync(cts.Token))
+        //            {
+        //                if (limit > 0 && count > limit) return;
+        //                try
+        //                {
+        //                    long ChatId = reader.GetInt64(0);
+        //                    long PairId = reader.IsDBNull(1) ? 0 : reader.GetInt64(1);
+        //                    long Offset = reader.GetInt64(2);
+        //                    DateTime LastUpdate = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3);
+        //                    bool PairChecked = reader.IsDBNull(4) ? true : reader.GetBoolean(4);
+        //                    string Username = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
+        //                    string PairUsername = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
 
-                            Order order = new Order() { Id = ChatId, Link = Username, Offset = Offset, PairId = PairId, PairLink = PairUsername, Time = 30 };
-                            if (!PairChecked)
-                            {
-                                if (!state.MaxPriorityOrders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.GetFullChannel; }))
-                                {
-                                    order.Type = OrderType.GetFullChannel;
-                                    state.MaxPriorityOrders.Enqueue(order);
-                                    count++;
-                                }
-                            }
-                        }
-                        catch (InvalidCastException ex) { logger.Warn(ex); }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex, "Error while GetFullChannelOrdersCreation");
-            }
-        }
+        //                    Order order = new Order() { Id = ChatId, Link = Username, Offset = Offset, PairId = PairId, PairLink = PairUsername, Time = 30 };
+        //                    if (!PairChecked)
+        //                    {
+        //                        if (!state.MaxPriorityOrders.Any((order) => { return order.Id == ChatId && order.Type == OrderType.GetFullChannel; }))
+        //                        {
+        //                            order.Type = OrderType.GetFullChannel;
+        //                            state.MaxPriorityOrders.Enqueue(order);
+        //                            count++;
+        //                        }
+        //                    }
+        //                }
+        //                catch (InvalidCastException ex) { logger.Warn(ex); }
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        logger.Error(ex, "Error while GetFullChannelOrdersCreation");
+        //    }
+        //}
 
-        #endregion
+        //#endregion
 
 
 

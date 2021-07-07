@@ -25,8 +25,8 @@ namespace DataFair.Models
             Order order = new Order();
             order.OrderId = moq.OrderId;
             order.Id = moq.Id;
-            order.Link = moq.Link;
-            order.PairLink = moq.PairLink;
+            order.Link = moq.Link ?? string.Empty;
+            order.PairLink = moq.PairLink ?? string.Empty;
             order.Offset = moq.OrderId;
             order.PairId = moq.PairId;
             order.PairOffset = moq.PairOffset;

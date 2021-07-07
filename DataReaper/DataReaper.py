@@ -126,7 +126,15 @@ class TgDataGetter():
 				
 				try:
 					if isinstance( message.media, telethon.types.MessageMediaPoll):
-						message_for_send.Media = TgDataGetter.create_json(1,message.media.poll.id,'"'+str(message.media)+'"')
+						question = message.media.poll.question;
+						answers = []
+						for ans in message.media.poll.answers:
+							answers.append(ans.text);
+						temp_dict = {}
+						temp_dict["ansvers"]=answers;
+						temp_dict["question"] = question
+						content  = json.dumps(temp_dict)
+						message_for_send.Media = TgDataGetter.create_json(5,message.media.poll.id,'"'+url+'"')
 					elif isinstance( message.media, telethon.types.MessageMediaDocument):
 						message_for_send.Media = TgDataGetter.create_json(2,message.media.document.id,'')
 					elif isinstance( message.media, telethon.types.MessageMediaPhoto):
@@ -137,8 +145,9 @@ class TgDataGetter():
 							id  = message.media.webpage.id
 							url = message.media.webpage.url
 							message_for_send.Media = TgDataGetter.create_json(type,id,'"'+url+'"')
-					else:
-						message_for_send.Media = TgDataGetter.create_json(0,-1,json.dumps(message.media,cls=CustomEncoder)) 
+
+					#else:
+						#message_for_send.Media = TgDataGetter.create_json(0,-1,json.dumps(message.media,cls=CustomEncoder)) 
 				except BaseException as e:
 					pass
 
@@ -460,8 +469,8 @@ class TgDataGetter():
 
 
 time.sleep(2);
-grpc_host =os.environ.get('grpc_host') 
-collector_type =os.environ.get('type') 
+grpc_host ="localhost:5005"#os.environ.get('grpc_host') 
+collector_type ="main"#os.environ.get('type') 
 
 channel = grpc.insecure_channel(grpc_host)
 config_stub = Configurator_pb2_grpc.ConfiguratorStub(channel);
