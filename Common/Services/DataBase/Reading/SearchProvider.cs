@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Services.DataBase.Interfaces;
 using Npgsql;
 using System;
 using System.Collections.Generic;
@@ -11,35 +12,44 @@ namespace Common.Services.DataBase
 {
     public class SearchProvider
     {
-        public enum SearchType
-        {
-            search_period = 0,
-            search_name_period = 1,
-            search_in_channel = 2,
-        }
         public readonly ConnectionsFactory connectionPoolManager;
-        public SearchProvider(ConnectionsFactory connectionPoolManager)
+        public readonly ISearchResultReciever searchResultReciever;
+        public SearchProvider(ConnectionsFactory connectionPoolManager, ISearchResultReciever searchResultReciever)
         {
             this.connectionPoolManager = connectionPoolManager;
+            this.searchResultReciever = searchResultReciever;
         }
 
-        public async Task<List<SearchResult>> CommonSearch(SearchType storedProcedure,
-            string request, 
-            DateTime startDt, 
+        private async Task Search(SearchType storedProcedure,
+            string request,
+            DateTime startDt,
             DateTime endDt,
-            int limit, 
-            bool is_channel, 
-            bool is_group, 
-            CancellationToken token, 
-            long[] chat_ids =null)
+            int limit,
+            bool is_channel,
+            bool is_group,
+            CancellationToken token,
+            params long[] chat_ids)
         {
             try
             {
-
+                string storedProcedureName = null; ;
+                switch (storedProcedure)
+                {
+                    case SearchType.SearchNamePeriod:
+                        storedProcedureName = "search_name_period";
+                        break;
+                    case SearchType.SearchInChannel:
+                        storedProcedureName = "search_in_channel";
+                        break;
+                    case SearchType.SearchPeriod:
+                        storedProcedureName = "search_period";
+                        break;
+                    default: return;
+                }
                 using (ConnectionWrapper connectionWrapper = await connectionPoolManager.GetConnectionAsync(token))
                 {
                     NpgsqlCommand searchCommand = connectionWrapper.Connection.CreateCommand();
-                    searchCommand.CommandText = storedProcedure.ToString();
+                    searchCommand.CommandText = storedProcedureName;
                     searchCommand.CommandType = System.Data.CommandType.StoredProcedure;
                     searchCommand.Parameters.Add(new NpgsqlParameter("request", NpgsqlTypes.NpgsqlDbType.Text));
                     searchCommand.Parameters.Add(new NpgsqlParameter("lim", NpgsqlTypes.NpgsqlDbType.Integer));
@@ -55,31 +65,64 @@ namespace Common.Services.DataBase
                     searchCommand.Parameters["_is_group"].Value = is_group;
                     searchCommand.Parameters["_is_channel"].Value = is_channel;
 
-                    if (chat_ids != null && storedProcedure == SearchType.search_in_channel)
+                    if (chat_ids != null && chat_ids.Length > 0 && storedProcedure == SearchType.SearchInChannel)
                     {
-                        searchCommand.Parameters.Add(new NpgsqlParameter("ids", NpgsqlTypes.NpgsqlDbType.Array|NpgsqlTypes.NpgsqlDbType.Bigint));
+                        searchCommand.Parameters.Add(new NpgsqlParameter("ids", NpgsqlTypes.NpgsqlDbType.Array | NpgsqlTypes.NpgsqlDbType.Bigint));
                         searchCommand.Parameters["ids"].Value = chat_ids;
                     }
 
                     using NpgsqlDataReader reader = await searchCommand.ExecuteReaderAsync();
-                    List<SearchResult> results = new List<SearchResult>();
+                    //List<SearchResult> results = new List<SearchResult>();
 
                     while (await reader.ReadAsync())
                     {
-                        if (!reader.IsDBNull(0)&&!reader.IsDBNull(1))
-                            results.Add(new SearchResult() {Link= reader.GetString(0),Text = reader.GetString(1)
-                          });
+                        if (!reader.IsDBNull(0) && !reader.IsDBNull(1))
+                            searchResultReciever.Recieve(new SearchResult()
+                            {
+                                Link = reader.GetString(0),
+                                Text = reader.GetString(1)
+                            });
                     }
-                    return results;
+                    //searchResultReciever.IsComplited = true;
+                    //return results;
                 }
             }
             catch (Exception ex)
             {
-                return new List<SearchResult>() { new SearchResult() {Link=ex.StackTrace, Text=ex.Message } };
+                //return new List<SearchResult>() { new SearchResult() {Link=ex.StackTrace, Text=ex.Message } };
             }
         }
+        public async Task CommonSearch(SearchType storedProcedure,
+            string request, 
+            DateTime startDt, 
+            DateTime endDt,
+            int limit, 
+            bool is_channel, 
+            bool is_group, 
+            CancellationToken token, 
+            params long [] chat_ids)
+        {
+            double days = Math.Round(endDt.Subtract(startDt).TotalDays);
+            if (days > 2)
+            {
+                List<Task> tasks = new List<Task>();
+                int i = 0;
+                for (i = 1; i <= days && i<=14; i++)
+                {
+                    tasks.Add(Search(storedProcedure, request, endDt.AddDays(-i), endDt.AddDays(-i+1), limit, is_channel, is_group, token, chat_ids));
+                }
+                DateTime dt = endDt.AddDays(-i);
+                tasks.Add(Search(storedProcedure, request,startDt , dt, limit, is_channel, is_group, token, chat_ids));
+                Task.WaitAll(tasks.ToArray());
+            }
+            else
+            {
+                await Search(storedProcedure, request, startDt, endDt, limit, is_channel, is_group, token, chat_ids);
+            }
+            
+        }
 
-        public async Task<List<SearchResult>> PersonSearch(int limit, long id,CancellationToken token)
+        public async Task PersonSearch(int limit, long id,CancellationToken token)
         {
             try
             {
@@ -97,23 +140,23 @@ namespace Common.Services.DataBase
 
 
                     using NpgsqlDataReader reader = await searchCommand.ExecuteReaderAsync();
-                    List<SearchResult> results = new List<SearchResult>();
+                    //List<SearchResult> results = new List<SearchResult>();
 
                     while (await reader.ReadAsync())
                     {
                         if (!reader.IsDBNull(0) && !reader.IsDBNull(1))
-                            results.Add(new SearchResult()
+                            searchResultReciever.Recieve(new SearchResult()
                             {
                                 Link = reader.GetString(0),
                                 Text = reader.GetString(1)
                             });
                     }
-                    return results;
+                    //return results;
                 }
             }
             catch (Exception ex)
             {
-                return new List<SearchResult>();
+               // return new List<SearchResult>();
             }
         }
 

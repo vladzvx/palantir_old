@@ -30,7 +30,5 @@ namespace Bot.Service.Controllers
             cancellationTokenSource.Cancel();
             return "ok";
         }
-
-
     }
 }

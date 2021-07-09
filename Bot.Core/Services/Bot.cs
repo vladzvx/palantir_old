@@ -1,5 +1,7 @@
 ﻿using Bot.Core.Interfaces;
 using Bot.Core.Services;
+using Common.Services.Interfaces;
+using Grpc.Net.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,13 +17,11 @@ namespace Bot.Core.Services
     {
         private readonly protected TelegramBotClient botClient;
         private readonly CancellationToken cancellationToken;
-        private readonly HttpClient httpClient;
-        public Bot(IBotSettings settings, CancellationTokenSource cancellationTokenSource,HttpClient httpClient)
+        public Bot(IBotSettings settings, IServiceProvider serviceProvider, CancellationTokenSource cancellationTokenSource)
         {
             botClient = new TelegramBotClient(settings.Token);
             cancellationToken = cancellationTokenSource.Token;
-            this.httpClient = httpClient;
-            BotMessageHandler.httpClient = httpClient;
+            BotMessageHandler.serviceProvider = serviceProvider;
         }
 
         public void Start()

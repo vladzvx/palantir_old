@@ -11,7 +11,7 @@ namespace Common.Models
 {
     public class SearchRequest
     {
-        public SearchProvider.SearchType searchType { get; set; }
+        public SearchType searchType { get; set; }
         public DateTime startDT { get; set; } = new DateTime(2014, 1, 1);
         public DateTime endDT { get; set; } = new DateTime(2050, 1, 1);
         public string Request { get; set; }

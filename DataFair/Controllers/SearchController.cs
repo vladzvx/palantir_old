@@ -7,15 +7,18 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using SearchRequest = Common.Models.SearchRequest;
 
 namespace DataFair.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class SearchController
+    public class SearchController :ControllerBase
     {
         private readonly SearchProvider searchProvider;
 
@@ -28,15 +31,17 @@ namespace DataFair.Controllers
         [EnableCors()]
         public async Task<string> SimpleSearch(SearchRequest req,CancellationToken token)
         {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(await searchProvider.CommonSearch(req.searchType,
-                req.Request,req.startDT,req.endDT,req.Limit,req.isChannel, req.isGroup,token,req.ChatIds));
+            await searchProvider.CommonSearch(req.searchType,
+                req.Request, req.startDT, req.endDT, req.Limit, req.isChannel, req.isGroup, token, req.ChatIds);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(searchProvider.searchResultReciever.ViewResults());
         }
 
         [HttpPost("person")]
         [EnableCors()]
         public async Task<string> GetPersonMessages(PersonSearchRequest req, CancellationToken token)
         {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(await searchProvider.PersonSearch(req.Limit,req.Id,token));
+            await searchProvider.PersonSearch(req.Limit, req.Id, token);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(searchProvider.searchResultReciever.ViewResults());
         }
     }
 }

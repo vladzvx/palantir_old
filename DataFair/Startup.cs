@@ -3,6 +3,7 @@ using Common.Services;
 using Common.Services.DataBase;
 using Common.Services.DataBase.DataProcessing;
 using Common.Services.DataBase.Interfaces;
+using Common.Services.DataBase.Reading;
 using Common.Services.gRPC;
 using Common.Services.Interfaces;
 using DataFair.Services;
@@ -40,6 +41,7 @@ namespace DataFair
             services.AddTransient<IWriterCore<Message>,MessagesWriterCore>();
             services.AddTransient<IWriterCore<Entity>,EntityWriterCore>();
             services.AddTransient<IWriterCore,WriterCore>();
+            services.AddTransient<ISearchResultReciever, StreamSearchResiever>();
             services.AddTransient<ICommonReader<ChatInfo>,ChatInfoReader>();
             
             services.AddTransient<StateReport>();
@@ -74,6 +76,7 @@ namespace DataFair
             {
                 endpoints.MapGrpcService<OrderBoardService>();
                 endpoints.MapGrpcService<ConfiguratorService>();
+                endpoints.MapGrpcService<SearchService>();
 
                 endpoints.MapControllers();
             });

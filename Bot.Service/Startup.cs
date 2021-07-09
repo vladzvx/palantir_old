@@ -1,6 +1,11 @@
 using Bot.Core.Interfaces;
 using Bot.Core.Services;
 using Bot.Service.Services;
+using Common.Services.DataBase.Interfaces;
+using Common.Services.DataBase.Reading;
+using Common.Services.gRPC;
+using Common.Services.Interfaces;
+using Grpc.Net.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -19,16 +24,20 @@ namespace Bot.Service
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            //services.AddControllers();
 
-            services.AddSingleton(new HttpClient());
             services.AddSingleton(new CancellationTokenSource());
             services.AddSingleton<IBotSettings, BotSettings>();
-
+            IGrpcSettings grpcSettings = new GrpcSettings();
+            services.AddSingleton(GrpcChannel.ForAddress(grpcSettings.Url));
             services.AddHostedService<BotsEntryPoint>();
 
             services.AddTransient<BotMessageHandler>();
+            services.AddTransient<SearchClient>();
+            services.AddTransient<ISearchResultReciever, StreamSearchResiever>();
             services.AddTransient<Bot.Core.Services.Bot>();
+            AppContext.SetSwitch(
+    "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -40,10 +49,6 @@ namespace Bot.Service
 
             app.UseRouting();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
         }
     }
 }
