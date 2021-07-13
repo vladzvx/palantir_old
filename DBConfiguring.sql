@@ -666,33 +666,46 @@ $$LANGUAGE plpgsql;
 alter table chats add column finders text[]
 
 
-create or replace function search_period(request text,dt1 timestamp,dt2 timestamp, lim int, _is_group bool, _is_channel bool) returns table (link text, text text) as
+create or replace function search_name_period(request text,dt1 timestamp,dt2 timestamp, lim int, _is_group bool, _is_channel bool) returns table (url text, te text) as
 $$
+    declare
+        query tsquery;
     begin
+        query=to_tsquery('my_default',replace(request))::tsquery;
         if (_is_group and _is_channel) then
-        return query SELECT ('https://t.me/'||COALESCE(username,'c/'||(chat_id::text))||'/'||messages.id)::text, messages.text from messages inner join chats c on c.id = messages.chat_id
-        WHERE to_tsquery('combo',replace(request))::tsquery @@ vectorised_text_combo and message_timestamp>=dt1 and message_timestamp<dt2
-        LIMIT lim;
-            else
-        return query SELECT ('https://t.me/'||COALESCE(username,'c/'||(chat_id::text))||'/'||messages.id)::text, messages.text from messages inner join chats c on c.id = messages.chat_id
-        WHERE to_tsquery('combo',replace(request))::tsquery @@ vectorised_text_combo and message_timestamp>=dt1 and message_timestamp<dt2 and c.is_channel=_is_channel and c.is_group=_is_group
-        LIMIT lim;
+            return query
+                with sel as(
+                SELECT username, chat_id, messages.id as id, messages.text as te,(vectorised_text_my_default <=> query)::float4 as rank from messages inner join chats c on c.id = messages.chat_id
+            WHERE query @@ vectorised_text_my_default and message_timestamp>=dt1 and message_timestamp<dt2 order by rank
+            LIMIT lim) select ('https://t.me/'||COALESCE(sel.username,'c/'||(sel.chat_id::text))||'/'||sel.id)::text, sel.te from sel;
+        else
+            return query
+            with sel as(
+                SELECT username, chat_id, messages.id as id, messages.text as te,(vectorised_text_my_default <=> query)::float4 as rank  from messages inner join chats c on c.id = messages.chat_id
+            WHERE query @@ vectorised_text_my_default and message_timestamp>=dt1 and message_timestamp<dt2 and c.is_channel=_is_channel and c.is_group=_is_group order by rank
+            LIMIT lim) select ('https://t.me/'||COALESCE(sel.username,'c/'||(sel.chat_id::text))||'/'||sel.id)::text, sel.te from sel;
         end if;
-
     end;
 $$ LANGUAGE plpgsql;
 
-create or replace function search_name_period(request text,dt1 timestamp,dt2 timestamp, lim int, _is_group bool, _is_channel bool) returns table (link text, text text) as
+create or replace function search_period(request text,dt1 timestamp,dt2 timestamp, lim int, _is_group bool, _is_channel bool) returns table (url text, te text) as
 $$
+    declare
+        query tsquery;
     begin
+        query=to_tsquery('combo',replace(request))::tsquery;
         if (_is_group and _is_channel) then
-            return query SELECT ('https://t.me/'||COALESCE(username,'c/'||(chat_id::text))||'/'||messages.id)::text, messages.text from messages inner join chats c on c.id = messages.chat_id
-            WHERE to_tsquery('my_default',replace(request))::tsquery @@ vectorised_text_my_default and message_timestamp>=dt1 and message_timestamp<dt2
-            LIMIT lim;
+            return query
+                with sel as(
+                SELECT username, chat_id, messages.id as id, messages.text as te,(vectorised_text_combo <=> query)::float4 as rank from messages inner join chats c on c.id = messages.chat_id
+            WHERE query @@ vectorised_text_combo and message_timestamp>=dt1 and message_timestamp<dt2 order by rank
+            LIMIT lim) select ('https://t.me/'||COALESCE(sel.username,'c/'||(sel.chat_id::text))||'/'||sel.id)::text, sel.te from sel;
         else
-            return query SELECT ('https://t.me/'||COALESCE(username,'c/'||(chat_id::text))||'/'||messages.id)::text, messages.text from messages inner join chats c on c.id = messages.chat_id
-            WHERE to_tsquery('my_default',replace(request))::tsquery @@ vectorised_text_my_default and message_timestamp>=dt1 and message_timestamp<dt2 and c.is_channel=_is_channel and c.is_group=_is_group
-            LIMIT lim;
+            return query
+            with sel as(
+                SELECT username, chat_id, messages.id as id, messages.text as te,(vectorised_text_combo <=> query)::float4 as rank  from messages inner join chats c on c.id = messages.chat_id
+            WHERE query @@ vectorised_text_combo and message_timestamp>=dt1 and message_timestamp<dt2 and c.is_channel=_is_channel and c.is_group=_is_group order by rank
+            LIMIT lim) select ('https://t.me/'||COALESCE(sel.username,'c/'||(sel.chat_id::text))||'/'||sel.id)::text, sel.te from sel;
         end if;
     end;
 $$ LANGUAGE plpgsql;
