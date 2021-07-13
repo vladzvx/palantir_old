@@ -254,7 +254,7 @@ namespace Bot.Core.Services
                     CancellationTokenSource = new CancellationTokenSource();
                     SearchClient searchClient = (SearchClient)serviceProvider.GetService(typeof(SearchClient));
                     SearchingTask = searchClient.Search(GetRequest(update), CancellationTokenSource.Token);
-                    MessagesSender messagesSender = new MessagesSender(botClient, update.Message.Chat.Id, CancellationTokenSource.Token);               
+                    MessagesSender messagesSender = new MessagesSender(botClient, update.Message.Chat.Id, CancellationTokenSource.Token, Limit);               
                     Task SendingTask = Task.Factory.StartNew(async () =>
                     {
                         int count = 0;
