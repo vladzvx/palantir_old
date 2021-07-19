@@ -45,7 +45,6 @@ namespace Bot.Core.Services
         }
         public void Dispose()
         {
-            botClient.StartReceiving<BotMessageHandler>();
         }
 
         #region subclasses
@@ -70,11 +69,9 @@ namespace Bot.Core.Services
             Year
         }
 
-
         public class FinitStateMachine
         {
             public static IServiceProvider serviceProvider;
-            public readonly string Token;
             public readonly ITelegramBotClient botClient;
             public readonly ChatId chatId;
             private State _state;

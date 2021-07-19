@@ -24,15 +24,12 @@ namespace Bot.Service
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddControllers();
-
             services.AddSingleton(new CancellationTokenSource());
             services.AddSingleton<IBotSettings, BotSettings>();
             IGrpcSettings grpcSettings = new GrpcSettings();
             services.AddSingleton(GrpcChannel.ForAddress(grpcSettings.Url));
             services.AddHostedService<BotsEntryPoint>();
 
-            services.AddTransient<BotMessageHandler>();
             services.AddTransient<SearchClient>();
             services.AddTransient<ISearchResultReciever, StreamSearchResiever>();
             services.AddTransient<Bot.Core.Services.Bot>();
