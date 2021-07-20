@@ -48,5 +48,5 @@ jobs:
             docker rm search_bot2
             docker login -u ${{ secrets.DOCKER_HUB_LOGIN }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
             docker pull vladzvx/tg-data-miner:data-fair-bot
-            docker run --name search_bot -d -p 5003:5003 --env GrpcUrl=${{ secrets.MAIN_HOST }} --env Token=${{ secrets.PROD_SEARCH_BOT_TOKEN2 }} vladzvx/tg-data-miner:data-fair-bot
+            docker run --name search_bot -d -p 5003:5003 --env GrpcUrl=${{ secrets.MAIN_HOST }}:5005 --env Token=${{ secrets.PROD_SEARCH_BOT_TOKEN2 }} vladzvx/tg-data-miner:data-fair-bot
 
