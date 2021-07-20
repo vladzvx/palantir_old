@@ -33,6 +33,7 @@ jobs:
           push: true
           tags: vladzvx/tg-data-miner:data-fair-bot
           
+          
       - name: deploy
         uses: appleboy/ssh-action@master
         with:
