@@ -33,8 +33,7 @@ namespace Bot.Service
             services.AddTransient<SearchClient>();
             services.AddTransient<ISearchResultReciever, StreamSearchResiever>();
             services.AddTransient<Bot.Core.Services.Bot>();
-            AppContext.SetSwitch(
-    "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
