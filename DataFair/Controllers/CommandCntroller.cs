@@ -57,7 +57,6 @@ namespace DataFair.Controllers
             await ordersGenerator.SetOrderUnGeneratedStatus(token);
             await ordersGenerator.GetUpdatesOrders(token);
             return "ok";
-
         }
 
 
