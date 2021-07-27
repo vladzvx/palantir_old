@@ -271,7 +271,7 @@ $$
                                          forward_from_message_id,
                                          text,
                                          media,
-                                         formatting) values (_message_timestamp,
+                                         formatting, vectorised_text_my_default) values (_message_timestamp,
                                                              _message_id,
                                                              _chat_id,
                                                              _user_id,
@@ -282,7 +282,7 @@ $$
                                                              _forward_from_message_id,
                                                              _text,
                                                              _media,
-                                                             _formatting);
+                                                             _formatting, to_tsvector('my_default', _text));
     end;
 $$ LANGUAGE plpgsql;
 
@@ -588,7 +588,7 @@ $$
     declare
         pattern text;
     begin
-        pattern = '[^0-9абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ ,abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\.:/?\^\\=\-_%\$#@!\n"]*';
+        pattern = '[^0-9абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ ,abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\.:/?\^\\=\-_%\$#@!\n"&]*';
         return regexp_replace(text, pattern, '','g');
     end;
 $$ LANGUAGE plpgsql;
@@ -746,6 +746,8 @@ create table Requests(
     primary key (id)
 )
 
+
+create index messages_id_index on messages (chat_id,id);
 
 
 
