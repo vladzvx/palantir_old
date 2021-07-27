@@ -35,6 +35,68 @@ namespace Common.Services
         #region history and updates
         public async Task GetHistoryOrders(CancellationToken token)
         {
+            await CreateSingleHistoryOrders(token);
+            await SetCreateSingleHistoryOrdersStatus(token);
+        }
+        public async Task<ConcurrentQueue<Order>> CreateSingleHistoryOrders(CancellationToken token)
+        {
+            try
+            {
+                ConcurrentQueue<Order> SingleUpdatesQueue = new ConcurrentQueue<Order>();
+                using (ConnectionWrapper connection = await connectionsFactory.GetConnectionAsync(token))
+                {
+                    using NpgsqlCommand command = connection.Connection.CreateCommand();
+                    command.CommandType = System.Data.CommandType.Text;
+                    command.CommandText = "select id,username,last_message_id,finders from chats where " +
+                        "(has_actual_order is null or not has_actual_order) and not banned and (finders is not null and array_length(finders,1)>0);";
+                    using NpgsqlDataReader reader = await command.ExecuteReaderAsync(token);
+                    while (!token.IsCancellationRequested && await reader.ReadAsync(token))
+                    {
+                        long ChatId = reader.GetInt64(0);
+                        string Username = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
+                        long Offset = reader.IsDBNull(2) ? 1 : reader.GetInt64(2);
+                        string[] Finders = reader.IsDBNull(3) ? new string[0] : (string[])reader.GetValue(3);
+
+                        if (string.IsNullOrEmpty(Username)) continue;
+                        Order order = new Order()
+                        {
+                            Id = ChatId,
+                            Link = Username,
+                            Offset = Offset,
+                            Type = OrderType.History,
+                        };
+                        foreach (string finder in Finders)
+                        {
+                            order.Finders.Add(finder);
+                        }
+                        state.AddOrder(order);
+                        //state.Orders.Enqueue(order);
+
+                    }
+                }
+                return SingleUpdatesQueue;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Error while UpdateOrdersCreation");
+                throw ex;
+            }
+        }
+        public async Task SetCreateSingleHistoryOrdersStatus(CancellationToken token)
+        {
+            using (ConnectionWrapper connection = await connectionsFactory.GetConnectionAsync(token))
+            {
+                using NpgsqlCommand command = connection.Connection.CreateCommand();
+                command.CommandType = System.Data.CommandType.Text;
+                command.CommandText = "update chats set last_time_checked = current_timestamp, has_actual_order=true where " +
+                    "(has_actual_order is null or not has_actual_order) and not banned and (finders is not null and array_length(finders,1)>0);";
+                await command.ExecuteNonQueryAsync(token);
+            }
+        }
+
+
+        public async Task GetUpdatesOrders(CancellationToken token)
+        {
             await CreateSingleUpdatesOrders(token);
             await SetCreateSingleUpdatesOrdersStatus(token);
         }
@@ -47,7 +109,7 @@ namespace Common.Services
                 {
                     using NpgsqlCommand command = connection.Connection.CreateCommand();
                     command.CommandType = System.Data.CommandType.Text;
-                    command.CommandText = "select id,username,last_message_id,finders from chats where (has_actual_order is null or not has_actual_order) and not banned and (finders is not null and array_length(finders,1)>0);";
+                    command.CommandText = "select id,username,last_message_id,finders from chats where (has_actual_order is null or not has_actual_order) and not banned and (finders is not null and array_length(finders,1)>0) and (is_group or pair_id_checked);";
                     using NpgsqlDataReader reader = await command.ExecuteReaderAsync(token);
                     while (!token.IsCancellationRequested && await reader.ReadAsync(token))
                     {
@@ -87,10 +149,11 @@ namespace Common.Services
             {
                 using NpgsqlCommand command = connection.Connection.CreateCommand();
                 command.CommandType = System.Data.CommandType.Text;
-                command.CommandText = "update chats set last_time_checked = current_timestamp, has_actual_order=true where (has_actual_order is null or not has_actual_order) and not banned and (finders is not null and array_length(finders,1)>0);";
+                command.CommandText = "update chats set last_time_checked = current_timestamp, has_actual_order=true where (has_actual_order is null or not has_actual_order) and not banned and (finders is not null and array_length(finders,1)>0) and (is_group or pair_id_checked);";
                 await command.ExecuteNonQueryAsync(token);
             }
         }
+
         #endregion
 
         #region поиск новых групп
