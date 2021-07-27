@@ -749,5 +749,17 @@ create table Requests(
 
 create index messages_id_index on messages (chat_id,id);
 
+create or replace function last_messages_processing() returns void as
+$$
+    declare
+        current_id bigint;
+        next_current_id bigint;
+    begin
+        current_id=(select max(data1) from temp where id=1);
+        next_current_id = (select max(message_db_id) from messages);
+        update chats c set test = (select max(id) from messages m where chat_id=c.id and message_db_id>current_id) where not banned;
+        update temp set data1=next_current_id where id=1;
+    end;
+$$ LANGUAGE plpgsql;
 
 

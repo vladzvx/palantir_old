@@ -59,28 +59,25 @@ namespace Common.Services
             {
                 while (MaxPriorityOrders.TryDequeue(out Order temp))
                 {
-                    if (temp.status == Order.Status.Created)
+                    if (temp.TryGet())
                     {
                         order = temp;
-                        temp.status = Order.Status.Getted;
                         return true;
                     }
                 }
                 while (MiddlePriorityOrders.TryDequeue(out Order temp))
                 {
-                    if (temp.status == Order.Status.Created)
+                    if (temp.TryGet())
                     {
                         order = temp;
-                        temp.status = Order.Status.Getted;
                         return true;
                     }
                 }
                 while (Orders.TryDequeue(out Order temp))
                 {
-                    if (temp.status == Order.Status.Created)
+                    if (temp.TryGet())
                     {
                         order = temp;
-                        temp.status = Order.Status.Getted;
                         return true;
                     }
                 }
@@ -89,9 +86,8 @@ namespace Common.Services
             {
                 while (TargetedOrders.ContainsKey(req.Finder) && TargetedOrders[req.Finder].TryDequeue(out order))
                 {
-                    if (order.status == Order.Status.Created)
+                    if (order.TryGet())
                     {
-                        order.status = Order.Status.Getted;
                         return true;
                     }
                 }
