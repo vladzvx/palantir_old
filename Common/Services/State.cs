@@ -15,6 +15,7 @@ namespace Common.Services
         public ConcurrentQueue<Order> MiddlePriorityOrders = new ConcurrentQueue<Order>();
         public ConcurrentQueue<Order> Orders = new ConcurrentQueue<Order>();
         public ConcurrentDictionary<string, ConcurrentQueue<Order>> TargetedOrders = new ConcurrentDictionary<string, ConcurrentQueue<Order>>();
+        public ConcurrentDictionary<string, int> HeavyOrdersCount = new ConcurrentDictionary<string, int>();
         public ConcurrentBag<SessionSettings> SessionStorages = new ConcurrentBag<SessionSettings>();
         public ConcurrentDictionary<string, ConcurrentBag<Common.Collector>> Collectors = new ConcurrentDictionary<string, ConcurrentBag<Collector>>();
         public ConcurrentDictionary<string, Common.SessionSettings> AllSessions = new ConcurrentDictionary<string, SessionSettings>();
@@ -51,7 +52,18 @@ namespace Common.Services
                 Orders.Enqueue(order);
             }
         }
-
+        private void CountHeavyOrder(string collector)
+        {
+            if (HeavyOrdersCount.ContainsKey(collector))
+            {
+                HeavyOrdersCount[collector]++;
+            }
+            else
+            {
+                HeavyOrdersCount.TryAdd(collector, 0);
+                HeavyOrdersCount[collector]++;
+            }
+        }
         public bool TryGetOrder(OrderRequest req, out Order order)
         {
             order = empty;

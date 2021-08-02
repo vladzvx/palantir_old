@@ -13,13 +13,22 @@ namespace Common.Services
 {
     public class OrdersManager : IHostedService
     {
+        public enum ExecutingState
+        {
+            Downtime,
+            OrdersCreation,
+            UpdatesLoading,
+            CommonWorking
+        }
+
+        private ExecutingState executingState;
+
         private System.Timers.Timer timer = new System.Timers.Timer(Options.OrderGenerationTimerPeriod);
         private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
         private readonly State state;
         private readonly OrdersGenerator ordersGenerator;
-        private readonly CancellationTokenSource cts = new CancellationTokenSource();
         private readonly object sync = new object();
-        private bool GenerationOn = true;
+        private Task MainTask;
         public OrdersManager(State state, OrdersGenerator ordersGenerator)
         {
             this.state = state;
@@ -49,7 +58,6 @@ namespace Common.Services
         public Task StopAsync(CancellationToken cancellationToken)
         {
             timer.Stop();
-            cts.Cancel();
             return Task.CompletedTask;
         }
     }
