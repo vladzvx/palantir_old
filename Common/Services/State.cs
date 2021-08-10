@@ -52,17 +52,21 @@ namespace Common.Services
                 Orders.Enqueue(order);
             }
         }
-        private void CountHeavyOrder(string collector)
+        public int CountOrders()
         {
-            if (HeavyOrdersCount.ContainsKey(collector))
+            int result = 0;
+            result+= Orders.Count;
+            result += MaxPriorityOrders.Count;
+            result += MiddlePriorityOrders.Count;
+
+            foreach (string finder in TargetedOrders.Keys)
             {
-                HeavyOrdersCount[collector]++;
+                if (TargetedOrders.TryGetValue(finder, out var que))
+                {
+                    result += que.Count;
+                }
             }
-            else
-            {
-                HeavyOrdersCount.TryAdd(collector, 0);
-                HeavyOrdersCount[collector]++;
-            }
+            return result;
         }
         public bool TryGetOrder(OrderRequest req, out Order order)
         {

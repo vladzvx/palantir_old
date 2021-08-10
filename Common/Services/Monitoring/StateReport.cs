@@ -32,12 +32,15 @@ namespace Common.Services
                 }
             }
             SessionsAvaliable = state.SessionStorages.Count;
-            Orders = state.Orders.Count;
-            MaxPriorityOrders = state.MaxPriorityOrders.Count;
-            MiddlePriorityOrders = state.MiddlePriorityOrders.Count;
             Messages = commonWriter.GetQueueCount();
             TotalConnections = connectionsFactory.TotalConnections;
             ConnectionsHotReserve = connectionsFactory.HotReserve;
+
+
+            Orders = state.Orders.Count;
+            MaxPriorityOrders = state.MaxPriorityOrders.Count;
+            MiddlePriorityOrders = state.MiddlePriorityOrders.Count;
+
             TargetOrders = 0;
             foreach (string finder in state.TargetedOrders.Keys)
             {
@@ -46,6 +49,8 @@ namespace Common.Services
                     TargetOrders += que.Count;
                 }
             }
+
+
             DriveInfo[] allDrives = DriveInfo.GetDrives();
             long disk = 0;
             foreach (DriveInfo d in allDrives)

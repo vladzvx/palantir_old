@@ -20,7 +20,7 @@ namespace Common.Services
             UpdatesLoading,
             CommonWorking
         }
-
+        private int totalOrders = 0;
         private ExecutingState executingState;
 
         private System.Timers.Timer timer = new System.Timers.Timer(Options.OrderGenerationTimerPeriod);
@@ -42,7 +42,7 @@ namespace Common.Services
             {
                 try
                 {
-                
+                    
                 }
                 catch { }
                 Monitor.Exit(sync);
