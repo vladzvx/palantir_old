@@ -66,7 +66,7 @@ namespace DataFair.Controllers
         {
             state.ClearOrders();
             await ordersGenerator.SetOrderUnGeneratedStatus(token);
-            await ordersGenerator.GetHistoryOrders(token);
+            await ordersGenerator.GetNewGroupsOrders(token);
             return "ok";
         }
 
