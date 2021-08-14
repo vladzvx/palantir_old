@@ -6,6 +6,7 @@ using Common.Services.DataBase.Interfaces;
 using Common.Services.DataBase.Reading;
 using Common.Services.gRPC;
 using Common.Services.Interfaces;
+using Common.Services.Managers;
 using DataFair.Services;
 using DataFair.Utils;
 using Microsoft.AspNetCore.Builder;
@@ -29,7 +30,7 @@ namespace DataFair
             services.AddSingleton<State>();
             services.AddSingleton<IDataBaseSettings, DataBaseSettings>();
             services.AddSingleton<ICommonWriter,CommonWriter>();
-            services.AddSingleton<LoadManager>();
+            services.AddSingleton<ILoadManager, LoadManager>();
             services.AddSingleton<ConnectionsFactory>();
 
             services.AddSingleton<ICommonWriter<Entity>, CommonWriter<Entity>>();

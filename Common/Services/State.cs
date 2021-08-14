@@ -1,4 +1,5 @@
 ﻿using Common;
+using Common.Services.DataBase.Interfaces;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -9,7 +10,13 @@ namespace Common.Services
 {
     public class State
     {
+        public State(ILoadManager loadManager)
+        {
+            this.loadManager = loadManager;
+        }
+        private readonly ILoadManager loadManager;
         private readonly Order empty = new Order() { Type = OrderType.Empty, status=Order.Status.Executed };
+        private readonly Order sleep = new Order() { Type = OrderType.Sleep, status=Order.Status.Executed, Time=60 };
         public ConcurrentQueue<Report> Reports = new ConcurrentQueue<Report>();
         public ConcurrentQueue<Order> MaxPriorityOrders = new ConcurrentQueue<Order>();
         public ConcurrentQueue<Order> MiddlePriorityOrders = new ConcurrentQueue<Order>();
@@ -70,6 +77,11 @@ namespace Common.Services
         }
         public bool TryGetOrder(OrderRequest req, out Order order)
         {
+            if (loadManager.CheckPauseNecessity())
+            {
+                order = sleep;
+                return true;
+            }
             order = empty;
             if (!req.Banned)
             {
