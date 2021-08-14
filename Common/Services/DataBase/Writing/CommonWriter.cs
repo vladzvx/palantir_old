@@ -24,12 +24,10 @@ namespace Common.Services
         private readonly ConcurrentQueue<object> DataQueue = new ConcurrentQueue<object>();
         private readonly object sync = new object();
         private readonly IWriterCore writerSettings;
-        private readonly LoadManager loadManager;
         private DbConnection Connention;
-        public CommonWriter(LoadManager loadManager, IWriterCore writerSettings)
+        public CommonWriter(IWriterCore writerSettings)
         {
             this.writerSettings = writerSettings;
-            this.loadManager = loadManager;
             Timer = new Timer();
             Timer.Interval = writerSettings.StartWritingInterval;
             Timer.Elapsed += TryStartWriting;

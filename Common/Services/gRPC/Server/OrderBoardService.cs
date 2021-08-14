@@ -27,16 +27,14 @@ namespace Common.Services.gRPC
         private readonly ICommonWriter commonWriter;
         private readonly ICommonWriter<Message> messagesWriter;
         private readonly ICommonWriter<Entity> entitiesWriter;
-        private readonly LoadManager loadManager;
         private readonly ICommonReader<ChatInfo> commonReader;
         public OrderBoardService(State ordersStorage, ICommonWriter commonWriter, ICommonWriter<Message> messagesWriter,
-            ICommonWriter<Entity> entitiesWriter, LoadManager loadManager, ICommonReader<ChatInfo> commonReader)
+            ICommonWriter<Entity> entitiesWriter, ICommonReader<ChatInfo> commonReader)
         {
             this.ordersStorage = ordersStorage;
             this.commonWriter = commonWriter;
             this.entitiesWriter = entitiesWriter;
             this.messagesWriter = messagesWriter;
-            this.loadManager = loadManager;
             this.commonReader = commonReader;
         }
 
