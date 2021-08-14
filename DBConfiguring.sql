@@ -260,6 +260,7 @@ CREATE OR REPLACE FUNCTION add_message(_message_timestamp timestamp,_message_id 
      _text text, _media jsonb, _formatting jsonb) RETURNS void as
 $$
     begin
+           if _message_timestamp>'2021-05-01 00:00:00.000000' then
             insert into public.messages (message_timestamp,
                                          id,
                                          chat_id,
@@ -283,6 +284,31 @@ $$
                                                              _text,
                                                              _media,
                                                              _formatting, to_tsvector('my_default', _text));
+            else
+                    insert into public.messages (message_timestamp,
+                                         id,
+                                         chat_id,
+                                         user_id,
+                                         reply_to,
+                                         thread_start,
+                                         media_group_id,
+                                         forward_from_id,
+                                         forward_from_message_id,
+                                         text,
+                                         media,
+                                         formatting, parsed) values (_message_timestamp,
+                                                             _message_id,
+                                                             _chat_id,
+                                                             _user_id,
+                                                             _reply_to,
+                                                             _thread_start,
+                                                             _media_group_id,
+                                                             _forward_from_id,
+                                                             _forward_from_message_id,
+                                                             _text,
+                                                             _media,
+                                                             _formatting,false);
+        end if;
     end;
 $$ LANGUAGE plpgsql;
 
