@@ -283,7 +283,7 @@ $$
                                                              _forward_from_message_id,
                                                              _text,
                                                              _media,
-                                                             _formatting, to_tsvector('my_default', _text));
+                                                             _formatting, to_tsvector('my_default', _text)) on conflict do nothing;
             else
                     insert into public.messages (message_timestamp,
                                          id,
@@ -307,7 +307,7 @@ $$
                                                              _forward_from_message_id,
                                                              _text,
                                                              _media,
-                                                             _formatting,false);
+                                                             _formatting,false) on conflict do nothing;
         end if;
     end;
 $$ LANGUAGE plpgsql;
