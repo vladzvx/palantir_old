@@ -30,7 +30,24 @@ namespace Common.Services
             command.Parameters["dt"].Value = BoundDateTime;
             return command;
         }
+        #region main methods
 
+        public async Task CreateUpdates(CancellationToken token)
+        {
+            await SetOrderUnGeneratedStatus(token);
+            await GetUpdatesOrders(token);
+        }
+        public async Task GetNewGroups(CancellationToken token)
+        {
+            await SetOrderUnGeneratedStatus(token);
+            await GetNewGroupsOrders(token);
+        }
+
+        public async Task GetConsistenceSupportingOrders(CancellationToken token)
+        {
+
+        }
+        #endregion
 
         #region history and updates
         public async Task GetHistoryOrders(CancellationToken token)

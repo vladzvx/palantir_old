@@ -37,18 +37,8 @@ namespace Common.Services
             ConnectionsHotReserve = connectionsFactory.HotReserve;
 
 
-            Orders = state.Orders.Count;
-            MaxPriorityOrders = state.MaxPriorityOrders.Count;
-            MiddlePriorityOrders = state.MiddlePriorityOrders.Count;
 
-            TargetOrders = 0;
-            foreach (string finder in state.TargetedOrders.Keys)
-            {
-                if (state.TargetedOrders.TryGetValue(finder, out var que))
-                {
-                    TargetOrders += que.Count;
-                }
-            }
+            Orders = state.CountOrders();
 
 
             DriveInfo[] allDrives = DriveInfo.GetDrives();

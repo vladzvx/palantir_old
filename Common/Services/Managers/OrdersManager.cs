@@ -11,54 +11,146 @@ using System.Timers;
 
 namespace Common.Services
 {
-    public class OrdersManager : IHostedService
+    public enum ExecutingState
     {
-        public enum ExecutingState
-        {
-            Downtime,
-            OrdersCreation,
-            UpdatesLoading,
-            CommonWorking
-        }
-        private int totalOrders = 0;
-        private ExecutingState executingState;
+        Started,
+        OrdersCreation,
+        UpdatesLoading,
+        HeavyOrdersExecuting,
+        HistoryLoading
+    }
 
-        private System.Timers.Timer timer = new System.Timers.Timer(Options.OrderGenerationTimerPeriod);
-        private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+    public class OrdersManager :IHostedService
+    {
+        public CancellationTokenSource cancellationTokenSource;
+        public Thread worker;
+
         private readonly State state;
         private readonly OrdersGenerator ordersGenerator;
-        private readonly object sync = new object();
-        private Task MainTask;
+        private int ordersCount;
+        private DateTime lastCycleRestart=DateTime.UtcNow.Date;
+        private bool heavyOrdersDone = false;
+        private ExecutingState executingState { get; set; }
         public OrdersManager(State state, OrdersGenerator ordersGenerator)
         {
             this.state = state;
             this.ordersGenerator = ordersGenerator;
-            timer.Elapsed += TimerAction;
+            ordersCount = state.CountOrders();
+            worker = new Thread(new ParameterizedThreadStart(MainWork));
+            cancellationTokenSource= new CancellationTokenSource();
         }
 
-        private void TimerAction(object sender, ElapsedEventArgs args)
+
+        private void MainWork(object cancellationToken)
         {
-            if (Monitor.TryEnter(sync))
+            if (cancellationToken is CancellationToken token)
             {
-                try
+                while (!token.IsCancellationRequested)
                 {
-                    
+                    TrySwitchStatus();
+                    Thread.Sleep(1 * 60 * 1000);
                 }
-                catch { }
-                Monitor.Exit(sync);
             }
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
+        private bool isWorkStopped()
         {
-            timer.Start();
-            return Task.CompletedTask;
+            int ordersCountOld = ordersCount;
+            ordersCount = state.CountOrders();
+            return ordersCountOld == ordersCount;
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        private void GoToUpdates()
         {
-            timer.Stop();
-            return Task.CompletedTask;
+            executingState = ExecutingState.OrdersCreation;
+            state.ClearOrders();
+            ordersGenerator.SetOrderUnGeneratedStatus(CancellationToken.None).Wait();
+            ordersGenerator.GetUpdatesOrders(CancellationToken.None).Wait();
+            executingState = ExecutingState.UpdatesLoading;
+        }
+
+        private void GoToHistory()
+        {
+            executingState = ExecutingState.OrdersCreation;
+            state.ClearOrders();
+            ordersGenerator.SetOrderUnGeneratedStatus(CancellationToken.None).Wait();
+            ordersGenerator.GetHistoryOrders(CancellationToken.None).Wait();
+            executingState = ExecutingState.HistoryLoading;
+        }
+
+        private void GoToHeavy()
+        {
+            state.ClearOrders();
+            executingState = ExecutingState.OrdersCreation;
+            ordersGenerator.GetNewGroups(CancellationToken.None).Wait();
+            ordersGenerator.GetConsistenceSupportingOrders(CancellationToken.None).Wait();
+            executingState = ExecutingState.HeavyOrdersExecuting;
+        }
+
+        private void TrySwitchStatus()
+        {
+            try
+            {
+                if (DateTime.UtcNow.Subtract(lastCycleRestart).TotalHours > 24)
+                {
+                    lastCycleRestart = DateTime.UtcNow.Date;
+                    GoToUpdates();
+                    heavyOrdersDone = false;
+                }
+                else
+                {
+                    switch (executingState)
+                    {
+                        case ExecutingState.Started:
+                            {
+                                GoToUpdates();
+                                break;
+                            }
+                        case ExecutingState.UpdatesLoading:
+
+                            if (isWorkStopped())
+                            {
+                                if (heavyOrdersDone)
+                                {
+                                    GoToHistory();
+                                }
+                                else
+                                {
+                                    GoToHeavy();
+                                }
+                            }
+                            break;
+                        case ExecutingState.HeavyOrdersExecuting:
+                            if (isWorkStopped())
+                            {
+                                heavyOrdersDone = true;
+                                GoToUpdates();
+                            }
+                            break;
+                        case ExecutingState.HistoryLoading:
+                            if (isWorkStopped())
+                            {
+                                GoToUpdates();
+                            }
+                            break;
+                        default:
+                            break;
+
+                    }
+                }
+
+            }
+            catch { }
+        }
+
+        public async Task StartAsync(CancellationToken cancellationToken)
+        {
+            worker.Start(cancellationTokenSource.Token);
+        }
+
+        public async Task StopAsync(CancellationToken cancellationToken)
+        {
+            cancellationTokenSource.Cancel();
         }
     }
 }
