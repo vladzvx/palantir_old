@@ -96,6 +96,7 @@ namespace Common.Services
                     lastCycleRestart = DateTime.UtcNow.Date;
                     GoToUpdates();
                     heavyOrdersDone = false;
+                    state.ExecutingOrdersJournal.Clear();
                 }
                 else
                 {

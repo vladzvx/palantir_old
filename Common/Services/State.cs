@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace Common.Services
 {
+    public class CounterWrapper
+    {
+        public int count = 1;
+    }
     public class State
     {
         public State(ILoadManager loadManager)
@@ -28,6 +32,7 @@ namespace Common.Services
         public ConcurrentDictionary<string, Common.SessionSettings> AllSessions = new ConcurrentDictionary<string, SessionSettings>();
         public ConcurrentDictionary<string, Common.Collector> AllCollectors = new ConcurrentDictionary<string, Collector>();
 
+        public ConcurrentDictionary<string, CounterWrapper> ExecutingOrdersJournal = new ConcurrentDictionary<string, CounterWrapper>();
         public void ClearOrders()
         {
             Orders.Clear();
@@ -75,6 +80,35 @@ namespace Common.Services
             }
             return result;
         }
+
+        private void TryIncrementCounter(string key)
+        {
+            if (!string.IsNullOrEmpty(key))
+            {
+                if (ExecutingOrdersJournal.TryGetValue(key, out var val))
+                {
+                    val.count++;
+                }
+                else
+                {
+                    ExecutingOrdersJournal.TryAdd(key, new CounterWrapper()) ;
+                }
+            }
+        }
+
+        private bool CheckCounter(string key)
+        {
+            if (!string.IsNullOrEmpty(key))
+            {
+                if (ExecutingOrdersJournal.TryGetValue(key, out var val))
+                {
+                    return val.count < 65;
+                }
+                else return true;
+            }
+            return false;
+        }
+
         public bool TryGetOrder(OrderRequest req, out Order order)
         {
             if (loadManager.CheckPauseNecessity())
@@ -83,12 +117,20 @@ namespace Common.Services
                 return true;
             }
             order = empty;
+
             if (!req.Banned)
             {
+                if (!CheckCounter(req.Finder))
+                {
+                    order = sleep;
+                    return true;
+                }
+
                 while (MaxPriorityOrders.TryDequeue(out Order temp))
                 {
                     if (temp.TryGet())
                     {
+                        TryIncrementCounter(req.Finder);
                         order = temp;
                         return true;
                     }
@@ -97,6 +139,7 @@ namespace Common.Services
                 {
                     if (temp.TryGet())
                     {
+                        TryIncrementCounter(req.Finder);
                         order = temp;
                         return true;
                     }
@@ -105,18 +148,38 @@ namespace Common.Services
                 {
                     if (temp.TryGet())
                     {
+                        TryIncrementCounter(req.Finder);
                         order = temp;
                         return true;
                     }
                 }
             }
+
             if (!string.IsNullOrEmpty(req.Finder))
             {
                 while (TargetedOrders.ContainsKey(req.Finder) && TargetedOrders[req.Finder].TryDequeue(out order))
                 {
-                    if (order.TryGet())
+                    if (order.Type == OrderType.Pair || order.Type == OrderType.GetFullChannel)
                     {
-                        return true;
+                        if (!CheckCounter(req.Finder))
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            if (order.TryGet())
+                            {
+                                TryIncrementCounter(req.Finder);
+                                return true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (order.TryGet())
+                        {
+                            return true;
+                        }
                     }
                 }
             }
