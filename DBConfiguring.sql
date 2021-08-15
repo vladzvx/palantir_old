@@ -61,6 +61,8 @@ create table chats_buffer(
     primary key (id)
 )
 
+create index messages_db_id ON messages (message_db_id);
+
 CREATE TABLE messages_2014_m01 PARTITION OF messages FOR VALUES FROM ('2014-01-01') TO ('2014-02-01');
 CREATE TABLE messages_2014_m02 PARTITION OF messages FOR VALUES FROM ('2014-02-01') TO ('2014-03-01');
 CREATE TABLE messages_2014_m03 PARTITION OF messages FOR VALUES FROM ('2014-03-01') TO ('2014-04-01');
@@ -551,7 +553,7 @@ alter text search configuration public.combo alter mapping for word with rusmorp
 ALTER TEXT SEARCH CONFIGURATION public.combo
     DROP MAPPING FOR email, url,host, url_path, sfloat, float, int,uint;
 
-alter table messages add column parsed bool default false;
+alter table messages add column parsed bool default true;
 alter table messages add column vectorised_text_combo tsvector;
 alter table messages add column vectorised_text_my_default tsvector;
 
