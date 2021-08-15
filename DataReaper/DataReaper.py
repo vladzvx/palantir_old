@@ -471,8 +471,8 @@ class TgDataGetter():
 
 
 time.sleep(2);
-grpc_host ="localhost:5005"#os.environ.get('grpc_host') 
-collector_type ="test"#os.environ.get('type') 
+grpc_host =os.environ.get('grpc_host') 
+collector_type =os.environ.get('type') 
 
 channel = grpc.insecure_channel(grpc_host)
 config_stub = Configurator_pb2_grpc.ConfiguratorStub(channel);
