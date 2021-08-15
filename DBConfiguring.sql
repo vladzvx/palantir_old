@@ -51,7 +51,7 @@ create table public.messages(
     formatting jsonb,
     media_costyl text,
     formatting_costyl text,
-    primary key (message_db_id, message_timestamp),
+    primary key (message_timestamp, chat_id, id),
 )  PARTITION BY RANGE (message_timestamp);
 
 create table chats_buffer(
