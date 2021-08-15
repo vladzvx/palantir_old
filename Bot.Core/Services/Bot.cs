@@ -144,8 +144,8 @@ namespace Bot.Core.Services
                 SearchRequest request = new SearchRequest()
                 {
                     SearchType = SearchType.SearchNamePeriod,
-                    IsChannel = SearchInGroups,
-                    IsGroup = SearchInChannels,
+                    IsChannel = SearchInChannels,
+                    IsGroup = SearchInGroups,
                     Limit = Limit,
                     Request = PreparateRequest(update.Message.Text),
                 };
