@@ -22,6 +22,7 @@ namespace Common.Services
         public int TotalConnections;
         public int ConnectionsHotReserve;
         public long FreeDisk;
+        public string OrderManagerState;
         public StateReport(State state, ICommonWriter<Message> commonWriter, ICommonWriter<Entity> commonWriter2, ConnectionsFactory connectionsFactory)
         {
             foreach (string key in state.Collectors.Keys.ToArray())
@@ -37,9 +38,9 @@ namespace Common.Services
             ConnectionsHotReserve = connectionsFactory.HotReserve;
 
 
-
+            OrderManagerState = state.ordersManager.executingState.ToString();
             Orders = state.CountOrders();
-
+            TargetOrders= state.CountTargetOrders(); 
 
             DriveInfo[] allDrives = DriveInfo.GetDrives();
             long disk = 0;

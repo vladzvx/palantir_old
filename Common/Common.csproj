@@ -31,5 +31,10 @@
     <Protobuf Include="Proto\OrderBoard.proto" GrpcServices="Both" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <Folder Include="Services\DataBase\Interfaces\Новая папка\" />
+  </ItemGroup>
+
 </Project>
 

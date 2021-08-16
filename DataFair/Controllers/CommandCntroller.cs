@@ -2,6 +2,7 @@
 using Common.Services;
 using Common.Services.DataBase;
 using Common.Services.DataBase.DataProcessing;
+using Common.Services.DataBase.Interfaces;
 using DataFair.Models;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -17,11 +18,11 @@ namespace DataFair.Controllers
     [Route("[controller]")]
     public class CommandController
     {
-        private readonly OrdersGenerator ordersGenerator;
+        private readonly IOrdersGenerator ordersGenerator;
         public readonly State state;
         //private readonly CancellationToken token;
 
-        public CommandController(OrdersGenerator ordersGenerator, State state)
+        public CommandController(IOrdersGenerator ordersGenerator, State state)
         {
             this.ordersGenerator = ordersGenerator;
             this.state = state;
@@ -38,24 +39,23 @@ namespace DataFair.Controllers
         }
 
 
-        [HttpPost("GetHistory")]
-        [EnableCors()]
-        public async Task<string> PostRequest3(CancellationToken token)
-        {
-            state.ClearOrders();
-            await ordersGenerator.SetOrderUnGeneratedStatus(token);
-            await ordersGenerator.GetHistoryOrders(token);
-            return "ok";
+        //[HttpPost("GetHistory")]
+        //[EnableCors()]
+        //public async Task<string> PostRequest3(CancellationToken token)
+        //{
+        //    state.ClearOrders();
+        //    await ordersGenerator.SetOrderUnGeneratedStatus(token);
+        //    await ordersGenerator.GetHistoryOrders(token);
+        //    return "ok";
 
-        }
+        //}
 
         [HttpPost("GetUpdates")]
         [EnableCors()]
         public async Task<string> PostRequest8(CancellationToken token)
         {
             state.ClearOrders();
-            await ordersGenerator.SetOrderUnGeneratedStatus(token);
-            await ordersGenerator.GetUpdatesOrders(token);
+            await ordersGenerator.CreateUpdatesOrders(token);
             return "ok";
         }
 
@@ -65,31 +65,30 @@ namespace DataFair.Controllers
         public async Task<string> PostRequest5(CancellationToken token)
         {
             state.ClearOrders();
-            await ordersGenerator.SetOrderUnGeneratedStatus(token);
-            await ordersGenerator.GetNewGroupsOrders(token);
+            await ordersGenerator.CreateGetNewGroupsOrders(token);
             return "ok";
         }
 
-        [HttpPost("create_orders")]
-        [EnableCors()]
-        public async Task<string> PostRequest6(CancellationToken token)
-        {
-            state.ClearOrders();
-            await ordersGenerator.SetOrderUnGeneratedStatus(token);
-            await ordersGenerator.GetNewGroupsOrders(token);
-            await ordersGenerator.GetHistoryOrders(token);
-            return "ok";
-        }
+        //[HttpPost("create_orders")]
+        //[EnableCors()]
+        //public async Task<string> PostRequest6(CancellationToken token)
+        //{
+        //    state.ClearOrders();
+        //    await ordersGenerator.SetOrderUnGeneratedStatus(token);
+        //    await ordersGenerator.GetNewGroupsOrders(token);
+        //    await ordersGenerator.GetHistoryOrders(token);
+        //    return "ok";
+        //}
 
-        [HttpPost("restore")]
-        [EnableCors()]
-        public async Task<string> PostRequest7(CancellationToken token)
-        {
-            state.ClearOrders();
-            await ordersGenerator.SetOrderUnGeneratedStatus(token);
-            await ordersGenerator.RestoreLostGroups(token);
-            await ordersGenerator.RestoreLostGroupsSetStatus(token);
-            return "ok";
-        }
+        //[HttpPost("restore")]
+        //[EnableCors()]
+        //public async Task<string> PostRequest7(CancellationToken token)
+        //{
+        //    state.ClearOrders();
+        //    await ordersGenerator.SetOrderUnGeneratedStatus(token);
+        //    await ordersGenerator.RestoreLostGroups(token);
+        //    await ordersGenerator.RestoreLostGroupsSetStatus(token);
+        //    return "ok";
+        //}
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Common;
+using Common.Services.DataBase.Interfaces;
 using Common.Services.Interfaces;
 using Microsoft.Extensions.Hosting;
 using Npgsql;
@@ -20,22 +21,40 @@ namespace Common.Services
         HistoryLoading
     }
 
-    public class OrdersManager :IHostedService
+    public class OrdersManager : IHostedService
     {
         public CancellationTokenSource cancellationTokenSource;
         public Thread worker;
 
         private readonly State state;
-        private readonly OrdersGenerator ordersGenerator;
+        private readonly ISettings settings;
+        private readonly IOrdersGenerator ordersGenerator;
         private int ordersCount;
-        private DateTime lastCycleRestart=DateTime.UtcNow.Date;
-        private bool heavyOrdersDone = false;
-        private ExecutingState executingState { get; set; }
-        public OrdersManager(State state, OrdersGenerator ordersGenerator)
+        private DateTime lastCycleRestart = DateTime.UtcNow.Date;
+        public bool heavyOrdersDone = false;
+        private readonly object locker = new object();
+        private ExecutingState _executingState;
+        public ExecutingState executingState { get
+            {
+                lock (locker)
+                {
+                    return _executingState;
+                }
+            }
+            private set
+            {
+                lock (locker)
+                {
+                    _executingState = value;
+                }
+            }   
+        }
+        public OrdersManager(State state, IOrdersGenerator ordersGenerator, ISettings settings)
         {
             this.state = state;
+            this.settings = settings;
             this.ordersGenerator = ordersGenerator;
-            ordersCount = state.CountOrders();
+            ordersCount = state.CountOrders()+ state.CountTargetOrders();
             worker = new Thread(new ParameterizedThreadStart(MainWork));
             cancellationTokenSource= new CancellationTokenSource();
         }
@@ -43,12 +62,14 @@ namespace Common.Services
 
         private void MainWork(object cancellationToken)
         {
+            state.ordersManager = this;
             if (cancellationToken is CancellationToken token)
             {
                 while (!token.IsCancellationRequested)
                 {
                     TrySwitchStatus();
-                    Thread.Sleep(1 * 60 * 1000);
+                    var temp = settings.OrdersManagerCheckingPeriod;
+                    Thread.Sleep(temp);
                 }
             }
         }
@@ -56,16 +77,16 @@ namespace Common.Services
         private bool isWorkStopped()
         {
             int ordersCountOld = ordersCount;
-            ordersCount = state.CountOrders();
-            return ordersCountOld == ordersCount;
+            ordersCount = state.CountOrders() + state.CountTargetOrders();
+            bool t = ordersCountOld == ordersCount;
+            return t;
         }
 
         private void GoToUpdates()
         {
             executingState = ExecutingState.OrdersCreation;
             state.ClearOrders();
-            ordersGenerator.SetOrderUnGeneratedStatus(CancellationToken.None).Wait();
-            ordersGenerator.GetUpdatesOrders(CancellationToken.None).Wait();
+            ordersGenerator.CreateUpdatesOrders(CancellationToken.None).Wait();
             executingState = ExecutingState.UpdatesLoading;
         }
 
@@ -73,8 +94,7 @@ namespace Common.Services
         {
             executingState = ExecutingState.OrdersCreation;
             state.ClearOrders();
-            ordersGenerator.SetOrderUnGeneratedStatus(CancellationToken.None).Wait();
-            ordersGenerator.GetHistoryOrders(CancellationToken.None).Wait();
+            ordersGenerator.CreateGetHistoryOrders(CancellationToken.None).Wait();
             executingState = ExecutingState.HistoryLoading;
         }
 
@@ -82,8 +102,8 @@ namespace Common.Services
         {
             state.ClearOrders();
             executingState = ExecutingState.OrdersCreation;
-            ordersGenerator.GetNewGroups(CancellationToken.None).Wait();
-            ordersGenerator.GetConsistenceSupportingOrders(CancellationToken.None).Wait();
+            ordersGenerator.CreateGetNewGroupsOrders(CancellationToken.None).Wait();
+            ordersGenerator.CreateGetConsistenceSupportingOrders(CancellationToken.None).Wait();
             executingState = ExecutingState.HeavyOrdersExecuting;
         }
 

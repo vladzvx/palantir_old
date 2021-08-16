@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bot.Core", "Bot.Core\Bot.Co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bot.Service", "Bot.Service\Bot.Service.csproj", "{D613D811-914D-43C9-A79A-00B440E3E2F3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Tests", "Common.Tests\Common.Tests.csproj", "{88C5F5A0-3258-47B1-898B-431379DCBFB2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,10 @@ Global
 		{D613D811-914D-43C9-A79A-00B440E3E2F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D613D811-914D-43C9-A79A-00B440E3E2F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D613D811-914D-43C9-A79A-00B440E3E2F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88C5F5A0-3258-47B1-898B-431379DCBFB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88C5F5A0-3258-47B1-898B-431379DCBFB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88C5F5A0-3258-47B1-898B-431379DCBFB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88C5F5A0-3258-47B1-898B-431379DCBFB2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -31,6 +31,8 @@ namespace DataFair
             services.AddSingleton<IDataBaseSettings, DataBaseSettings>();
             services.AddSingleton<ICommonWriter,CommonWriter>();
             services.AddSingleton<ILoadManager, LoadManager>();
+            services.AddSingleton<ISettings, Settings>();
+            services.AddSingleton<ILimits, Limits>();
             services.AddSingleton<ConnectionsFactory>();
 
             services.AddSingleton<ICommonWriter<Entity>, CommonWriter<Entity>>();
@@ -47,7 +49,7 @@ namespace DataFair
             
             services.AddTransient<StateReport>();
             //services.AddTransient<SystemReport>();
-            services.AddTransient<OrdersGenerator>();
+            services.AddTransient<IOrdersGenerator,OrdersGenerator>();
             services.AddScoped<SearchProvider>();
 
 

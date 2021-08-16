@@ -14,11 +14,14 @@ namespace Common.Services
     }
     public class State
     {
-        public State(ILoadManager loadManager)
+        public State(ILoadManager loadManager, ILimits limits)
         {
             this.loadManager = loadManager;
+            this.limits = limits;
         }
+        public OrdersManager ordersManager;
         private readonly ILoadManager loadManager;
+        private readonly ILimits limits;
         private readonly Order empty = new Order() { Type = OrderType.Empty, status=Order.Status.Executed };
         private readonly Order sleep = new Order() { Type = OrderType.Sleep, status=Order.Status.Executed, Time=60 };
         public ConcurrentQueue<Report> Reports = new ConcurrentQueue<Report>();
@@ -64,13 +67,10 @@ namespace Common.Services
                 Orders.Enqueue(order);
             }
         }
-        public int CountOrders()
+
+        public int CountTargetOrders()
         {
             int result = 0;
-            result+= Orders.Count;
-            result += MaxPriorityOrders.Count;
-            result += MiddlePriorityOrders.Count;
-
             foreach (string finder in TargetedOrders.Keys)
             {
                 if (TargetedOrders.TryGetValue(finder, out var que))
@@ -79,6 +79,15 @@ namespace Common.Services
                 }
             }
             return result;
+        }
+        public int CountOrders()
+        {
+            int result = 0;
+            result+= Orders.Count;
+            result += MaxPriorityOrders.Count;
+            result += MiddlePriorityOrders.Count;
+            return result;
+
         }
 
         private void TryIncrementCounter(string key)
@@ -102,7 +111,8 @@ namespace Common.Services
             {
                 if (ExecutingOrdersJournal.TryGetValue(key, out var val))
                 {
-                    return val.count < 65;
+                    bool temp = val.count < limits.MaxOrdersNumber;
+                    return temp;
                 }
                 else return true;
             }

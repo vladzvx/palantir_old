@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Common.Services
+namespace Common.Services.DataBase.Interfaces
 {
-    class Limits
+    public interface ILimits
     {
+        public int MaxOrdersNumber => 70;
     }
 }
