@@ -23,10 +23,9 @@ using Message = Telegram.Bot.Types.Message;
 
 namespace Bot.Core.Services
 {
-    public class BotMessageHandler2 : IUpdateHandler
+    public class MessageHandler : IUpdateHandler
     {
-        
-        private ConcurrentDictionary<long, Bot.FinitStateMachine> sessions = new ConcurrentDictionary<long, Bot.FinitStateMachine>();
+        private ConcurrentDictionary<long, Bot.FSM> sessions = new ConcurrentDictionary<long, Bot.FSM>();
         public UpdateType[] AllowedUpdates => new UpdateType[] { UpdateType.Message};
 
         public async Task HandleError(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
@@ -36,13 +35,13 @@ namespace Bot.Core.Services
 
         public async Task HandleUpdate(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            if (sessions.TryGetValue(update.Message.From.Id, out Bot.FinitStateMachine state))
+            if (sessions.TryGetValue(update.Message.From.Id, out Bot.FSM state))
             {
                 await state.ProcessUpdate(update);
             }
             else
             {
-                state = new Bot.FinitStateMachine(botClient, update.Message.Chat.Id);
+                state = new Bot.FSM(botClient, update.Message.Chat.Id);
                 sessions.TryAdd(update.Message.From.Id, state);
                 await state.ProcessUpdate(update);
             }

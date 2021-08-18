@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DataFair.Services
+namespace Common.Services.DataBase
 {
     public class DataBaseSettings : IDataBaseSettings
     {

@@ -30,5 +30,6 @@ message SearchRequest{
 message SearchResult{
 	string Link =1;
 	string Text =2;
+	string Name = 3;
 }
 

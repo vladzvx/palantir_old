@@ -4,6 +4,25 @@ create table statuses(
     primary key (id)
 );
 
+create table users(
+    id bigint not null ,
+    status int default 2,
+    primary key (id),
+    foreign key (status) references statuses (id)
+);
+
+insert into statuses (id, name) values (-1,'master');
+insert into statuses (id, name) values (0,'privileged');
+insert into statuses (id, name) values (1,'beta_testers');
+insert into statuses (id, name) values (2,'common');
+insert into statuses (id, name) values (3,'banned');
+
+
+
+
+
+
+
 create table actions(
     id int,
     name text,
@@ -13,18 +32,7 @@ create table actions(
 insert into actions (id, name) values (0,'next');
 insert into actions (id, name) values (1,'previous');
 
-insert into statuses (id, name) values (-1,'master');
-insert into statuses (id, name) values (0,'privileged');
-insert into statuses (id, name) values (1,'beta_testers');
-insert into statuses (id, name) values (2,'common');
-insert into statuses (id, name) values (3,'banned');
 
-create table users(
-    id bigint not null ,
-    status int default 2,
-    primary key (id),
-    foreign key (status) references statuses (id)
-);
 
 create table messages (
     message_db_id bigserial,

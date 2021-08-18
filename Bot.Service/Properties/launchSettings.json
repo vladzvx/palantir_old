@@ -19,6 +19,7 @@
       "commandName": "Project",
       "environmentVariables": {
         "GrpcUrl": "http://localhost:5005",
+        "ConnectionString": "User ID=postgres;Password=qw12cv90;Host=45.132.17.148;Port=5432;Database=bots;Pooling=true;Timeout=30;CommandTimeout=0;",
         "ASPNETCORE_ENVIRONMENT": "Development",
         "Token": "1879635077:AAF0VwZBYJ-OLAkuNdXhZvGLCiHD0E2Yfek"
       },

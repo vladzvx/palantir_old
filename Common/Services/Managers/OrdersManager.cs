@@ -31,6 +31,7 @@ namespace Common.Services
         private readonly IOrdersGenerator ordersGenerator;
         private int ordersCount;
         private DateTime lastCycleRestart = DateTime.UtcNow.Date;
+        private DateTime currentStateStarted = DateTime.UtcNow;
         public bool heavyOrdersDone = false;
         private readonly object locker = new object();
         private ExecutingState _executingState;
@@ -84,6 +85,7 @@ namespace Common.Services
 
         private void GoToUpdates()
         {
+            currentStateStarted = DateTime.UtcNow;
             executingState = ExecutingState.OrdersCreation;
             state.ClearOrders();
             ordersGenerator.CreateUpdatesOrders(CancellationToken.None).Wait();
@@ -92,6 +94,7 @@ namespace Common.Services
 
         private void GoToHistory()
         {
+            currentStateStarted = DateTime.UtcNow;
             executingState = ExecutingState.OrdersCreation;
             state.ClearOrders();
             ordersGenerator.CreateGetHistoryOrders(CancellationToken.None).Wait();
@@ -100,6 +103,7 @@ namespace Common.Services
 
         private void GoToHeavy()
         {
+            currentStateStarted = DateTime.UtcNow;
             state.ClearOrders();
             executingState = ExecutingState.OrdersCreation;
             ordersGenerator.CreateGetNewGroupsOrders(CancellationToken.None).Wait();
@@ -149,7 +153,7 @@ namespace Common.Services
                             }
                             break;
                         case ExecutingState.HistoryLoading:
-                            if (isWorkStopped())
+                            if (isWorkStopped()|| DateTime.UtcNow.Subtract(currentStateStarted).TotalHours > 3)
                             {
                                 GoToUpdates();
                             }

@@ -1,6 +1,9 @@
+using Bot.Core;
 using Bot.Core.Interfaces;
 using Bot.Core.Services;
 using Bot.Service.Services;
+using Common.Services;
+using Common.Services.DataBase;
 using Common.Services.DataBase.Interfaces;
 using Common.Services.DataBase.Reading;
 using Common.Services.gRPC;
@@ -17,6 +20,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Telegram.Bot.Types;
 
 namespace Bot.Service
 {
@@ -29,7 +33,13 @@ namespace Bot.Service
             IGrpcSettings grpcSettings = new GrpcSettings();
             services.AddSingleton(GrpcChannel.ForAddress(grpcSettings.Url));
             services.AddHostedService<BotsEntryPoint>();
-
+            services.AddSingleton<DBWorker>();
+            services.AddSingleton<MessagesSender>();
+            services.AddSingleton<ConnectionsFactory>();
+            services.AddSingleton(new CancellationTokenSource ());
+            services.AddSingleton<IDataBaseSettings,DataBaseSettings>();
+            services.AddSingleton<ICommonWriter<Message>,CommonWriter<Message>>();
+            services.AddSingleton<IWriterCore<Message>,BotMessagesWriterCore>();
             services.AddTransient<SearchClient>();
             services.AddTransient<ISearchResultReciever, StreamSearchResiever>();
             services.AddTransient<Bot.Core.Services.Bot>();

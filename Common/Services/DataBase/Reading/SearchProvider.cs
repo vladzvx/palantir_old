@@ -102,7 +102,6 @@ namespace Common.Services.DataBase
             CancellationToken token, 
             params long [] chat_ids)
         {
-
             await Search(storedProcedure, request, startDt, endDt, limit, is_channel, is_group, token, chat_ids);
 
 
@@ -127,6 +126,42 @@ namespace Common.Services.DataBase
             
         }
 
+
+        public async Task<Task> AsyncSearch(SearchType storedProcedure,
+            string request,
+            DateTime startDt,
+            DateTime endDt,
+            int limit,
+            bool is_channel,
+            bool is_group,
+            CancellationToken token,
+            params long[] chat_ids)
+        {
+            List<Task> tasks = new List<Task>();
+            tasks.Add(Search(storedProcedure, request, startDt, endDt, limit, is_channel, is_group, token, chat_ids));
+            await Task.WhenAny(tasks);
+            return Task.WhenAll(tasks);
+
+            //double days = Math.Round(endDt.Subtract(startDt).TotalDays);
+
+            //if (days > 2)
+            //{
+            //    List<Task> tasks = new List<Task>();
+            //    int i = 0;
+            //    for (i = 1; i <= days && i<=14; i++)
+            //    {
+            //        tasks.Add(Search(storedProcedure, request, endDt.AddDays(-i), endDt.AddDays(-i+1), limit, is_channel, is_group, token, chat_ids));
+            //    }
+            //    DateTime dt = endDt.AddDays(-i);
+            //    tasks.Add(Search(storedProcedure, request,startDt , dt, limit, is_channel, is_group, token, chat_ids));
+            //    Task.WaitAll(tasks.ToArray());
+            //}
+            //else
+            //{
+            //    await Search(storedProcedure, request, startDt, endDt, limit, is_channel, is_group, token, chat_ids);
+            //}
+
+        }
         public async Task PersonSearch(int limit, long id,CancellationToken token)
         {
             try
