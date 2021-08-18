@@ -23,18 +23,11 @@ namespace Common.Services.gRPC
         {
             SearchingTask = await searchProvider.AsyncSearch(request.SearchType, request.Request, request.StartTime.ToDateTime(), request.EndTime.ToDateTime(), request.Limit, request.IsChannel, request.IsGroup, tokenSource.Token, request.Ids != null && request.Ids.Count > 0 ? request.Ids.ToArray() : null);
             bool lastExecutionEnable = true;
-            int count = 0;
             while (!SearchingTask.IsCompleted || lastExecutionEnable)
             {
                 while (searchProvider.searchResultReciever.TryDequeueResult(out SearchResult res))
                 {
                     await responseStream.WriteAsync(res);
-                    count++;
-                    if (count > 100000)
-                    {
-                        tokenSource.Cancel();
-                        break;
-                    }
                 }
                 await Task.Delay(50);
                 if (SearchingTask.IsCompleted && lastExecutionEnable)

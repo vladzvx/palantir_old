@@ -1,4 +1,5 @@
 ﻿using Bot.Core.Enums;
+using Bot.Core.Models;
 using Common.Services.DataBase;
 using Npgsql;
 using System;
@@ -50,6 +51,52 @@ namespace Bot.Core
                     }
                 }
                 return UserStatus.common;
+            }
+        }
+
+        public async Task SavePage(long user_id,Page page, CancellationToken token)
+        {
+            using (var conn = await connectionsFactory.GetConnectionAsync(token))
+            {
+                DbCommand command = conn.Connection.CreateCommand();
+                command.CommandType = System.Data.CommandType.StoredProcedure;
+                command.CommandText = "save_page";
+                command.Parameters.Add(new NpgsqlParameter("_page", NpgsqlTypes.NpgsqlDbType.Integer));
+                command.Parameters.Add(new NpgsqlParameter("_search_guid", NpgsqlTypes.NpgsqlDbType.Text));
+                command.Parameters.Add(new NpgsqlParameter("_data", NpgsqlTypes.NpgsqlDbType.Json));
+
+                command.Parameters["_page"].Value = user_id;
+                command.Parameters["_search_guid"].Value = page.SearchGuid.ToString();
+                command.Parameters["_data"].Value = Newtonsoft.Json.JsonConvert.SerializeObject(page);
+                await command.ExecuteNonQueryAsync(token);
+            }
+        }
+
+        public async Task<Page> GetPage(Guid guid, int number, CancellationToken token)
+        {
+            using (var conn = await connectionsFactory.GetConnectionAsync(token))
+            {
+                DbCommand command = conn.Connection.CreateCommand();
+                command.CommandType = System.Data.CommandType.StoredProcedure;
+                command.CommandText = "get_page";
+                command.Parameters.Add(new NpgsqlParameter("_page", NpgsqlTypes.NpgsqlDbType.Integer));
+                command.Parameters.Add(new NpgsqlParameter("_search_guid", NpgsqlTypes.NpgsqlDbType.Text));
+
+                command.Parameters["_page"].Value = number;
+                command.Parameters["_search_guid"].Value = guid.ToString();
+
+                using (var reader = await command.ExecuteReaderAsync(token))
+                {
+                    while (await reader.ReadAsync(token))
+                    {
+                        if (!await reader.IsDBNullAsync(0))
+                        {
+                            string result = reader.GetString(0);
+                            return Newtonsoft.Json.JsonConvert.DeserializeObject<Page>(result);
+                        }
+                    }
+                }
+                return Page.Empty;
             }
         }
     }

@@ -50,7 +50,7 @@ namespace DataFair
             services.AddTransient<StateReport>();
             //services.AddTransient<SystemReport>();
             services.AddTransient<IOrdersGenerator,OrdersGenerator>();
-            services.AddScoped<SearchProvider>();
+            services.AddTransient<SearchProvider>();
 
 
             services.AddHostedService<OrdersManager>();

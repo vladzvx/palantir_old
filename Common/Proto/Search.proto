@@ -31,5 +31,7 @@ message SearchResult{
 	string Link =1;
 	string Text =2;
 	string Name = 3;
+	bool isGroup = 4;
+	int32 Page = 5;
 }
 

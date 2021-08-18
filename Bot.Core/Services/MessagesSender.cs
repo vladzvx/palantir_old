@@ -21,6 +21,7 @@ namespace Bot.Core.Services
         }
         public void AddItem(ISendedItem sendedItem)
         {
+            if (sendedItem == null) return;
             sendedItems.Enqueue(sendedItem);
             if (SendingTask == null || SendingTask.IsCompleted)
                 SendingTask = Send();
