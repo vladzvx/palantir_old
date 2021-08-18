@@ -34,27 +34,20 @@ create table messages (
 ) partition by RANGE (db_time);
 
 
-create table search_results(
+create table pages(
     id bigserial,
-    request_id1 bigint,
-    request_id2 bigint,
-    time timestamp default CURRENT_TIMESTAMP not null,
-    link text,
-    text text,
-    chat_username text,
-    chat_id bigint,
-    user_id bigint,
+    time timestamp default current_timestamp,
+    request_id text,
     page int,
-    primary key (id,time),
-    foreign key (user_id)references users(id)
-) partition by RANGE (time);
+    data jsonb,
+    primary key (request_id,page)
+);
 
 
 
 create index users_ids_in_mess on messages using hash(user_id);
-create index search_request_ids_ind on search_results using hash(request_id);
-create index search_results_ind on search_results (request_id1,request_id2,page);
-create index users_ids on users using hash(id);
+create index search_results_ind on pages (request_id,page);
+
 
 
 
@@ -76,6 +69,21 @@ $$
     begin
             insert into messages (user_id, chat_id, message_number,text, tg_time) values (_user_id, _chat_id, _message_number,_text,_tg_time)
             on conflict on constraint messages_pkey do nothing ;
+    end;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION save_page(_page int, _search_guid text,_data jsonb) RETURNS void as
+$$
+    begin
+            insert into pages (page, request_id, data) values (_page, _search_guid, _data)
+            on conflict on constraint pages_pkey do nothing ;
+    end;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_page(_page int, _search_guid text) RETURNS jsonb as
+$$
+    begin
+        return (select data from pages where request_id=_search_guid and page = _page);
     end;
 $$ LANGUAGE plpgsql;
 
