@@ -48,7 +48,7 @@ namespace DataFair
             services.AddTransient<SearchProvider>();
 
 
-            //services.AddHostedService<OrdersManager>();
+            services.AddHostedService<OrdersManager>();
             services.AddHostedService<CollectorsManager>();
             //services.AddHostedService<MediaAndFormattingProcessor>();
             services.AddHostedService<TextVectorizer>();
