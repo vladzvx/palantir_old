@@ -1,12 +1,6 @@
 ﻿using Common.Services.DataBase.Interfaces;
 using Npgsql;
 using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Common.Services.DataBase
 {
@@ -34,7 +28,7 @@ namespace Common.Services.DataBase
                 data.FormatingCostyl = reader.IsDBNull(14) ? reader.GetString(14) : string.Empty;
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception)
             {
                 return false;
             }

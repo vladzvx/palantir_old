@@ -1,19 +1,16 @@
-﻿using Common;
-using Common.Services.DataBase;
+﻿using Common.Services.DataBase;
 using Common.Services.DataBase.Interfaces;
 using Npgsql;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Common.Services
 {
-    public class OrdersGenerator: IOrdersGenerator
+    public class OrdersGenerator : IOrdersGenerator
     {
-        private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+        private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
         private readonly State state;
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
         private readonly ConnectionsFactory connectionsFactory;
@@ -36,9 +33,9 @@ namespace Common.Services
             await CreatePairForRequestsOrders(token);
             await SetOrderGeneratedStatusRequest(CancellationToken.None);
         }
-        public async Task CreateGetConsistenceSupportingOrders(CancellationToken token)
+        public Task CreateGetConsistenceSupportingOrders(CancellationToken token)
         {
-
+            return Task.CompletedTask;
         }
         public async Task CreateGetHistoryOrders(CancellationToken token)
         {
@@ -67,7 +64,11 @@ namespace Common.Services
                         long Offset = reader.IsDBNull(2) ? 1 : reader.GetInt64(2);
                         string[] Finders = reader.IsDBNull(3) ? new string[0] : (string[])reader.GetValue(3);
 
-                        if (string.IsNullOrEmpty(Username)) continue;
+                        if (string.IsNullOrEmpty(Username))
+                        {
+                            continue;
+                        }
+
                         Order order = new Order()
                         {
                             Id = ChatId,
@@ -121,7 +122,11 @@ namespace Common.Services
                         long Offset = reader.IsDBNull(2) ? 1 : reader.GetInt64(2);
                         string[] Finders = reader.IsDBNull(3) ? new string[0] : (string[])reader.GetValue(3);
 
-                        if (string.IsNullOrEmpty(Username)) continue;
+                        if (string.IsNullOrEmpty(Username))
+                        {
+                            continue;
+                        }
+
                         Order order = new Order()
                         {
                             Id = ChatId,
@@ -173,7 +178,11 @@ namespace Common.Services
                         string Username = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
                         long Offset = reader.IsDBNull(2) ? 1 : reader.GetInt64(2);
 
-                        if (string.IsNullOrEmpty(Username)) continue;
+                        if (string.IsNullOrEmpty(Username))
+                        {
+                            continue;
+                        }
+
                         Order order = new Order()
                         {
                             Id = ChatId,

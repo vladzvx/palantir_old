@@ -1,14 +1,8 @@
-﻿using Common;
-using Common.Services.DataBase.Interfaces;
-using Common.Services.Interfaces;
+﻿using Common.Services.DataBase.Interfaces;
 using Microsoft.Extensions.Hosting;
-using Npgsql;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 
 namespace Common.Services
 {
@@ -35,7 +29,9 @@ namespace Common.Services
         public bool heavyOrdersDone = false;
         private readonly object locker = new object();
         private ExecutingState _executingState;
-        public ExecutingState executingState { get
+        public ExecutingState executingState
+        {
+            get
             {
                 lock (locker)
                 {
@@ -48,16 +44,16 @@ namespace Common.Services
                 {
                     _executingState = value;
                 }
-            }   
+            }
         }
         public OrdersManager(State state, IOrdersGenerator ordersGenerator, ISettings settings)
         {
             this.state = state;
             this.settings = settings;
             this.ordersGenerator = ordersGenerator;
-            ordersCount = state.CountOrders()+ state.CountTargetOrders();
+            ordersCount = state.CountOrders() + state.CountTargetOrders();
             worker = new Thread(new ParameterizedThreadStart(MainWork));
-            cancellationTokenSource= new CancellationTokenSource();
+            cancellationTokenSource = new CancellationTokenSource();
         }
 
 
@@ -153,7 +149,7 @@ namespace Common.Services
                             }
                             break;
                         case ExecutingState.HistoryLoading:
-                            if (isWorkStopped()|| DateTime.UtcNow.Subtract(currentStateStarted).TotalHours > 3)
+                            if (isWorkStopped() || DateTime.UtcNow.Subtract(currentStateStarted).TotalHours > 3)
                             {
                                 GoToUpdates();
                             }
@@ -168,14 +164,16 @@ namespace Common.Services
             catch { }
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        public Task StartAsync(CancellationToken cancellationToken)
         {
             worker.Start(cancellationTokenSource.Token);
+            return Task.CompletedTask;
         }
 
-        public async Task StopAsync(CancellationToken cancellationToken)
+        public Task StopAsync(CancellationToken cancellationToken)
         {
             cancellationTokenSource.Cancel();
+            return Task.CompletedTask;
         }
     }
 }

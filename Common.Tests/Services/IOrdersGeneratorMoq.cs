@@ -1,9 +1,5 @@
 ﻿using Common.Services;
 using Common.Services.DataBase.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,7 +12,7 @@ namespace Common.Tests.Services
         {
             this.state = state;
         }
-        public async Task CreateGetConsistenceSupportingOrders(CancellationToken token)
+        public Task CreateGetConsistenceSupportingOrders(CancellationToken token)
         {
             for (int i = 0; i < 1000; i++)
             {
@@ -26,9 +22,10 @@ namespace Common.Tests.Services
                 order.Finders.Add("2");
                 state.AddOrder(order);
             }
+            return Task.CompletedTask;
         }
 
-        public async Task CreateGetHistoryOrders(CancellationToken token)
+        public Task CreateGetHistoryOrders(CancellationToken token)
         {
             for (int i = 0; i < 1000; i++)
             {
@@ -39,9 +36,10 @@ namespace Common.Tests.Services
                 order.Finders.Add("3");
                 state.AddOrder(order);
             }
+            return Task.CompletedTask;
         }
 
-        public async Task CreateGetNewGroupsOrders(CancellationToken token)
+        public Task CreateGetNewGroupsOrders(CancellationToken token)
         {
             for (int i = 0; i < 1000; i++)
             {
@@ -49,9 +47,10 @@ namespace Common.Tests.Services
                 order.Type = OrderType.Pair;
                 state.AddOrder(order);
             }
+            return Task.CompletedTask;
         }
 
-        public async Task CreateUpdatesOrders(CancellationToken token)
+        public Task CreateUpdatesOrders(CancellationToken token)
         {
             for (int i = 0; i < 100000; i++)
             {
@@ -62,6 +61,7 @@ namespace Common.Tests.Services
                 order.Finders.Add("3");
                 state.AddOrder(order);
             }
+            return Task.CompletedTask;
         }
     }
 }

@@ -1,9 +1,6 @@
 ﻿using Common.Services.DataBase;
 using Grpc.Core;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,7 +18,7 @@ namespace Common.Services.gRPC
         }
         public async override Task Search(SearchRequest request, IServerStreamWriter<SearchResult> responseStream, ServerCallContext context)
         {
-            SearchingTask = await searchProvider.AsyncSearch(request.SearchType, request.Request, request.StartTime.ToDateTime(), request.EndTime.ToDateTime(), request.Limit, request.IsChannel, request.IsGroup, tokenSource.Token, request.Ids != null && request.Ids.Count > 0 ? request.Ids.ToArray() : null);
+            SearchingTask = await searchProvider.AsyncSearch(request.SearchType, request.Request, request.StartTime.ToDateTime(), request.EndTime.ToDateTime(), request.Limit == 0 ? 1500 : request.Limit, request.IsChannel, request.IsGroup, tokenSource.Token, request.Ids != null && request.Ids.Count > 0 ? request.Ids.ToArray() : null);
             bool lastExecutionEnable = true;
             while (!SearchingTask.IsCompleted || lastExecutionEnable)
             {
@@ -31,7 +28,9 @@ namespace Common.Services.gRPC
                 }
                 await Task.Delay(50);
                 if (SearchingTask.IsCompleted && lastExecutionEnable)
+                {
                     lastExecutionEnable = false;
+                }
             }
         }
     }

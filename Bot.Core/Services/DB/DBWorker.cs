@@ -3,10 +3,7 @@ using Bot.Core.Models;
 using Common.Services.DataBase;
 using Npgsql;
 using System;
-using System.Collections.Generic;
 using System.Data.Common;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
@@ -21,40 +18,67 @@ namespace Bot.Core
             this.connectionsFactory = connectionsFactory;
         }
 
-        public async Task<UserStatus> LogUser(Update update, CancellationToken token)
+        public async Task<Services.Bot.FSM.Settings> LogUser(Update update, CancellationToken token, Services.Bot.FSM.Settings settings = null)
         {
             using (var conn = await connectionsFactory.GetConnectionAsync(token))
             {
                 DbCommand command = conn.Connection.CreateCommand();
                 command.CommandType = System.Data.CommandType.StoredProcedure;
-                command.CommandText = "add_user";
+                command.CommandText = "log_user";
                 command.Parameters.Add(new NpgsqlParameter("_user_id", NpgsqlTypes.NpgsqlDbType.Bigint));
                 command.Parameters.Add(new NpgsqlParameter("sender_username", NpgsqlTypes.NpgsqlDbType.Text));
                 command.Parameters.Add(new NpgsqlParameter("sender_first_name", NpgsqlTypes.NpgsqlDbType.Text));
+                command.Parameters.Add(new NpgsqlParameter("_state", NpgsqlTypes.NpgsqlDbType.Integer));
+                command.Parameters.Add(new NpgsqlParameter("_search_in_groups", NpgsqlTypes.NpgsqlDbType.Boolean));
+                command.Parameters.Add(new NpgsqlParameter("_search_in_channels", NpgsqlTypes.NpgsqlDbType.Boolean));
+                command.Parameters.Add(new NpgsqlParameter("_depth", NpgsqlTypes.NpgsqlDbType.Integer));
 
                 command.Parameters["_user_id"].Value = update.Message.From.Id;
-                command.Parameters["sender_username"].Value = update.Message.From.Username == null ? DBNull.Value: update.Message.From.Username;
+                command.Parameters["sender_username"].Value = update.Message.From.Username == null ? DBNull.Value : update.Message.From.Username;
                 command.Parameters["sender_first_name"].Value = update.Message.From.FirstName == null ? DBNull.Value : update.Message.From.FirstName;
-
-                using (var reader = await command.ExecuteReaderAsync(token))
+                command.Parameters["_state"].Value = settings == null ? DBNull.Value : (int)settings.BotState;
+                command.Parameters["_search_in_groups"].Value = settings == null ? DBNull.Value : settings.SearchInGroups;
+                command.Parameters["_search_in_channels"].Value = settings == null ? DBNull.Value : settings.SearchInChannels;
+                command.Parameters["_depth"].Value = settings == null ? DBNull.Value : (int)settings.Depth;
+                try
                 {
-                    while (await reader.ReadAsync(token))
+                    using (var reader = await command.ExecuteReaderAsync(token))
                     {
-                        if (!await reader.IsDBNullAsync(0))
+                        while (await reader.ReadAsync(token))
                         {
-                            int result = reader.GetInt32(0);
-                            if (Enum.IsDefined(typeof(UserStatus), result))
+                            if (!await reader.IsDBNullAsync(0))
                             {
-                                return (UserStatus)result;
+                                int status = reader.GetInt32(0);
+                                int state = reader.GetInt32(1);
+                                int depth = reader.GetInt32(4);
+                                bool searchInGroups = reader.GetBoolean(2);
+                                bool searchInChannels = reader.GetBoolean(3);
+                                if (Enum.IsDefined(typeof(UserStatus), status) &&
+                                    Enum.IsDefined(typeof(BotState), state) &&
+                                    Enum.IsDefined(typeof(RequestDepth), depth))
+                                {
+                                    Services.Bot.FSM.Settings result = new Services.Bot.FSM.Settings();
+                                    result.BotState = (BotState)state;
+                                    result.Status = (UserStatus)status;
+                                    result.Depth = (RequestDepth)depth;
+                                    result.SearchInChannels = searchInChannels;
+                                    result.SearchInGroups = searchInGroups;
+                                    return result;
+                                }
                             }
                         }
                     }
                 }
-                return UserStatus.common;
+                catch (Exception)
+                {
+
+                }
+
+                return new Services.Bot.FSM.Settings();
             }
         }
 
-        public async Task SavePage(long user_id,Page page, CancellationToken token)
+        public async Task SavePage(Page page, CancellationToken token)
         {
             using (var conn = await connectionsFactory.GetConnectionAsync(token))
             {
@@ -63,9 +87,9 @@ namespace Bot.Core
                 command.CommandText = "save_page";
                 command.Parameters.Add(new NpgsqlParameter("_page", NpgsqlTypes.NpgsqlDbType.Integer));
                 command.Parameters.Add(new NpgsqlParameter("_search_guid", NpgsqlTypes.NpgsqlDbType.Text));
-                command.Parameters.Add(new NpgsqlParameter("_data", NpgsqlTypes.NpgsqlDbType.Json));
+                command.Parameters.Add(new NpgsqlParameter("_data", NpgsqlTypes.NpgsqlDbType.Jsonb));
 
-                command.Parameters["_page"].Value = user_id;
+                command.Parameters["_page"].Value = page.Number;
                 command.Parameters["_search_guid"].Value = page.SearchGuid.ToString();
                 command.Parameters["_data"].Value = Newtonsoft.Json.JsonConvert.SerializeObject(page);
                 await command.ExecuteNonQueryAsync(token);

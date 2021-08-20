@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Common
 {
@@ -13,11 +9,14 @@ namespace Common
             return formating.Type == FormatingType.Bold && formating.Offset == 0 && formating.Length == 0 && string.IsNullOrEmpty(formating.Content);
         }
 
-        public static bool IsEmpty( IEnumerable<Formating> formatings)
+        public static bool IsEmpty(IEnumerable<Formating> formatings)
         {
             foreach (Formating formating in formatings)
             {
-                if (Formating.IsEmpty(formating)) return true;
+                if (Formating.IsEmpty(formating))
+                {
+                    return true;
+                }
             }
             return false;
         }
@@ -32,13 +31,17 @@ namespace Common
                     result.Add(formating);
                 }
             }
-            return result.Count>0;
+            return result.Count > 0;
         }
 
         public static bool TryGetNonEmpty(IEnumerable<Formating> formatings, out List<Formating> result)
         {
             result = new List<Formating>();
-            if (formatings == null) return false;
+            if (formatings == null)
+            {
+                return false;
+            }
+
             foreach (Formating formating in formatings)
             {
                 if (!Formating.IsEmpty(formating))
@@ -46,7 +49,7 @@ namespace Common
                     result.Add(formating);
                 }
             }
-            return result.Count>0;
+            return result.Count > 0;
         }
     }
 }

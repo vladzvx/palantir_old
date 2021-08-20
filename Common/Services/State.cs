@@ -1,10 +1,5 @@
-﻿using Common;
-using Common.Services.DataBase.Interfaces;
-using System;
+﻿using Common.Services.DataBase.Interfaces;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Common.Services
 {
@@ -22,8 +17,8 @@ namespace Common.Services
         public OrdersManager ordersManager;
         private readonly ILoadManager loadManager;
         private readonly ILimits limits;
-        private readonly Order empty = new Order() { Type = OrderType.Empty, status=Order.Status.Executed };
-        private readonly Order sleep = new Order() { Type = OrderType.Sleep, status=Order.Status.Executed, Time=60 };
+        private readonly Order empty = new Order() { Type = OrderType.Empty, status = Order.Status.Executed };
+        private readonly Order sleep = new Order() { Type = OrderType.Sleep, status = Order.Status.Executed, Time = 60 };
         public ConcurrentQueue<Report> Reports = new ConcurrentQueue<Report>();
         public ConcurrentQueue<Order> MaxPriorityOrders = new ConcurrentQueue<Order>();
         public ConcurrentQueue<Order> MiddlePriorityOrders = new ConcurrentQueue<Order>();
@@ -46,7 +41,11 @@ namespace Common.Services
 
         public void AddOrder(Order order)
         {
-            if (order.status != Order.Status.Created) return;
+            if (order.status != Order.Status.Created)
+            {
+                return;
+            }
+
             if (order.Finders.Count > 0)
             {
                 foreach (string finder in order.Finders)
@@ -83,7 +82,7 @@ namespace Common.Services
         public int CountOrders()
         {
             int result = 0;
-            result+= Orders.Count;
+            result += Orders.Count;
             result += MaxPriorityOrders.Count;
             result += MiddlePriorityOrders.Count;
             return result;
@@ -100,7 +99,7 @@ namespace Common.Services
                 }
                 else
                 {
-                    ExecutingOrdersJournal.TryAdd(key, new CounterWrapper()) ;
+                    ExecutingOrdersJournal.TryAdd(key, new CounterWrapper());
                 }
             }
         }
@@ -114,7 +113,10 @@ namespace Common.Services
                     bool temp = val.count < limits.MaxOrdersNumber;
                     return temp;
                 }
-                else return true;
+                else
+                {
+                    return true;
+                }
             }
             return false;
         }

@@ -7,12 +7,10 @@ using System.Collections.Concurrent;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
-using Timer = System.Timers.Timer;
 
 namespace Common.Services
 {
-    public class CommonWriter<T>: ActionPeriodicExecutor, ICommonWriter<T> where T: class
+    public class CommonWriter<T> : ActionPeriodicExecutor, ICommonWriter<T> where T : class
     {
         internal Logger logger = NLog.LogManager.GetCurrentClassLogger();
         private readonly ConcurrentQueue<T> DataQueue = new ConcurrentQueue<T>();
@@ -20,7 +18,7 @@ namespace Common.Services
         private readonly ConnectionsFactory manager;
         private readonly IDataBaseSettings settings;
 
-        public CommonWriter(IWriterCore<T> writerCore, IDataBaseSettings settings, ConnectionsFactory manager, CancellationTokenSource globaCts):
+        public CommonWriter(IWriterCore<T> writerCore, IDataBaseSettings settings, ConnectionsFactory manager, CancellationTokenSource globaCts) :
             base(settings.StartWritingInterval, globaCts)
         {
             this.writerCore = writerCore;
@@ -41,7 +39,11 @@ namespace Common.Services
 
         private void WritingActionWrapper(object CancellationToken)
         {
-            if (CancellationToken is not CancellationToken forceStopToken) return;
+            if (CancellationToken is not CancellationToken forceStopToken)
+            {
+                return;
+            }
+
             WritingAction(forceStopToken).Wait();
         }
         private async Task WritingAction(CancellationToken forceStopToken)
@@ -80,7 +82,7 @@ namespace Common.Services
             {
                 using (ConnectionWrapper connectionWrapper = await manager.GetConnectionAsync(cancellationTokenSource.Token))
                 {
-                        await writerCore.ExecuteAdditionaAcion(connectionWrapper.Connection, data, cancellationTokenSource.Token);
+                    await writerCore.ExecuteAdditionaAcion(connectionWrapper.Connection, data, cancellationTokenSource.Token);
                 }
             }
             catch (Exception ex)

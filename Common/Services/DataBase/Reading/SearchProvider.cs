@@ -1,10 +1,7 @@
-﻿using Common.Models;
-using Common.Services.DataBase.Interfaces;
+﻿using Common.Services.DataBase.Interfaces;
 using Npgsql;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -77,30 +74,32 @@ namespace Common.Services.DataBase
                     while (await reader.ReadAsync())
                     {
                         if (!reader.IsDBNull(0) && !reader.IsDBNull(1))
+                        {
                             searchResultReciever.Recieve(new SearchResult()
                             {
                                 Link = reader.GetString(0),
                                 Text = reader.GetString(1)
                             });
+                        }
                     }
                     //searchResultReciever.IsComplited = true;
                     //return results;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //return new List<SearchResult>() { new SearchResult() {Link=ex.StackTrace, Text=ex.Message } };
             }
         }
         public async Task CommonSearch(SearchType storedProcedure,
-            string request, 
-            DateTime startDt, 
+            string request,
+            DateTime startDt,
             DateTime endDt,
-            int limit, 
-            bool is_channel, 
-            bool is_group, 
-            CancellationToken token, 
-            params long [] chat_ids)
+            int limit,
+            bool is_channel,
+            bool is_group,
+            CancellationToken token,
+            params long[] chat_ids)
         {
             await Search(storedProcedure, request, startDt, endDt, limit, is_channel, is_group, token, chat_ids);
 
@@ -123,7 +122,7 @@ namespace Common.Services.DataBase
             //{
             //    await Search(storedProcedure, request, startDt, endDt, limit, is_channel, is_group, token, chat_ids);
             //}
-            
+
         }
 
 
@@ -162,7 +161,7 @@ namespace Common.Services.DataBase
             //}
 
         }
-        public async Task PersonSearch(int limit, long id,CancellationToken token)
+        public async Task PersonSearch(int limit, long id, CancellationToken token)
         {
             try
             {
@@ -185,18 +184,20 @@ namespace Common.Services.DataBase
                     while (await reader.ReadAsync())
                     {
                         if (!reader.IsDBNull(0) && !reader.IsDBNull(1))
+                        {
                             searchResultReciever.Recieve(new SearchResult()
                             {
                                 Link = reader.GetString(0),
                                 Text = reader.GetString(1)
                             });
+                        }
                     }
                     //return results;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-               // return new List<SearchResult>();
+                // return new List<SearchResult>();
             }
         }
 

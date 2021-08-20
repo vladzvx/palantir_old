@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace Common
+﻿namespace Common
 {
     public partial class Order
     {
         public readonly static Order empty = new Order() { Type = OrderType.Empty };
-        private object locker = new object();
+        private readonly object locker = new object();
         public bool TryGet()
         {
             lock (locker)
@@ -37,7 +30,8 @@ namespace Common
         //private ReaderWriterLockSlim cacheLock = new ReaderWriterLockSlim();
 
         private Status stat;
-        public Status status { 
+        public Status status
+        {
             get
             {
                 lock (locker)

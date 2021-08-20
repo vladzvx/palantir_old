@@ -1,22 +1,13 @@
 ﻿using Bot.Core.Enums;
-using Bot.Core.Interfaces;
 using Bot.Core.Models;
-using Bot.Core.Services;
 using Common;
-using Common.Services.DataBase;
-using Common.Services.gRPC;
+using Common.Services;
 using Common.Services.Interfaces;
-using Grpc.Net.Client;
 using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Telegram.Bot;
-using Telegram.Bot.Extensions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using Message = Telegram.Bot.Types.Message;
@@ -25,11 +16,12 @@ namespace Bot.Core.Services
 {
     public partial class Bot
     {
-        public class FSM
+        public partial class FSM
         {
             public static IServiceProvider serviceProvider;
 
 
+            private readonly AsyncTaskExecutor asyncTaskExecutor;
             private readonly MessagesSender messagesSender;
             private readonly DBWorker dBWorker;
             private readonly ICommonWriter<Message> writer;
@@ -62,27 +54,6 @@ namespace Bot.Core.Services
                     }
                 }
             }
-
-            private readonly object lastMessageLocker = new object();
-            private Message _lastMessage;
-            public Message LastBotMessage
-            {
-                get
-                {
-                    lock (lastMessageLocker)
-                    {
-                        return _lastMessage;
-                    }
-                }
-                set
-                {
-                    lock (lastMessageLocker)
-                    {
-                        _lastMessage = value;
-                    }
-                }
-            }
-
 
             private readonly object depthLocker = new object();
             private RequestDepth _requestDepth;
@@ -141,29 +112,16 @@ namespace Bot.Core.Services
                 }
             }
             private bool _searchInChannels = true;
-            public int Limit
-            {
-                get
-                {
-                    lock (settingsLocker)
-                    {
-                        return _limit;
-                    }
-                }
-                set
-                {
-                    lock (settingsLocker)
-                    {
-                        _limit = value;
-                    }
-                }
-            }
-            private int _limit = 150;
+
             #endregion
 
-            public FSM(ITelegramBotClient botClient, long chatId, Settings settings=null)
+            public FSM(ITelegramBotClient botClient, long chatId, Settings settings = null)
             {
-                if (serviceProvider == null) throw new ArgumentNullException("IServiceProvider serviceProvider static field is null! Work impossible!");
+                if (serviceProvider == null)
+                {
+                    throw new ArgumentNullException("IServiceProvider serviceProvider static field is null! Work impossible!");
+                }
+
                 this.botClient = botClient;
                 this.chatId = chatId;
                 if (settings != null)
@@ -171,11 +129,16 @@ namespace Bot.Core.Services
                     this.SearchInChannels = settings.SearchInChannels;
                     this.SearchInGroups = settings.SearchInGroups;
                     this.BotState = settings.BotState;
+                    this.RequestDepth = settings.Depth;
                 }
                 messagesSender = (MessagesSender)serviceProvider.GetService(typeof(MessagesSender));
                 dBWorker = (DBWorker)serviceProvider.GetService(typeof(DBWorker));
                 writer = (ICommonWriter<Message>)serviceProvider.GetService(typeof(ICommonWriter<Message>));
-                TextMessage.commonWriter = writer;
+                asyncTaskExecutor = (AsyncTaskExecutor)serviceProvider.GetService(typeof(AsyncTaskExecutor));
+                if (TextMessage.commonWriter == null)
+                {
+                    TextMessage.commonWriter = writer;
+                }
             }
 
             private static string PreparateRequest(string text)
@@ -198,7 +161,6 @@ namespace Bot.Core.Services
                     SearchType = SearchType.SearchNamePeriod,
                     IsChannel = SearchInChannels,
                     IsGroup = SearchInGroups,
-                    Limit = Limit,
                     Request = PreparateRequest(update.Message.Text),
                 };
                 DateTime start = DateTime.UtcNow.Date.AddDays(-15 * 365);
@@ -260,7 +222,7 @@ namespace Bot.Core.Services
                 if (Constants.CallSettings.Contains(update.Message.Text.ToLower()))
                 {
                     BotState = BotState.ConfiguringDepth;
-                    Channel<bool> channel = Channel.CreateBounded<bool>(1);
+                    Channel<int> channel = Channel.CreateBounded<int>(1);
                     TextMessage textMessage = new TextMessage(botClient, chatId, "Выберите глубину поиска", channel, keyboard: Constants.Keyboards.settingKeyboard);
                     messagesSender.AddItem(textMessage);
                     await channel.Reader.ReadAsync();
@@ -271,28 +233,20 @@ namespace Bot.Core.Services
                     return true;
                 }
             }
-
-            private bool CheckStatus(UserStatus status)
-            {
-                return status != UserStatus.banned;
-            }
             private async Task Ok(Update update, IReplyMarkup keyboard = null, string additionalMessage = "")
             {
-                Channel<bool> channel = Channel.CreateBounded<bool>(1);
+                Channel<int> channel = Channel.CreateBounded<int>(1);
                 TextMessage textMessage = new TextMessage(botClient, chatId, "Принято! " + additionalMessage, channel, keyboard, replyToMessageId: update.Message.MessageId);
                 messagesSender.AddItem(textMessage);
                 await channel.Reader.ReadAsync();
             }
-
-            #region searching processing
             private async Task ImBusy()
             {
-                Channel<bool> channel = Channel.CreateBounded<bool>(1);
+                Channel<int> channel = Channel.CreateBounded<int>(1);
                 TextMessage textMessage = new TextMessage(botClient, chatId, "Идет поиск, но вы можете отменить его.", channel, keyboard: Constants.Keyboards.searchingKeyboard);
                 messagesSender.AddItem(textMessage);
                 await channel.Reader.ReadAsync();
             }
-
             private async Task SearchingProcessing(Update update)
             {
                 if (Constants.Cancells.Contains(update.Message.Text.ToLower()))
@@ -306,71 +260,29 @@ namespace Bot.Core.Services
                     await ImBusy();
                 }
             }
-
-
             private async Task ReadyProcessing(Update update)
             {
                 if (await TryEnterSearchingMode(update))
                 {
                     BotState = BotState.Searching;
                     CancellationTokenSource = new CancellationTokenSource();
-
-
-
-
-
-                    SearchClient searchClient = (SearchClient)serviceProvider.GetService(typeof(SearchClient));
-                    SearchingTask = searchClient.Search(GetRequest(update), CancellationTokenSource.Token);
-                    MessagesSenderOld messagesSender = new MessagesSenderOld(botClient, update.Message.Chat.Id, CancellationTokenSource.Token, Limit);
-                    Task SendingTask = Task.Factory.StartNew(async () =>
+                    SearchReciever searchClient = (SearchReciever)serviceProvider.GetService(typeof(SearchReciever));
+                    SearchingTask = searchClient.Search(update.Message.From.Id, GetRequest(update), CancellationTokenSource.Token);
+                    Task searchFinalsTask = SearchingTask.ContinueWith((state) =>
                     {
-                        int count = 0;
-                        CancellationToken token = CancellationTokenSource.Token;
-                        while (!searchClient.searchResultReciever.IsComplited && !token.IsCancellationRequested)
-                        {
-                            await Task.Delay(200);
-                            while (searchClient.searchResultReciever.TryDequeueResult(out SearchResult res) && !token.IsCancellationRequested)
-                            {
-                                messagesSender.Send(res);
-                                count++;
-                            }
-                        }
-                        if (count == 0)
-                        {
-                            LastBotMessage = await botClient.SendTextMessageAsync(chatId, "Ничего не найдено, попробуйте другой запрос.", replyMarkup: new ReplyKeyboardRemove(), cancellationToken: CancellationTokenSource.Token);
-                            CancellationTokenSource.Cancel();
-                            BotState = BotState.Ready;
-                        }
+                        TextMessage textMessage = new TextMessage(botClient, chatId, "Поиск завершен!", null, new ReplyKeyboardRemove());
+                        messagesSender.AddItem(textMessage);
+                        BotState = BotState.Ready;
                     });
-                    Task.Factory.StartNew(() =>
-                    {
-                        Task.WaitAll(SendingTask, SearchingTask);
-                        if (messagesSender.sendingTask != null)
-                        {
-                            messagesSender.sendingTask.ContinueWith((prevState) =>
-                            {
-                                BotState = BotState.Ready;
-                                LastBotMessage = botClient.SendTextMessageAsync(chatId, "Поиск завершен!", replyMarkup: new ReplyKeyboardRemove(), cancellationToken: CancellationTokenSource.Token).Result;
-                            });
-                        }
-
-                    });
+                    await SearchingTask;
+                    await searchFinalsTask;
                 }
             }
-            #endregion
-            public async Task ProcessUpdate(Update update)
+            public async Task ProcessUpdate(Update update, CancellationToken token)
             {
                 if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message)
                 {
                     writer.PutData(update.Message);
-                    UserStatus status = await dBWorker.LogUser(update, CancellationToken.None);
-                    if (!CheckStatus(status))
-                    {
-                        Channel<bool> channel = Channel.CreateBounded<bool>(1);
-                        TextMessage textMessage = new TextMessage(botClient, chatId, "Вас приветствует бот-поисковик по телеграму! Вы не входите в число пользователей, пожалуйста, свяжитесь с владельцами бота!", channel);
-                        messagesSender.AddItem(textMessage);
-                        await channel.Reader.ReadAsync();
-                    }
                     try
                     {
                         switch (BotState)
@@ -379,7 +291,7 @@ namespace Bot.Core.Services
                                 {
                                     if (await TryEnterSearchingMode(update))
                                     {
-                                        Channel<bool> channel = Channel.CreateBounded<bool>(1);
+                                        Channel<int> channel = Channel.CreateBounded<int>(1);
                                         TextMessage textMessage = new TextMessage(botClient, chatId, "Вас приветствует бот-поисковик по телеграму! Здесь вы можете найти пост или комментарий по ключевым словам. Для начала работы настройте бота, набрав команду /settings", channel);
                                         messagesSender.AddItem(textMessage);
                                         await channel.Reader.ReadAsync();
@@ -403,18 +315,9 @@ namespace Bot.Core.Services
                             case BotState.ConfiguringChannel:
                                 {
                                     SearchInChannels = update.Message.Text.ToLower() == "да";
-                                    await Ok(update, Constants.Keyboards.limtKeyboard, " Выберете предельное число результатов (по умолчанию - 150)");
-                                    BotState = BotState.ConfiguringLimit;
-                                    break;
-                                }
-                            case BotState.ConfiguringLimit:
-                                {
-                                    if (int.TryParse(update.Message.Text.ToLower(), out int res))
-                                    {
-                                        await Ok(update, new ReplyKeyboardRemove(), " Настройки завершены. Для поиска просто отправьте слово/словосочетание боту.");
-                                        BotState = BotState.Ready;
-                                        Limit = res;
-                                    }
+                                    await Ok(update, new ReplyKeyboardRemove(), " Настройки завершены. Для поиска просто отправьте слово/словосочетание боту.");
+                                    BotState = BotState.Ready;
+                                    await dBWorker.LogUser(update, token, GetSettings());
                                     break;
                                 }
                             case BotState.Ready:
@@ -435,17 +338,17 @@ namespace Bot.Core.Services
 
 
             }
-
             public Settings GetSettings()
             {
-                return new Settings() { BotState = BotState, SearchInGroups=SearchInGroups, SearchInChannels= SearchInChannels };
+                return new Settings() { BotState = BotState, SearchInGroups = SearchInGroups, SearchInChannels = SearchInChannels, Depth = RequestDepth };
             }
-
             public class Settings
             {
-                public BotState BotState { get; set; }
-                public bool SearchInGroups { get; set; }
-                public bool SearchInChannels { get; set; }
+                public UserStatus Status { get; set; } = UserStatus.common;
+                public BotState BotState { get; set; } = BotState.Started;
+                public RequestDepth Depth { get; set; } = RequestDepth.Month;
+                public bool SearchInGroups { get; set; } = false;
+                public bool SearchInChannels { get; set; } = true;
             }
         }
     }

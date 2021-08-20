@@ -1,14 +1,10 @@
-﻿using Common;
-using Common.Models;
+﻿using Common.Models;
 using Common.Services.Interfaces;
-using Microsoft.Extensions.Logging;
 using NLog;
 using Npgsql;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Data.Common;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -16,15 +12,15 @@ using Timer = System.Timers.Timer;
 
 namespace Common.Services
 {
-    public class CommonWriter:ICommonWriter 
+    public class CommonWriter : ICommonWriter
     {
-        private Timer Timer;
+        private readonly Timer Timer;
         internal Logger logger = NLog.LogManager.GetCurrentClassLogger();
         internal Task WritingTask;
         private readonly ConcurrentQueue<object> DataQueue = new ConcurrentQueue<object>();
         private readonly object sync = new object();
         private readonly IWriterCore writerSettings;
-        private DbConnection Connention;
+        private readonly DbConnection Connention;
         public CommonWriter(IWriterCore writerSettings)
         {
             this.writerSettings = writerSettings;
@@ -41,7 +37,7 @@ namespace Common.Services
             //loadManager.AddValue(DataQueue.Count);
             if (Monitor.TryEnter(sync))
             {
-                if (DataQueue.Count > 0 && (WritingTask == null || WritingTask.IsCompleted)) 
+                if (DataQueue.Count > 0 && (WritingTask == null || WritingTask.IsCompleted))
                 {
                     WritingTask = Task.Factory.StartNew(WritingTaskAction);
                 }
@@ -92,8 +88,8 @@ namespace Common.Services
             {
                 if (ManageConnection())
                 {
-                    using DbCommand AddMessageCommand = writerSettings.CreateCommand(Connention,typeof(Message));
-                    using DbCommand AddChatCommand = writerSettings.CreateCommand(Connention,typeof(Chat));
+                    using DbCommand AddMessageCommand = writerSettings.CreateCommand(Connention, typeof(Message));
+                    using DbCommand AddChatCommand = writerSettings.CreateCommand(Connention, typeof(Chat));
                     using DbCommand AddUserCommand = writerSettings.CreateCommand(Connention, typeof(User));
                     using DbCommand BanChatCommand = writerSettings.CreateCommand(Connention, typeof(Ban));
                     using DbCommand DelMessageCommand = writerSettings.CreateCommand(Connention, typeof(Deleting));

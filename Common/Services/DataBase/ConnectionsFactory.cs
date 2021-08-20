@@ -1,10 +1,6 @@
 ﻿using Common.Services.DataBase.Interfaces;
-using Npgsql;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -74,7 +70,9 @@ namespace Common.Services.DataBase
                 if (Pool.TryTake(out connection))
                 {
                     if (connection.Connection.FullState == System.Data.ConnectionState.Open)
+                    {
                         return connection;
+                    }
                     else if (connection.Connection.FullState == System.Data.ConnectionState.Connecting)
                     {
                         continue;
@@ -94,13 +92,16 @@ namespace Common.Services.DataBase
                             //Monitor.Exit(locker);
                             return connection;
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
-                           // Monitor.Exit(locker);
+                            // Monitor.Exit(locker);
                         }
                     }
                 }
-                else await Task.Delay(100, token);
+                else
+                {
+                    await Task.Delay(100, token);
+                }
             }
             throw new OperationCanceledException();
         }

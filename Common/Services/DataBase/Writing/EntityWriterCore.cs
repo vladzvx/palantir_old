@@ -1,14 +1,9 @@
-﻿using Npgsql;
+﻿using Common.Services.Interfaces;
+using Npgsql;
 using System;
-using System.Collections.Concurrent;
-using System.Threading;
-using Common;
-using System.Threading.Tasks;
-using NLog;
 using System.Data.Common;
-using Common.Services.Interfaces;
-using Common.Models;
-using Common.Services.DataBase;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Common.Services
 {
@@ -37,7 +32,7 @@ namespace Common.Services
             command.Parameters["pair_chat_id"].Value = entity.PairId != 0 ? entity.PairId : DBNull.Value;
             command.Parameters["_is_group"].Value = entity.Type == EntityType.Group;
             command.Parameters["_is_channel"].Value = entity.Type == EntityType.Channel;
-            command.Parameters["_finder"].Value = !string.IsNullOrEmpty( entity.Finder)? entity.Finder:string.Empty;
+            command.Parameters["_finder"].Value = !string.IsNullOrEmpty(entity.Finder) ? entity.Finder : string.Empty;
             await command.ExecuteNonQueryAsync(token);
         }
 
@@ -53,7 +48,7 @@ namespace Common.Services
 
         public async Task ExecuteAdditionaAcion(DbConnection dbConnection, object data, CancellationToken token)
         {
-            DbCommand additionalCommand=null;
+            DbCommand additionalCommand = null;
             if (data is Order order)
             {
                 if (order.Type == OrderType.Container)
@@ -75,7 +70,7 @@ namespace Common.Services
                     additionalCommand.Parameters.Add(new NpgsqlParameter("_chat_id", NpgsqlTypes.NpgsqlDbType.Bigint));
                     additionalCommand.Parameters.Add(new NpgsqlParameter("_finder", NpgsqlTypes.NpgsqlDbType.Text));
                     additionalCommand.Parameters["_chat_id"].Value = order.Id;
-                    additionalCommand.Parameters["_finder"].Value = order.Finders.Count>0?order.Finders[0]:DBNull.Value;
+                    additionalCommand.Parameters["_finder"].Value = order.Finders.Count > 0 ? order.Finders[0] : DBNull.Value;
                     await additionalCommand.ExecuteNonQueryAsync(token);
                 }
 

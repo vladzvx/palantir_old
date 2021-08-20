@@ -1,15 +1,10 @@
-﻿using Npgsql;
-using System;
-using System.Collections.Concurrent;
-using System.Threading;
-using Common;
-using System.Threading.Tasks;
-using NLog;
-using System.Data.Common;
-using Common.Services.Interfaces;
-using Common.Models;
-using Common.Services.DataBase;
+﻿using Common.Services.DataBase;
 using Common.Services.DataBase.Interfaces;
+using Npgsql;
+using System;
+using System.Data.Common;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Common.Services
 {
@@ -39,7 +34,7 @@ namespace Common.Services
                         {
                             offset = reader.GetInt64(0);
                         }
-                        return new ChatInfo() {Id=request.Id,Offset=offset };
+                        return new ChatInfo() { Id = request.Id, Offset = offset };
                     }
                 }
                 throw new Exception("Reading failed");

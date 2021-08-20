@@ -1,28 +1,19 @@
-using Grpc.Core;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Common;
-using Google.Protobuf.WellKnownTypes;
-using System.Collections.Concurrent;
-using System.Timers;
-using System.Threading;
-using Timer = System.Timers.Timer;
-using System.Diagnostics;
-using System.IO;
-using Common.Services.Interfaces;
 using Common.Models;
 using Common.Services.DataBase.Interfaces;
+using Common.Services.Interfaces;
+using Google.Protobuf.WellKnownTypes;
+using Grpc.Core;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Common.Services.gRPC
 {
     public class OrderBoardService : OrderBoard.OrderBoardBase
     {
-        private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
-        private static Order EmptyOrder = new Order() { Type = OrderType.Empty};
-        private static Order Sleep = new Order() { Type = OrderType.Sleep,Time=10};
+        private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+        private static readonly Order EmptyOrder = new Order() { Type = OrderType.Empty };
+        private static readonly Order Sleep = new Order() { Type = OrderType.Sleep, Time = 10 };
         private readonly State ordersStorage;
         private readonly ICommonWriter commonWriter;
         private readonly ICommonWriter<Message> messagesWriter;
@@ -44,12 +35,12 @@ namespace Common.Services.gRPC
         }
         public override Task<Empty> PostEntity(Entity entity, ServerCallContext context)
         {
-            logger.Trace("New entity Id: {0}; username: {1}; name: {2}; type: {3};", entity.Id, entity.Link,entity.LastName,entity.Type.ToString());
-            if (entity.Type==EntityType.Channel|| entity.Type == EntityType.Group)
+            logger.Trace("New entity Id: {0}; username: {1}; name: {2}; type: {3};", entity.Id, entity.Link, entity.LastName, entity.Type.ToString());
+            if (entity.Type == EntityType.Channel || entity.Type == EntityType.Group)
             {
                 entitiesWriter.PutData(entity);
             }
-            else if (User.TryCast(entity,out User user))
+            else if (User.TryCast(entity, out User user))
             {
                 commonWriter.PutData(user);
             }
@@ -69,13 +60,19 @@ namespace Common.Services.gRPC
                 {
                     messagesWriter.PutData(requestStream.Current);
                     //await loadManager.WaitIfNeed();
-                    if (requestStream.Current.Id > maxId) maxId = requestStream.Current.Id;
+                    if (requestStream.Current.Id > maxId)
+                    {
+                        maxId = requestStream.Current.Id;
+                    }
+
                     chatId = requestStream.Current.ChatId;
                     //Message message = requestStream.Current;
                     //logger.Trace("Message. DateTime: {0}; FromId: {1}; Text: {2}; Media: {3};", message.Timestamp, message.FromId, message.Text, message.Media);
                 }
-                if (maxId!=0)
-                    await entitiesWriter.ExecuteAdditionalAction(new Order() { Id = chatId, Offset = maxId,Type=OrderType.Container });
+                if (maxId != 0)
+                {
+                    await entitiesWriter.ExecuteAdditionalAction(new Order() { Id = chatId, Offset = maxId, Type = OrderType.Container });
+                }
             }
             catch (Exception ex)
             {
@@ -91,7 +88,10 @@ namespace Common.Services.gRPC
                 {
                     return Task.FromResult(resOrder);
                 }
-                else return Task.FromResult(EmptyOrder);
+                else
+                {
+                    return Task.FromResult(EmptyOrder);
+                }
                 //if (string.IsNullOrEmpty(req.Finder))
                 //{
                 //    Order order = EmptyOrder;
@@ -131,9 +131,9 @@ namespace Common.Services.gRPC
 
                 //return Task.FromResult(Sleep);
             }
-            catch (Exception ex )
+            catch (Exception ex)
             {
-                logger.Error(ex,"Error while executing GetOrder request");
+                logger.Error(ex, "Error while executing GetOrder request");
                 return Task.FromResult(EmptyOrder);
             }
         }

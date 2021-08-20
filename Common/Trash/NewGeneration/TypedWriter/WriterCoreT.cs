@@ -1,16 +1,4 @@
-﻿using Npgsql;
-using System;
-using System.Collections.Concurrent;
-using System.Threading;
-using Common;
-using System.Threading.Tasks;
-using NLog;
-using System.Data.Common;
-using Common.Services.Interfaces;
-using Common.Models;
-using Common.Services.DataBase;
-
-namespace Common.Services
+﻿namespace Common.Services
 {
     //public class WriterCore<T> : IWriterCore<T>
     //{
@@ -28,7 +16,7 @@ namespace Common.Services
     //        DbCommand Command = null;
     //        if (typeof(T) == typeof(Message))
     //        {
-                
+
     //            Command.CommandType = System.Data.CommandType.StoredProcedure;
     //            Command.CommandText = "add_message";
     //            Command.Parameters.Add(new NpgsqlParameter("_message_timestamp", NpgsqlTypes.NpgsqlDbType.Timestamp));

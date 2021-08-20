@@ -1,12 +1,7 @@
-﻿using Common;
-using Common.Services.DataBase;
+﻿using Common.Services.DataBase;
 using Common.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Common.Services
 {
@@ -27,7 +22,7 @@ namespace Common.Services
         {
             foreach (string key in state.Collectors.Keys.ToArray())
             {
-                if (state.Collectors.TryGetValue(key,out var val))
+                if (state.Collectors.TryGetValue(key, out var val))
                 {
                     Collectors += val.Count;
                 }
@@ -40,7 +35,7 @@ namespace Common.Services
 
             OrderManagerState = state.ordersManager.executingState.ToString();
             Orders = state.CountOrders();
-            TargetOrders= state.CountTargetOrders(); 
+            TargetOrders = state.CountTargetOrders();
 
             DriveInfo[] allDrives = DriveInfo.GetDrives();
             long disk = 0;

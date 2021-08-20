@@ -1,14 +1,9 @@
 ﻿using Common.Services.DataBase.Interfaces;
-using DataFair.Utils;
 using Microsoft.Extensions.Hosting;
 using Npgsql;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
-using System.Timers;
 using System.Threading.Tasks;
-using Timer = System.Timers.Timer;
 
 namespace Common.Services.DataBase.DataProcessing
 {
@@ -18,7 +13,7 @@ namespace Common.Services.DataBase.DataProcessing
         private readonly ConnectionsFactory connectionPoolManager;
         private readonly CancellationTokenSource globalCts;
         private readonly IDataBaseSettings settings;
-        public StoredProcedureExecutor(ConnectionsFactory connectionPoolManager, CancellationTokenSource globalCts, IDataBaseSettings settings):
+        public StoredProcedureExecutor(ConnectionsFactory connectionPoolManager, CancellationTokenSource globalCts, IDataBaseSettings settings) :
             base(settings.StartWritingInterval, globalCts)
         {
             this.connectionPoolManager = connectionPoolManager;
@@ -29,7 +24,11 @@ namespace Common.Services.DataBase.DataProcessing
 
         private void ActionWrapper(object CancellationToken)
         {
-            if (CancellationToken is not CancellationToken token) return;
+            if (CancellationToken is not CancellationToken token)
+            {
+                return;
+            }
+
             action(token).Wait();
         }
         private async Task action(CancellationToken token)
@@ -38,7 +37,7 @@ namespace Common.Services.DataBase.DataProcessing
             {
                 while (!token.IsCancellationRequested)
                 {
-                    using (ConnectionWrapper connection =await connectionPoolManager.GetConnectionAsync(token))
+                    using (ConnectionWrapper connection = await connectionPoolManager.GetConnectionAsync(token))
                     {
                         try
                         {
@@ -55,7 +54,7 @@ namespace Common.Services.DataBase.DataProcessing
                                 }
                             }
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
 
                         }

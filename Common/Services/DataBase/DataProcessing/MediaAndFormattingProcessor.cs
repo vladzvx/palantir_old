@@ -3,13 +3,12 @@ using Microsoft.Extensions.Hosting;
 using Npgsql;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Common.Services.DataBase.DataProcessing
 {
-    public class MediaAndFormattingProcessor: IHostedService
+    public class MediaAndFormattingProcessor : IHostedService
     {
         internal class Record
         {
@@ -17,7 +16,7 @@ namespace Common.Services.DataBase.DataProcessing
             public string media_costyl;
             public string formatting_costyl;
         }
-        private CancellationTokenSource cts = new CancellationTokenSource();
+        private readonly CancellationTokenSource cts = new CancellationTokenSource();
         private NpgsqlConnection connection;
         private NpgsqlCommand WriteCommand;
         private NpgsqlCommand ReadCommand;
@@ -30,7 +29,11 @@ namespace Common.Services.DataBase.DataProcessing
         }
         private async Task action(object cancellationToken)
         {
-            if (!(cancellationToken is CancellationToken)) return;
+            if (!(cancellationToken is CancellationToken))
+            {
+                return;
+            }
+
             CancellationToken ct = (CancellationToken)cancellationToken;
 
             using (ConnectionWrapper connectionWrapper = await connectionPoolManager.GetConnectionAsync(ct))
@@ -67,7 +70,11 @@ namespace Common.Services.DataBase.DataProcessing
                             }
                         }
 
-                        if (records.Count == 0) return;
+                        if (records.Count == 0)
+                        {
+                            return;
+                        }
+
                         List<object> list = new List<object>();
                         using NpgsqlTransaction transaction = connection.BeginTransaction();
                         try
@@ -86,12 +93,12 @@ namespace Common.Services.DataBase.DataProcessing
                             }
                             transaction.Commit();
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
                             transaction.Rollback();
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
 
                     }

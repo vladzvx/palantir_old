@@ -11,14 +11,9 @@ using DataFair.Services;
 using DataFair.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace DataFair
 {
@@ -29,7 +24,7 @@ namespace DataFair
             services.AddSingleton<CancellationTokenSource>();
             services.AddSingleton<State>();
             services.AddSingleton<IDataBaseSettings, DataBaseSettings>();
-            services.AddSingleton<ICommonWriter,CommonWriter>();
+            services.AddSingleton<ICommonWriter, CommonWriter>();
             services.AddSingleton<ILoadManager, LoadManager>();
             services.AddSingleton<ISettings, Settings>();
             services.AddSingleton<ILimits, Limits>();
@@ -41,19 +36,19 @@ namespace DataFair
 
             services.AddTransient<DataPreparator>();
 
-            services.AddTransient<IWriterCore<Message>,MessagesWriterCore>();
-            services.AddTransient<IWriterCore<Entity>,EntityWriterCore>();
-            services.AddTransient<IWriterCore,WriterCore>();
+            services.AddTransient<IWriterCore<Message>, MessagesWriterCore>();
+            services.AddTransient<IWriterCore<Entity>, EntityWriterCore>();
+            services.AddTransient<IWriterCore, WriterCore>();
             services.AddTransient<ISearchResultReciever, StreamSearchResiever>();
-            services.AddTransient<ICommonReader<ChatInfo>,ChatInfoReader>();
-            
+            services.AddTransient<ICommonReader<ChatInfo>, ChatInfoReader>();
+
             services.AddTransient<StateReport>();
             //services.AddTransient<SystemReport>();
-            services.AddTransient<IOrdersGenerator,OrdersGenerator>();
+            services.AddTransient<IOrdersGenerator, OrdersGenerator>();
             services.AddTransient<SearchProvider>();
 
 
-            services.AddHostedService<OrdersManager>();
+            //services.AddHostedService<OrdersManager>();
             services.AddHostedService<CollectorsManager>();
             //services.AddHostedService<MediaAndFormattingProcessor>();
             services.AddHostedService<TextVectorizer>();

@@ -1,13 +1,8 @@
-﻿using Npgsql;
-using System;
-using System.Collections.Concurrent;
-using System.Threading;
-using Common;
-using System.Threading.Tasks;
-using NLog;
-using System.Data.Common;
+﻿using Common.Models;
 using Common.Services.Interfaces;
-using Common.Models;
+using Npgsql;
+using System;
+using System.Data.Common;
 
 namespace Common.Services
 {
@@ -88,10 +83,13 @@ namespace Common.Services
                 DelMessageCommand.Parameters.Add(new NpgsqlParameter("_id", NpgsqlTypes.NpgsqlDbType.Bigint));
                 return DelMessageCommand;
             }
-            else throw new InvalidCastException();
+            else
+            {
+                throw new InvalidCastException();
+            }
         }
 
-        public void WriteSingleObject(object data,DbTransaction transaction)
+        public void WriteSingleObject(object data, DbTransaction transaction)
         {
             if (data is Message message && AddMessageCommand != null)
             {
@@ -151,12 +149,12 @@ namespace Common.Services
                 return;
             }
 
-            if (data is Deleting del && DelMessageCommand!=null)
+            if (data is Deleting del && DelMessageCommand != null)
             {
                 DbCommand command = DelMessageCommand;
                 command.Transaction = transaction;
                 command.Parameters["_id"].Value = del.message_db_id;
-                int q  = command.ExecuteNonQuery();
+                int q = command.ExecuteNonQuery();
                 return;
             }
         }

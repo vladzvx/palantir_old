@@ -1,15 +1,8 @@
-﻿using Common;
-using Common.Models;
-using Common.Services;
+﻿using Common.Models;
 using Common.Services.DataBase;
-using Common.Services.DataBase.DataProcessing;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using SearchRequest = Common.Models.SearchRequest;
@@ -18,7 +11,7 @@ namespace DataFair.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class SearchController :ControllerBase
+    public class SearchController : ControllerBase
     {
         private readonly SearchProvider searchProvider;
 
@@ -29,7 +22,7 @@ namespace DataFair.Controllers
 
         [HttpPost()]
         [EnableCors()]
-        public async Task<string> SimpleSearch(SearchRequest req,CancellationToken token)
+        public async Task<string> SimpleSearch(SearchRequest req, CancellationToken token)
         {
             req.endDT = DateTime.UtcNow;
             req.startDT = DateTime.UtcNow.AddDays(-7);

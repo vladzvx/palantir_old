@@ -1,9 +1,7 @@
 ﻿using Common;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace DataFair.Utils
 {
@@ -16,13 +14,17 @@ namespace DataFair.Utils
             public string content;
         }
 
-        private Regex webRegex = new Regex("{\"__MessageMediaWebPage__\": {\"webpage\": {\"__WebPage__\": {\"id\": (\\d+), \"url\": \"(\\S+)\", ");
-        private Regex docRegex = new Regex("{\"__MessageMediaDocument__\": {\"document\": {\"__Document__\": {\"id\": (\\d+), ");
-        private Regex pollRegex = new Regex("{\"__MessageMediaPoll__\": {\"poll\": {\"__Poll__\": {\"id\": (\\d+), ");
-        private Regex photoRegex = new Regex("{\"__MessageMediaPhoto__\": {\"photo\": {\"__Photo__\": {\"id\": (\\d+)," );
+        private readonly Regex webRegex = new Regex("{\"__MessageMediaWebPage__\": {\"webpage\": {\"__WebPage__\": {\"id\": (\\d+), \"url\": \"(\\S+)\", ");
+        private readonly Regex docRegex = new Regex("{\"__MessageMediaDocument__\": {\"document\": {\"__Document__\": {\"id\": (\\d+), ");
+        private readonly Regex pollRegex = new Regex("{\"__MessageMediaPoll__\": {\"poll\": {\"__Poll__\": {\"id\": (\\d+), ");
+        private readonly Regex photoRegex = new Regex("{\"__MessageMediaPhoto__\": {\"photo\": {\"__Photo__\": {\"id\": (\\d+),");
         public object PreparateMedia(string mediaInfo)
         {
-            if (string.IsNullOrEmpty(mediaInfo)) return DBNull.Value;
+            if (string.IsNullOrEmpty(mediaInfo))
+            {
+                return DBNull.Value;
+            }
+
             try
             {
                 Media media = new Media();
@@ -68,7 +70,11 @@ namespace DataFair.Utils
 
         public object PreparateFormatting(string formatting)
         {
-            if (string.IsNullOrEmpty(formatting)) return DBNull.Value;
+            if (string.IsNullOrEmpty(formatting))
+            {
+                return DBNull.Value;
+            }
+
             object result = DBNull.Value;
             try
             {

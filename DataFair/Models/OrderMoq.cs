@@ -1,8 +1,4 @@
 ﻿using Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DataFair.Models
 {
@@ -35,15 +31,15 @@ namespace DataFair.Models
             order.Type = moq.Type;
             return order;
         }
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
     }
 }

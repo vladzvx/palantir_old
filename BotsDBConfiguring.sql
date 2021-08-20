@@ -4,16 +4,38 @@ create table statuses(
     primary key (id)
 );
 
+create table states(
+    id int,
+    name text,
+    primary key (id)
+);
+
+
+insert into states (id, name) values (0,'Started');
+insert into states (id, name) values (1,'ConfiguringDepth');
+insert into states (id, name) values (4,'ConfiguringGroups');
+insert into states (id, name) values (5,'ConfiguringChannel');
+insert into states (id, name) values (2,'Ready');
+insert into states (id, name) values (3,'Searching');
+
+
 create table users(
     id bigint not null ,
     username text,
     firstname text,
     status int default 2,
+    state int default 0,
+    depth int default 3,
+    search_in_groups bool default false not null,
+    search_in_channels bool default true not null,
     registration timestamp default current_timestamp,
     update timestamp,
     primary key (id),
-    foreign key (status) references statuses (id)
+    foreign key (status) references statuses (id),
+    foreign key (state) references states (id)
 );
+
+
 
 insert into statuses (id, name) values (-1,'master');
 insert into statuses (id, name) values (0,'privileged');
@@ -30,7 +52,6 @@ create table messages (
     message_number bigint,
     text text,
     primary key (message_db_id,db_time),
-    foreign key (user_id) references users (id)
 ) partition by RANGE (db_time);
 
 
@@ -48,21 +69,28 @@ create table pages(
 create index users_ids_in_mess on messages using hash(user_id);
 create index search_results_ind on pages (request_id,page);
 
-
-
-
-
-CREATE OR REPLACE FUNCTION add_user(_user_id bigint,sender_username text,sender_first_name text) RETURNS int as
+CREATE OR REPLACE FUNCTION log_user(_user_id bigint,sender_username text,sender_first_name text, _state int,_search_in_groups bool,_search_in_channels bool, _depth int)
+RETURNS table (status2 int,state2 int,search_in_groups2 bool, search_in_channels2 bool, depth2 int) as
 $$
-    declare
-        result int;
     begin
-        insert into users (id, username, firstname) values (_user_id,sender_username,sender_first_name) on conflict on constraint users_pkey do update
-                SET username=sender_username, firstname=sender_first_name, update=current_timestamp where excluded.id=users.id returning status into result;
-        return result;
+        if _state is null and _search_in_groups is null and _search_in_channels is null and _depth is null then
+
+                return query insert into users (id, username, firstname) values (_user_id,sender_username,sender_first_name) on conflict on constraint users_pkey do update
+                SET username=sender_username, firstname=sender_first_name, update=current_timestamp where excluded.id=users.id
+                returning status, state,search_in_groups,search_in_channels, depth;
+            else
+                return query insert into users (id, username, firstname,state, search_in_groups,search_in_channels) values
+                (_user_id,sender_username,sender_first_name, _state ,_search_in_groups ,_search_in_channels ) on conflict on constraint users_pkey do update
+                SET username=sender_username, firstname=sender_first_name,state = _state, search_in_groups =_search_in_groups ,
+                    depth=_depth,
+                    search_in_channels =_search_in_channels, update=current_timestamp where excluded.id=users.id
+        returning status, state,search_in_groups,search_in_channels, depth;
+        end if;
     end;
 $$ LANGUAGE plpgsql;
 
+
+select log_user(0,'1','343',null,null,null);
 
 CREATE OR REPLACE FUNCTION add_message(_user_id bigint, _chat_id bigint,_message_number bigint,_text text,_tg_time timestamp) RETURNS void as
 $$
@@ -86,7 +114,6 @@ $$
         return (select data from pages where request_id=_search_guid and page = _page);
     end;
 $$ LANGUAGE plpgsql;
-
 
 CREATE TABLE messages_2020_m07 PARTITION OF messages FOR VALUES FROM ('2020-07-01') TO ('2020-08-01');
 CREATE TABLE messages_2020_m08 PARTITION OF messages FOR VALUES FROM ('2020-08-01') TO ('2020-09-01');

@@ -1,11 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Common
 {
@@ -24,15 +17,15 @@ namespace Common
 
         public ApplicationContext()
         {
-            try
-            {
-               //var databaseCreator = (Database.GetService<IDatabaseCreator>() as RelationalDatabaseCreator);
-               // databaseCreator.CreateTables();
-            }
-            catch (Exception ex)
-            {
-                //A SqlException will be thrown if tables already exist. So simply ignore it.
-            }
+            //try
+            //{
+            //   //var databaseCreator = (Database.GetService<IDatabaseCreator>() as RelationalDatabaseCreator);
+            //   // databaseCreator.CreateTables();
+            //}
+            //catch (Exception ex)
+            //{
+            //    //A SqlException will be thrown if tables already exist. So simply ignore it.
+            //}
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

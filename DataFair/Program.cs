@@ -1,16 +1,8 @@
-using Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 [assembly: InternalsVisibleTo("DataFairTests")]
 
 namespace DataFair
@@ -27,9 +19,10 @@ namespace DataFair
                 {
                     webBuilder.ConfigureKestrel(serverOptions =>
                     {
-                        serverOptions.Listen(IPAddress.Any, 5005, o => {
+                        serverOptions.Listen(IPAddress.Any, 5005, o =>
+                        {
                             o.Protocols = HttpProtocols.Http2;
-                        });                     
+                        });
                         serverOptions.Listen(IPAddress.Any, 5002, o =>
                         {
                             o.Protocols = HttpProtocols.Http1;

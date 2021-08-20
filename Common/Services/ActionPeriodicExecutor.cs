@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Timers;
 using System.Threading.Tasks;
+using System.Timers;
 using Timer = System.Timers.Timer;
 
 namespace Common.Services
@@ -16,9 +13,9 @@ namespace Common.Services
         protected readonly CancellationTokenSource cancellationTokenSource;
         private readonly object locker = new object();
 
-        internal Action<object?> ExecutingAction { get; private set; }
+        internal Action<object> ExecutingAction { get; private set; }
 
-        public ActionPeriodicExecutor(double RepeatingInterval, CancellationTokenSource cancellationTokenSource, Action<object?> action =null)
+        public ActionPeriodicExecutor(double RepeatingInterval, CancellationTokenSource cancellationTokenSource, Action<object> action = null)
         {
             this.ExecutingAction = action;
             this.cancellationTokenSource = cancellationTokenSource;
@@ -28,7 +25,7 @@ namespace Common.Services
             timer.AutoReset = true;
         }
 
-        public void SetAction(Action<object?> action)
+        public void SetAction(Action<object> action)
         {
             if (Monitor.TryEnter(locker))
             {
@@ -44,8 +41,11 @@ namespace Common.Services
         {
             if (Monitor.TryEnter(locker))
             {
-                if (ExecutingAction != null&&(workingTask == null || workingTask.IsCompleted))
+                if (ExecutingAction != null && (workingTask == null || workingTask.IsCompleted))
+                {
                     workingTask = Task.Factory.StartNew(ExecutingAction, cancellationTokenSource.Token, TaskCreationOptions.LongRunning);
+                }
+
                 Monitor.Exit(locker);
             }
         }

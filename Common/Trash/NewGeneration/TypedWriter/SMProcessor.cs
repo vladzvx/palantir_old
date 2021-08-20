@@ -1,13 +1,5 @@
-﻿using Common.Services.DataBase.Interfaces;
-using Common.Services.Interfaces;
-using Npgsql;
-using System;
-using System.Collections.Generic;
-using System.Data.Common;
+﻿using Common.Services.Interfaces;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Common.Services.DataBase
 {
@@ -22,13 +14,19 @@ namespace Common.Services.DataBase
         }
         public bool IsResultsOk
         {
-            get 
-            { 
-                lock (locker) return IsResultsOk; 
-            }
-            private set 
+            get
             {
-                lock (locker) IsResultsOk = value; 
+                lock (locker)
+                {
+                    return IsResultsOk;
+                }
+            }
+            private set
+            {
+                lock (locker)
+                {
+                    IsResultsOk = value;
+                }
             }
         }
 
@@ -36,11 +34,17 @@ namespace Common.Services.DataBase
         {
             get
             {
-                lock (locker) return ProcessingsCounter;
+                lock (locker)
+                {
+                    return ProcessingsCounter;
+                }
             }
             private set
             {
-                lock (locker) ProcessingsCounter = value;
+                lock (locker)
+                {
+                    ProcessingsCounter = value;
+                }
             }
         }
 

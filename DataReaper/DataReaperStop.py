@@ -490,8 +490,7 @@ for cfg in config_stub.GetConfiguration(emp):
 																  config.Session.SessionStorageDB)
 	getter = TgDataGetter(config.CollectorParams.SessionName, config.CollectorParams.ApiId, 
 						  config.CollectorParams.ApiHash,
-						  config.CollectorParams.Phone,connection_string)
-                          
+						  config.CollectorParams.Phone,connection_string)                          
 
 	time.sleep(3600);
 	

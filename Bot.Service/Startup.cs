@@ -11,15 +11,10 @@ using Common.Services.Interfaces;
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Threading;
-using System.Threading.Tasks;
 using Telegram.Bot.Types;
 
 namespace Bot.Service
@@ -36,11 +31,14 @@ namespace Bot.Service
             services.AddSingleton<DBWorker>();
             services.AddSingleton<MessagesSender>();
             services.AddSingleton<ConnectionsFactory>();
-            services.AddSingleton(new CancellationTokenSource ());
-            services.AddSingleton<IDataBaseSettings,DataBaseSettings>();
-            services.AddSingleton<ICommonWriter<Message>,CommonWriter<Message>>();
-            services.AddSingleton<IWriterCore<Message>,BotMessagesWriterCore>();
+            services.AddSingleton(new CancellationTokenSource());
+            services.AddSingleton<IDataBaseSettings, DataBaseSettings>();
+            services.AddSingleton<ICommonWriter<Message>, CommonWriter<Message>>();
+            services.AddSingleton<IWriterCore<Message>, BotMessagesWriterCore>();
             services.AddTransient<SearchClient>();
+            services.AddTransient<SearchReciever>();
+            services.AddSingleton<SearchState>();
+            services.AddSingleton<AsyncTaskExecutor>();
             services.AddTransient<ISearchResultReciever, StreamSearchResiever>();
             services.AddTransient<Bot.Core.Services.Bot>();
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);

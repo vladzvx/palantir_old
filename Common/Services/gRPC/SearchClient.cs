@@ -2,9 +2,6 @@
 using Grpc.Core;
 using Grpc.Net.Client;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,7 +20,7 @@ namespace Common.Services.gRPC
         {
             SearchProto.SearchProtoClient Client = new SearchProto.SearchProtoClient(grpcChannel);
             var searchResponse = Client.Search(request);
-            while (await searchResponse.ResponseStream.MoveNext()&& !cancellationToken.IsCancellationRequested)
+            while (await searchResponse.ResponseStream.MoveNext() && !cancellationToken.IsCancellationRequested)
             {
                 Console.WriteLine("Recieved!");
                 searchResultReciever.Recieve(searchResponse.ResponseStream.Current);

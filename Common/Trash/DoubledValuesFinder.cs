@@ -1,12 +1,7 @@
-﻿using Common;
-using Common.Services.Interfaces;
-using DataFair.Utils;
-using Microsoft.Extensions.Hosting;
-using NLog;
+﻿using NLog;
 using Npgsql;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,7 +11,7 @@ namespace Common.Services.DataBase.DataProcessing
     {
 
         internal Logger logger = NLog.LogManager.GetCurrentClassLogger();
-        private NpgsqlConnection connection = new NpgsqlConnection(Options.ConnectionString);
+        private readonly NpgsqlConnection connection = new NpgsqlConnection(Options.ConnectionString);
         private NpgsqlCommand GetIdCommand;
         private NpgsqlCommand UpdateChat;
 
@@ -44,7 +39,7 @@ namespace Common.Services.DataBase.DataProcessing
                 {
                     while (reader.Read())
                     {
-                        Ids.Add( reader.GetInt64(0));
+                        Ids.Add(reader.GetInt64(0));
                     }
                 }
                 int count = 0;
@@ -56,10 +51,13 @@ namespace Common.Services.DataBase.DataProcessing
                         await UpdateChat.ExecuteNonQueryAsync(ct);
 
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         count++;
-                        if (count > 10) return;
+                        if (count > 10)
+                        {
+                            return;
+                        }
                     }
 
                 }
@@ -69,7 +67,7 @@ namespace Common.Services.DataBase.DataProcessing
             {
                 logger.Error(ex, "Error while reading data for doubled values killing");
             }
-            
+
         }
     }
 }

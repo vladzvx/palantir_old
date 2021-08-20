@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Bot.Core.Enums
+﻿namespace Bot.Core.Enums
 {
-    public enum RequestDepth
+    public enum RequestDepth : int
     {
-        Inf,
-        Day,
-        Week,
-        Month,
-        Year
+        Inf = 0,
+        Day = 1,
+        Week = 2,
+        Month = 3,
+        Year = 4
     }
 }

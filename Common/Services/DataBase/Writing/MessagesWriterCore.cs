@@ -1,15 +1,10 @@
-﻿using Npgsql;
+﻿using Common.Services.Interfaces;
+using Npgsql;
 using System;
-using System.Collections.Concurrent;
-using System.Threading;
-using Common;
-using System.Threading.Tasks;
-using NLog;
-using System.Data.Common;
-using Common.Services.Interfaces;
-using Common.Models;
-using Common.Services.DataBase;
 using System.Collections.Generic;
+using System.Data.Common;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Common.Services
 {
@@ -47,18 +42,18 @@ namespace Common.Services
         {
             //try
             //{
-                //command.Transaction = transaction;
-                command.Parameters["_message_timestamp"].Value = message.Timestamp.ToDateTime();
-                command.Parameters["_message_id"].Value = message.Id;
-                command.Parameters["_chat_id"].Value = message.ChatId;
-                command.Parameters["_user_id"].Value = message.FromId != 0 ? message.FromId : DBNull.Value;
-                command.Parameters["_reply_to"].Value = message.ReplyTo != 0 ? message.ReplyTo : DBNull.Value;
-                command.Parameters["_thread_start"].Value = message.ThreadStart != 0 ? message.ThreadStart : DBNull.Value;
-                command.Parameters["_media_group_id"].Value = message.MediagroupId != 0 ? message.MediagroupId : DBNull.Value;
-                command.Parameters["_forward_from_id"].Value = message.ForwardFromId != 0 ? message.ForwardFromId : DBNull.Value;
-                command.Parameters["_forward_from_message_id"].Value = message.ForwardFromMessageId != 0 ? message.ForwardFromMessageId : DBNull.Value;
-                command.Parameters["_text"].Value = !string.IsNullOrEmpty(message.Text) ? message.Text : DBNull.Value;
-                command.Parameters["_media"].Value = string.IsNullOrEmpty(message.Media) ? DBNull.Value : message.Media;
+            //command.Transaction = transaction;
+            command.Parameters["_message_timestamp"].Value = message.Timestamp.ToDateTime();
+            command.Parameters["_message_id"].Value = message.Id;
+            command.Parameters["_chat_id"].Value = message.ChatId;
+            command.Parameters["_user_id"].Value = message.FromId != 0 ? message.FromId : DBNull.Value;
+            command.Parameters["_reply_to"].Value = message.ReplyTo != 0 ? message.ReplyTo : DBNull.Value;
+            command.Parameters["_thread_start"].Value = message.ThreadStart != 0 ? message.ThreadStart : DBNull.Value;
+            command.Parameters["_media_group_id"].Value = message.MediagroupId != 0 ? message.MediagroupId : DBNull.Value;
+            command.Parameters["_forward_from_id"].Value = message.ForwardFromId != 0 ? message.ForwardFromId : DBNull.Value;
+            command.Parameters["_forward_from_message_id"].Value = message.ForwardFromMessageId != 0 ? message.ForwardFromMessageId : DBNull.Value;
+            command.Parameters["_text"].Value = !string.IsNullOrEmpty(message.Text) ? message.Text : DBNull.Value;
+            command.Parameters["_media"].Value = string.IsNullOrEmpty(message.Media) ? DBNull.Value : message.Media;
 
             bool has_form = Formating.ClearEmpty(message.Formating, out List<Formating> res);
             object forms = !has_form ?
@@ -66,8 +61,8 @@ namespace Common.Services
                     "{\"formats\":" + Newtonsoft.Json.JsonConvert.SerializeObject(res) + "}";
 
             command.Parameters["_formatting"].Value = forms;
-                await command.ExecuteNonQueryAsync(token);
-                return;
+            await command.ExecuteNonQueryAsync(token);
+            return;
             //}
             //catch(Exception ex)
             //{

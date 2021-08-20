@@ -1,19 +1,10 @@
 ﻿using Grpc.Core;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Common;
-using Google.Protobuf.WellKnownTypes;
 using System.Collections.Concurrent;
-using System.Timers;
-using System.Threading;
-using Timer = System.Timers.Timer;
+using System.Threading.Tasks;
 
 namespace Common.Services.gRPC
 {
-    public class ConfiguratorService :Common.Configurator.ConfiguratorBase
+    public class ConfiguratorService : Common.Configurator.ConfiguratorBase
     {
         private readonly State state;
         public ConfiguratorService(State state)
@@ -24,12 +15,13 @@ namespace Common.Services.gRPC
         {
             SessionSettings session;
             Collector collector;
-            if (state.SessionStorages.TryPeek(out session)&&
-                state.Collectors.TryGetValue(req.Group, out ConcurrentBag<Collector> Collectors)&& Collectors.TryTake(out collector))
+            if (state.SessionStorages.TryPeek(out session) &&
+                state.Collectors.TryGetValue(req.Group, out ConcurrentBag<Collector> Collectors) && Collectors.TryTake(out collector))
             {
                 ConfigurationContainer cont = new ConfigurationContainer()
                 {
-                    Session = session, CollectorParams=collector
+                    Session = session,
+                    CollectorParams = collector
                 };
                 await serverStream.WriteAsync(cont);
                 try

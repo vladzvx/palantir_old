@@ -1,11 +1,5 @@
-﻿using Common;
-using Common.Services;
-using Microsoft.Extensions.Hosting;
-using System;
+﻿using Microsoft.Extensions.Hosting;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
@@ -21,7 +15,7 @@ namespace Common.Services
         {
             timer = new Timer(Options.CollectorsSyncTimerPeriod);
             this.state = state;
-            LoadCollectorsInfo(null,null);
+            LoadCollectorsInfo(null, null);
             timer.Elapsed += LoadCollectorsInfo;
             timer.AutoReset = true;
         }
@@ -45,14 +39,18 @@ namespace Common.Services
                         state.AllCollectors.TryAdd(collector.Phone, collector);
                         if (state.Collectors.TryGetValue(collector.Group, out ConcurrentBag<Collector> Collectors))
                         {
-                            if (Collectors == null) Collectors = new ConcurrentBag<Collector>();
+                            if (Collectors == null)
+                            {
+                                Collectors = new ConcurrentBag<Collector>();
+                            }
+
                             Collectors.Add(collector);
                         }
                         else
                         {
                             state.Collectors.TryAdd(collector.Group, new ConcurrentBag<Collector>() { collector });
                         }
-                        
+
                     }
                 }
             }
