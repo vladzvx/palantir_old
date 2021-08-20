@@ -323,7 +323,7 @@ namespace Bot.Core.Services
                             case BotState.Ready:
                                 {
                                     await Ok(update, Constants.Keyboards.searchingKeyboard);
-                                    await ReadyProcessing(update);
+                                    asyncTaskExecutor.Add(ReadyProcessing(update));
                                     break;
                                 }
                             case BotState.Searching:

@@ -26,7 +26,7 @@ namespace Common.Services
         private int ordersCount;
         private DateTime lastCycleRestart = DateTime.UtcNow.Date;
         private DateTime currentStateStarted = DateTime.UtcNow;
-        public bool heavyOrdersDone = false;
+        public bool heavyOrdersDone = true;
         private readonly object locker = new object();
         private ExecutingState _executingState;
         public ExecutingState executingState
