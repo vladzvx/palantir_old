@@ -5,8 +5,18 @@ namespace Common
 {
     internal static class Options
     {
+        internal static string GetConnectionString()
+        {
+            string pwd = Environment.GetEnvironmentVariable("db_pwd");
+            string db = Environment.GetEnvironmentVariable("db");
+            string user = Environment.GetEnvironmentVariable("user");
+            string result = "User ID={2};Password={0};Host=localhost;Port=5432;Database={1};Pooling=true;Timeout=30;CommandTimeout=0;";
+
+            return pwd != null && db != null && user != null ? result : null;
+        }
+
         internal static readonly string SettingsFilename = "settings.txt";
-        internal static readonly string ConnectionString = Environment.GetEnvironmentVariable("ConnectionString") ?? File.ReadAllText(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), Options.SettingsFilename));
+        internal static readonly string ConnectionString = Environment.GetEnvironmentVariable("ConnectionString") ?? GetConnectionString()??(File.ReadAllText(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), Options.SettingsFilename)));
 
         internal static TimeSpan OrderGenerationTimeSpan = -new TimeSpan(1, 10, 0);
         internal static double StartWritingInterval = 20000;
