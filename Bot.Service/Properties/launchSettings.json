@@ -18,7 +18,7 @@
     "Bot.Service": {
       "commandName": "Project",
       "environmentVariables": {
-        "GrpcUrl": "http://localhost:5005",
+        "GrpcUrl": "http://84.201.164.97:5005",
         "db": "bots",
         "db_pwd": "qw12cv90",
         "db_host": "45.132.17.148",
@@ -28,6 +28,12 @@
       },
       "dotnetRunMessages": "true",
       "applicationUrl": "http://localhost:5000"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "publishAllPorts": true,
+      "DockerfileRunArguments": "--env GrpcUrl=http://84.201.164.97:5005 --env Token=1879635077:AAF0VwZBYJ-OLAkuNdXhZvGLCiHD0E2Yfek --env db_pwd=qw12cv90 --env db=bots --env db_host=45.132.17.148 --env user=postgres"
     }
   }
 }

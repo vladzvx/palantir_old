@@ -1,4 +1,0 @@
-﻿namespace Common.Services
-{
-
-}

@@ -20,7 +20,7 @@ namespace Common.Services.gRPC
         {
             SearchProto.SearchProtoClient Client = new SearchProto.SearchProtoClient(grpcChannel);
             var searchResponse = Client.Search(request);
-            while (await searchResponse.ResponseStream.MoveNext() && !cancellationToken.IsCancellationRequested)
+            while (searchResponse.ResponseStream.MoveNext().Result && !cancellationToken.IsCancellationRequested)
             {
                 Console.WriteLine("Recieved!");
                 searchResultReciever.Recieve(searchResponse.ResponseStream.Current);
