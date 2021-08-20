@@ -7,12 +7,20 @@ namespace Common
     {
         internal static string GetConnectionString()
         {
-            string pwd = Environment.GetEnvironmentVariable("db_pwd");
-            string db = Environment.GetEnvironmentVariable("db");
-            string user = Environment.GetEnvironmentVariable("user");
-            string result = "User ID={2};Password={0};Host=localhost;Port=5432;Database={1};Pooling=true;Timeout=30;CommandTimeout=0;";
+            try
+            {
+                string pwd = Environment.GetEnvironmentVariable("db_pwd");
+                string db = Environment.GetEnvironmentVariable("db");
+                string user = Environment.GetEnvironmentVariable("user");
+                string result = string.Format("User ID={2};Password={0};Host=localhost;Port=5432;Database={1};Pooling=true;Timeout=30;CommandTimeout=0;", pwd, db, user);
 
-            return pwd != null && db != null && user != null ? result : null;
+                return pwd != null && db != null && user != null ? result : null;
+            }
+            catch 
+            {
+                return null;
+            }
+
         }
 
         internal static readonly string SettingsFilename = "settings.txt";
