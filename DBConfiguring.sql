@@ -791,3 +791,54 @@ $$
 $$ LANGUAGE plpgsql;
 
 
+create table queries(
+    id bigserial,
+    query tsquery,
+    client_id bigint,
+    primary key (id)
+);
+
+
+create table spotter(
+    id bigserial,
+    time timestamp default current_timestamp not null ,
+    query_id bigint,
+    requester_id text,
+    client_id bigint not null,
+    link text,
+    preview_text text,
+    data tsvector,
+    need_trigger bool not null default true,
+    primary key (id),
+    foreign key (query_id) references queries(id)
+);
+
+create or replace function add_query(request text, _client_id bigint) returns void as
+$$
+    begin
+        insert into queries (query,client_id) values (to_tsquery('my_default',request), _client_id);
+    end;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION spotter_protect() RETURNS trigger as
+$$
+    DECLARE
+        temp text;
+    begin
+        if not new.need_trigger then
+            temp = pg_notify('test','"link":'||new.link||'; "text": '||new.preview_text||'"client":'||new.client_id||'"requester":'||new.requester_id||'"query_id":'||new.query_id);
+            return null;
+        end if;
+        insert into spotter(query_id, requester_id, client_id, data,need_trigger,preview_text,link)  (
+        with q as(
+        select id,query,client_id from public.queries),
+        res as(
+            select (q.query @@ new.data) as result, q.id as q_id, q.client_id as client_id,new.requester_id as requester_id, new.data as data from q
+        ) select res.q_id,res.requester_id,res.client_id,res.data,false,new.preview_text,new.link from res where result);
+
+        return null;
+    end;
+$$ LANGUAGE plpgsql;
+drop trigger on_insert_to_spotter on spotter;
+CREATE TRIGGER on_insert_to_spotter before INSERT on public.spotter FOR EACH ROW execute PROCEDURE spotter_protect();
