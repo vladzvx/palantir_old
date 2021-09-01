@@ -8,6 +8,8 @@ namespace Bot.Core.Services
     {
         public static class Constants
         {
+            public const string BusyMessage = "Идет поиск, но вы можете отменить его.";
+            public const string OkMessage = "Принято! ";
             public static ImmutableList<string> Cancells = ImmutableList.CreateRange(new string[1] { "отмена" });
             public static ImmutableList<string> CallSettings = ImmutableList.CreateRange(new string[1] { "/settings" });
             public static ImmutableList<string> Day = ImmutableList.CreateRange(new string[1] { "день" });

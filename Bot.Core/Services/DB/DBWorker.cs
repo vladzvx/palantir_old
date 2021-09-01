@@ -54,11 +54,11 @@ namespace Bot.Core
                                 bool searchInGroups = reader.GetBoolean(2);
                                 bool searchInChannels = reader.GetBoolean(3);
                                 if (Enum.IsDefined(typeof(UserStatus), status) &&
-                                    Enum.IsDefined(typeof(BotState), state) &&
+                                    Enum.IsDefined(typeof(PrivateChatState), state) &&
                                     Enum.IsDefined(typeof(RequestDepth), depth))
                                 {
                                     Services.Bot.FSM.Settings result = new Services.Bot.FSM.Settings();
-                                    result.BotState = (BotState)state;
+                                    result.BotState = (PrivateChatState)state;
                                     result.Status = (UserStatus)status;
                                     result.Depth = (RequestDepth)depth;
                                     result.SearchInChannels = searchInChannels;

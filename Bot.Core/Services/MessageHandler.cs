@@ -29,7 +29,7 @@ namespace Bot.Core.Services
             if (update.Type == UpdateType.Message)
             {
                 Bot.FSM processor = await Bot.FSM.Factory.Get(botClient, update, cancellationToken);
-                await processor.ProcessUpdate(update, cancellationToken);
+                await processor.ProcessPrivate(update, cancellationToken);
             }
             else if (update.Type == UpdateType.CallbackQuery)
             {

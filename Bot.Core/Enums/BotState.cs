@@ -1,12 +1,10 @@
 ﻿namespace Bot.Core.Enums
 {
-    public enum BotState : int
+    public enum PrivateChatState : int
     {
         Started = 0,
-        ConfiguringDepth = 1,
-        ConfiguringGroups = 4,
-        ConfiguringChannel = 5,
+        Configuring = 1,
         Ready = 2,
-        Searching = 3
+        Busy = 3
     }
 }
