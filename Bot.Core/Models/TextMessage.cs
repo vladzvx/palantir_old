@@ -22,7 +22,7 @@ namespace Bot.Core.Models
         public long ChatId { get; private set; }
 
         public ChannelReader<int> Ready { get; private set; }
-        internal ChannelWriter<int> ReadyWriter;
+        public ChannelWriter<int> ReadyWriter;
 
         public TextMessage(ITelegramBotClient client, long chatId, string text, Channel<int> channel, IReplyMarkup keyboard = null, int replyToMessageId = 0, IEnumerable<MessageEntity> formattings = null, InlineKeyboardMarkup inlineKeyboard = null)
         {

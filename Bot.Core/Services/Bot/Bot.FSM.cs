@@ -11,31 +11,83 @@ using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+using static Bot.Core.Services.Bot;
 using Message = Telegram.Bot.Types.Message;
 
 namespace Bot.Core.Services
 {
+    public interface IConfig
+    {
+        public bool Finished { get; }
+    }
+
+    public class SearchBotConfig : IConfig
+    {
+        public RequestDepth RequestDepth;
+        public bool Finished { get; set; }
+    }
     public enum ConfiguringSubstates
     {
+        Started,
         ConfiguringDepth,
         ConfiguringGroups,
         ConfiguringChannel
     }
 
-    public partial class ConfigProcessor
+    public class ReadyProcessor
     {
-        ConfiguringSubstates state;
+        private CancellationTokenSource CancellationTokenSource;
+        private Task SearchingTask;
+        private readonly IServiceProvider serviceProvider;
         private readonly MessagesSender messagesSender;
-        public async Task<bool> ProcessUpdate(Update update, CancellationToken token)
+        public ReadyProcessor(IServiceProvider serviceProvider, MessagesSender messagesSender)
+        {
+            this.serviceProvider = serviceProvider;
+            this.messagesSender = messagesSender;
+        }
+
+        public ISendedItem Stop(Update update)
+        {
+            CancellationTokenSource.Cancel();
+            return Bot.FSM.CreateOk(update, new ReplyKeyboardRemove(), " Вы можете искать снова.");
+        }
+        public async Task ProcessUpdate(Update update, CancellationToken token,Func<object,Task> func)
+        {
+            CancellationTokenSource = new CancellationTokenSource();
+            SearchReciever searchClient = (SearchReciever)serviceProvider.GetService(typeof(SearchReciever));
+            SearchingTask = searchClient.Search(update.Message.From.Id, null, CancellationTokenSource.Token);
+            Task searchFinalsTask = SearchingTask.ContinueWith(func);
+            //Task searchFinalsTask = SearchingTask.ContinueWith((state) =>
+            //{
+            //    TextMessage textMessage = new TextMessage(null, update.Message.Chat.Id, "Поиск завершен!", null, new ReplyKeyboardRemove());
+            //    messagesSender.AddItem(textMessage);
+            //});
+            await SearchingTask;
+            await searchFinalsTask;
+        }
+    }
+    public class ConfigProcessor
+    {
+        private ConfiguringSubstates state;
+        private readonly MessagesSender messagesSender;
+
+
+        private SearchBotConfig current = new SearchBotConfig();
+        public ConfigProcessor(MessagesSender messagesSender)
+        {
+            this.messagesSender = messagesSender;
+        }
+        public async Task<IConfig> ProcessUpdate(Update update, CancellationToken token)
         {
             switch (state)
             {
                 case ConfiguringSubstates.ConfiguringDepth:
                     {
-                        //ParseDepth(update);
+                        current = new SearchBotConfig();
+                        current.RequestDepth = ParseDepth(update);
                         //await Ok(update, Constants.Keyboards.yesNoKeyboard, " Искать в группах?");
                         //BotState = BotState.ConfiguringGroups;
-                        return false;
+                        return current;
                         break;
                     }
                 case ConfiguringSubstates.ConfiguringGroups:
@@ -43,7 +95,7 @@ namespace Bot.Core.Services
                         //SearchInGroups = update.Message.Text.ToLower() == "да";
                         //await Ok(update, Constants.Keyboards.yesNoKeyboard, " Искать в каналах?");
                         //BotState = BotState.ConfiguringChannel;
-                        return false;
+                        return current;
                         break;
                     }
                 case ConfiguringSubstates.ConfiguringChannel:
@@ -52,14 +104,42 @@ namespace Bot.Core.Services
                         //await Ok(update, new ReplyKeyboardRemove(), " Настройки завершены. Для поиска просто отправьте слово/словосочетание боту.");
                         //BotState = PrivateChatState.Ready;
                         //await dBWorker.LogUser(update, token, GetSettings());
-                        return true;
+                        current.Finished = true;
+                        return current;
                         break;
                     }
                 default:
                     { 
-                        return true;
+                        return current;
                     }
             }
+        }
+
+
+        private RequestDepth ParseDepth(Update update)
+        {
+            string tmp = update.Message.Text.ToLower();
+            if (Constants.Day.Contains(tmp))
+            {
+                return RequestDepth.Day;
+            }
+            else if (Constants.Week.Contains(tmp))
+            {
+                return RequestDepth.Week;
+            }
+            else if (Constants.Month.Contains(tmp))
+            {
+                return RequestDepth.Month;
+            }
+            else if (Constants.Year.Contains(tmp))
+            {
+                return RequestDepth.Year;
+            }
+            else
+            {
+                return RequestDepth.Inf;
+            }
+
         }
     }
 
@@ -67,7 +147,8 @@ namespace Bot.Core.Services
     {
         public partial class FSM
         {
-            private ConfigProcessor configProcessor = new ConfigProcessor();
+            private readonly ConfigProcessor configProcessor;
+            private readonly ReadyProcessor readyProcessor;
             public static IServiceProvider serviceProvider;
 
             private readonly AsyncTaskExecutor asyncTaskExecutor;
@@ -79,8 +160,7 @@ namespace Bot.Core.Services
             public readonly ITelegramBotClient botClient;
             public readonly long chatId;
 
-            private CancellationTokenSource CancellationTokenSource;
-            private Task SearchingTask;
+
 
             #region Properties
 
@@ -185,6 +265,8 @@ namespace Bot.Core.Services
                 dBWorker = (DBWorker)serviceProvider.GetService(typeof(DBWorker));
                 writer = (ICommonWriter<Message>)serviceProvider.GetService(typeof(ICommonWriter<Message>));
                 asyncTaskExecutor = (AsyncTaskExecutor)serviceProvider.GetService(typeof(AsyncTaskExecutor));
+                configProcessor = (ConfigProcessor)serviceProvider.GetService(typeof(ConfigProcessor));
+                readyProcessor = (ReadyProcessor)serviceProvider.GetService(typeof(ReadyProcessor));
                 if (TextMessage.commonWriter == null)
                 {
                     TextMessage.commonWriter = writer;
@@ -205,18 +287,13 @@ namespace Bot.Core.Services
                         {
                             case PrivateChatState.Started:
                                 {
-                                    if (await TryStartBusyMode(update))
-                                    {
-                                        Channel<int> channel = Channel.CreateBounded<int>(1);
-                                        TextMessage textMessage = new TextMessage(botClient, chatId, "Вас приветствует бот-поисковик по телеграму! Здесь вы можете найти пост или комментарий по ключевым словам. Для начала работы настройте бота, набрав команду /settings", channel);
-                                        messagesSender.AddItem(textMessage);
-                                        await channel.Reader.ReadAsync();
-                                    }
+                                    await StartedProcessing(update);
                                     break;
                                 }
                             case PrivateChatState.Configuring:
                                 {
-                                    if (await configProcessor.ProcessUpdate(update, token))
+                                    IConfig cfg = await configProcessor.ProcessUpdate(update, token);
+                                    if (cfg.Finished)
                                     {
                                         BotState = PrivateChatState.Ready;
                                     }
@@ -224,7 +301,6 @@ namespace Bot.Core.Services
                                 }
                             case PrivateChatState.Ready:
                                 {
-                                    await Ok(update, Constants.Keyboards.searchingKeyboard);
                                     asyncTaskExecutor.Add(ReadyProcessing(update));
                                     break;
                                 }
@@ -241,72 +317,56 @@ namespace Bot.Core.Services
 
             }
 
+            private async Task StartedProcessing(Update update)
+            {
+                await TryStartConfiguring(update);
+            }
+
             private async Task ReadyProcessing(Update update)
             {
-                if (await TryStartBusyMode(update))
+                if (!await TryStartConfiguring(update))
                 {
                     BotState = PrivateChatState.Busy;
-
-                    CancellationTokenSource = new CancellationTokenSource();
-                    SearchReciever searchClient = (SearchReciever)serviceProvider.GetService(typeof(SearchReciever));
-                    SearchingTask = searchClient.Search(update.Message.From.Id, GetRequest(update), CancellationTokenSource.Token);
-                    Task searchFinalsTask = SearchingTask.ContinueWith((state) =>
+                    await readyProcessor.ProcessUpdate(update, CancellationToken.None,(_)=> 
                     {
-                        TextMessage textMessage = new TextMessage(botClient, chatId, "Поиск завершен!", null, new ReplyKeyboardRemove());
-                        messagesSender.AddItem(textMessage);
                         BotState = PrivateChatState.Ready;
+                        return Task.CompletedTask;
                     });
-                    await SearchingTask;
-                    await searchFinalsTask;
-
-
                 }
             }
-            private async Task BusyProcessing(Update update)
+
+            public async Task BusyProcessing(Update update)
             {
                 if (Constants.Cancells.Contains(update.Message.Text.ToLower()))
                 {
-                    CancellationTokenSource.Cancel();
-                    await Ok(update, new ReplyKeyboardRemove(), " Вы можете искать снова.");
+                    messagesSender.AddItem(readyProcessor.Stop(update));
                     BotState = PrivateChatState.Ready;
                 }
                 else
                 {
-                    await ImBusy();
+                    messagesSender.AddItem(CreateImBusy(update));
                 }
             }
 
-            private async Task<bool> TryStartBusyMode(Update update)
+            public async Task<bool> TryStartConfiguring(Update update)
             {
                 if (Constants.CallSettings.Contains(update.Message.Text.ToLower()))
                 {
                     BotState = PrivateChatState.Configuring;
-                    Channel<int> channel = Channel.CreateBounded<int>(1);
-                    TextMessage textMessage = new TextMessage(botClient, chatId, "Выберите глубину поиска", channel, keyboard: Constants.Keyboards.settingKeyboard);
-                    messagesSender.AddItem(textMessage);
-                    await channel.Reader.ReadAsync();
-                    return false;
-                }
-                else
-                {
+                    await configProcessor.ProcessUpdate(update, CancellationToken.None);
                     return true;
                 }
+                return false;
             }
 
-            private async Task ImBusy()
+            public static ISendedItem CreateImBusy(Update update)
             {
-                Channel<int> channel = Channel.CreateBounded<int>(1);
-                TextMessage textMessage = new TextMessage(botClient, chatId, Constants.BusyMessage, channel, keyboard: Constants.Keyboards.searchingKeyboard);
-                messagesSender.AddItem(textMessage);
-                await channel.Reader.ReadAsync();
+                return new TextMessage(null, update.Message.Chat.Id, Constants.BusyMessage, Channel.CreateBounded<int>(1), keyboard: Constants.Keyboards.searchingKeyboard);
             }
 
-            public async Task Ok(Update update, IReplyMarkup keyboard = null, string additionalMessage = "")
+            public static ISendedItem CreateOk(Update update, IReplyMarkup keyboard = null, string additionalMessage = "")
             {
-                Channel<int> channel = Channel.CreateBounded<int>(1);
-                TextMessage textMessage = new TextMessage(botClient, chatId, Constants.OkMessage + additionalMessage, channel, keyboard, replyToMessageId: update.Message.MessageId);
-                messagesSender.AddItem(textMessage);
-                await channel.Reader.ReadAsync();
+                return new TextMessage(null, update.Message.Chat.Id, Constants.OkMessage + additionalMessage, Channel.CreateBounded<int>(1), keyboard, replyToMessageId: update.Message.MessageId);
             }
 
             public Settings GetSettings()
@@ -320,7 +380,9 @@ namespace Bot.Core.Services
                 public RequestDepth Depth { get; set; } = RequestDepth.Month;
                 public bool SearchInGroups { get; set; } = false;
                 public bool SearchInChannels { get; set; } = true;
+
             }
+
             #endregion
 
 
@@ -375,31 +437,7 @@ namespace Bot.Core.Services
                 request.EndTime = Google.Protobuf.WellKnownTypes.Timestamp.FromDateTime(end);
                 return request;
             }
-            private void ParseDepth(Update update)
-            {
-                string tmp = update.Message.Text.ToLower();
-                if (Constants.Day.Contains(tmp))
-                {
-                    RequestDepth = RequestDepth.Day;
-                }
-                else if (Constants.Week.Contains(tmp))
-                {
-                    RequestDepth = RequestDepth.Week;
-                }
-                else if (Constants.Month.Contains(tmp))
-                {
-                    RequestDepth = RequestDepth.Month;
-                }
-                else if (Constants.Year.Contains(tmp))
-                {
-                    RequestDepth = RequestDepth.Year;
-                }
-                else
-                {
-                    RequestDepth = RequestDepth.Inf;
-                }
 
-            }
 
 
         }
