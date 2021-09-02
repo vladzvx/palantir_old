@@ -36,12 +36,14 @@ namespace Bot.Core.Services
 
     public class ReadyProcessor
     {
+        private readonly AsyncTaskExecutor asyncTaskExecutor;
         private CancellationTokenSource CancellationTokenSource;
         private Task SearchingTask;
         private readonly IServiceProvider serviceProvider;
         private readonly MessagesSender messagesSender;
-        public ReadyProcessor(IServiceProvider serviceProvider, MessagesSender messagesSender)
+        public ReadyProcessor(IServiceProvider serviceProvider, MessagesSender messagesSender, AsyncTaskExecutor asyncTaskExecutor)
         {
+            this.asyncTaskExecutor = asyncTaskExecutor;
             this.serviceProvider = serviceProvider;
             this.messagesSender = messagesSender;
         }
@@ -51,19 +53,13 @@ namespace Bot.Core.Services
             CancellationTokenSource.Cancel();
             return Bot.FSM.CreateOk(update, new ReplyKeyboardRemove(), " Вы можете искать снова.");
         }
-        public async Task ProcessUpdate(Update update, CancellationToken token,Func<object,Task> func)
+        public async Task ProcessUpdate(Update update,Func<object,Task> func)
         {
             CancellationTokenSource = new CancellationTokenSource();
             SearchReciever searchClient = (SearchReciever)serviceProvider.GetService(typeof(SearchReciever));
             SearchingTask = searchClient.Search(update.Message.From.Id, null, CancellationTokenSource.Token);
             Task searchFinalsTask = SearchingTask.ContinueWith(func);
-            //Task searchFinalsTask = SearchingTask.ContinueWith((state) =>
-            //{
-            //    TextMessage textMessage = new TextMessage(null, update.Message.Chat.Id, "Поиск завершен!", null, new ReplyKeyboardRemove());
-            //    messagesSender.AddItem(textMessage);
-            //});
-            await SearchingTask;
-            await searchFinalsTask;
+            asyncTaskExecutor.Add(Task.WhenAll(SearchingTask, searchFinalsTask));
         }
     }
     public class ConfigProcessor
@@ -81,11 +77,18 @@ namespace Bot.Core.Services
         {
             switch (state)
             {
-                case ConfiguringSubstates.ConfiguringDepth:
+                case ConfiguringSubstates.Started:
                     {
                         current = new SearchBotConfig();
+
+                        break;
+                    }
+                case ConfiguringSubstates.ConfiguringDepth:
+                    {
+
                         current.RequestDepth = ParseDepth(update);
-                        //await Ok(update, Constants.Keyboards.yesNoKeyboard, " Искать в группах?");
+                        Bot.FSM.CreateOk(update, Constants.Keyboards.yesNoKeyboard, " Искать в группах?");
+                        //await Ok(update, Constants.Keyboards.yesNoKeyboard, );
                         //BotState = BotState.ConfiguringGroups;
                         return current;
                         break;
@@ -275,10 +278,9 @@ namespace Bot.Core.Services
 
 
             #region common
-
-            public async Task ProcessPrivate(Update update, CancellationToken token)
+            public async Task Process(Update update, CancellationToken token)
             {
-                if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message)
+                if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message && update.Message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Private)
                 {
                     writer.PutData(update.Message);
                     try
@@ -301,7 +303,7 @@ namespace Bot.Core.Services
                                 }
                             case PrivateChatState.Ready:
                                 {
-                                    asyncTaskExecutor.Add(ReadyProcessing(update));
+                                    await ReadyProcessing(update);
                                     break;
                                 }
                             case PrivateChatState.Busy:
@@ -313,8 +315,6 @@ namespace Bot.Core.Services
                     }
                     catch { }
                 }
-
-
             }
 
             private async Task StartedProcessing(Update update)
@@ -327,7 +327,7 @@ namespace Bot.Core.Services
                 if (!await TryStartConfiguring(update))
                 {
                     BotState = PrivateChatState.Busy;
-                    await readyProcessor.ProcessUpdate(update, CancellationToken.None,(_)=> 
+                    await readyProcessor.ProcessUpdate(update, (_)=> 
                     {
                         BotState = PrivateChatState.Ready;
                         return Task.CompletedTask;
@@ -339,7 +339,8 @@ namespace Bot.Core.Services
             {
                 if (Constants.Cancells.Contains(update.Message.Text.ToLower()))
                 {
-                    messagesSender.AddItem(readyProcessor.Stop(update));
+                    ISendedItem reply = readyProcessor.Stop(update);
+                    messagesSender.AddItem(reply);
                     BotState = PrivateChatState.Ready;
                 }
                 else
@@ -348,7 +349,7 @@ namespace Bot.Core.Services
                 }
             }
 
-            public async Task<bool> TryStartConfiguring(Update update)
+            private async Task<bool> TryStartConfiguring(Update update)
             {
                 if (Constants.CallSettings.Contains(update.Message.Text.ToLower()))
                 {
