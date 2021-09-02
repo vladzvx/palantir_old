@@ -18,7 +18,7 @@ namespace Bot.Core
             this.connectionsFactory = connectionsFactory;
         }
 
-        public async Task<Services.Bot.FSM.Settings> LogUser(Update update, CancellationToken token, Services.Bot.FSM.Settings settings = null)
+        public async Task<Services.SearchBotConfig> LogUser(Update update, CancellationToken token, Services.SearchBotConfig settings = null)
         {
             using (var conn = await connectionsFactory.GetConnectionAsync(token))
             {
@@ -39,7 +39,7 @@ namespace Bot.Core
                 command.Parameters["_state"].Value = settings == null ? DBNull.Value : (int)settings.BotState;
                 command.Parameters["_search_in_groups"].Value = settings == null ? DBNull.Value : settings.SearchInGroups;
                 command.Parameters["_search_in_channels"].Value = settings == null ? DBNull.Value : settings.SearchInChannels;
-                command.Parameters["_depth"].Value = settings == null ? DBNull.Value : (int)settings.Depth;
+                command.Parameters["_depth"].Value = settings == null ? DBNull.Value : (int)settings.RequestDepth;
                 try
                 {
                     using (var reader = await command.ExecuteReaderAsync(token))
@@ -57,10 +57,10 @@ namespace Bot.Core
                                     Enum.IsDefined(typeof(PrivateChatState), state) &&
                                     Enum.IsDefined(typeof(RequestDepth), depth))
                                 {
-                                    Services.Bot.FSM.Settings result = new Services.Bot.FSM.Settings();
+                                    Services.SearchBotConfig result = new Services.SearchBotConfig();
                                     result.BotState = (PrivateChatState)state;
                                     result.Status = (UserStatus)status;
-                                    result.Depth = (RequestDepth)depth;
+                                    result.RequestDepth = (RequestDepth)depth;
                                     result.SearchInChannels = searchInChannels;
                                     result.SearchInGroups = searchInGroups;
                                     return result;
@@ -74,7 +74,7 @@ namespace Bot.Core
 
                 }
 
-                return new Services.Bot.FSM.Settings();
+                return new Services.SearchBotConfig();
             }
         }
 

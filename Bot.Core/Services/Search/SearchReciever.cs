@@ -25,13 +25,19 @@ namespace Bot.Core.Services
         {
             Guid guid = Guid.NewGuid();
             Task searchTask = searchClient.Search(searchRequest, token);
-            Task processingTask = Task.Factory.StartNew(async () =>
+            Task processingTask = Task.Factory.StartNew(async (tok) =>
             {
+                CancellationToken token1;
+                if (tok is CancellationToken token2)
+                {
+                    token1 = token2;
+                }
+                else token1 = CancellationToken.None;
                 bool lastExecutionEnable = true;
                 int number = 0;
                 Page PageForSave = null;
                 Page currentPage = new Page(guid, number) { position = Page.Position.First };
-                while (!searchTask.IsCompleted || lastExecutionEnable)
+                while ((!searchTask.IsCompleted || lastExecutionEnable)&&!token1.IsCancellationRequested)
                 {
                     while (searchClient.searchResultReciever.TryDequeueResult(out var result))
                     {
@@ -66,11 +72,11 @@ namespace Bot.Core.Services
                     await Task.Delay(50);
                 }
                 await searchState.SavePage(user, currentPage, token);
-                if (number == 0 && string.IsNullOrEmpty(currentPage.Text))
+                if (number == 0 && string.IsNullOrEmpty(currentPage.Text) && !token1.IsCancellationRequested)
                 {
                     messagesSender.AddItem(new TextMessage(null, user, "Ничего не найдено! Попробуйте другой запрос.", null, new ReplyKeyboardRemove()));
                 }
-            }, TaskCreationOptions.LongRunning);
+            }, token, TaskCreationOptions.LongRunning);
             await Task.WhenAll(searchTask, processingTask);
         }
     }

@@ -37,6 +37,8 @@ namespace Bot.Service
             services.AddSingleton<IWriterCore<Message>, BotMessagesWriterCore>();
             services.AddTransient<SearchClient>();
             services.AddTransient<SearchReciever>();
+            services.AddSingleton<IConfigurationProcessor, ConfigProcessor>();
+            services.AddSingleton<IReadyProcessor, ReadyProcessor>();
             services.AddSingleton<SearchState>();
             services.AddSingleton<AsyncTaskExecutor>();
             services.AddTransient<ISearchResultReciever, StreamSearchResiever>();
@@ -50,9 +52,7 @@ namespace Bot.Service
             {
                 app.UseDeveloperExceptionPage();
             }
-
             app.UseRouting();
-
         }
     }
 }
