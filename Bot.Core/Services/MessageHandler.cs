@@ -1,4 +1,5 @@
-﻿using Common.Services;
+﻿using Bot.Core.Interfaces;
+using Common.Services;
 using Common.Services.Interfaces;
 using System;
 using System.Threading;
@@ -16,7 +17,7 @@ namespace Bot.Core.Services
         public static ICommonWriter<Message> writer;
         public static AsyncTaskExecutor asyncTaskExecutor;
         public static SearchState searchState;
-
+        public static IBotSettings botSettings;
         public UpdateType[] AllowedUpdates => new UpdateType[] { UpdateType.Message, UpdateType.CallbackQuery };
 
         public Task HandleError(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)

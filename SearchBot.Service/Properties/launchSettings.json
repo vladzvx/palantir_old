@@ -19,6 +19,7 @@
       "commandName": "Project",
       "environmentVariables": {
         "GrpcUrl": "http://84.201.164.97:5005",
+        "BoundUserStatus": "beta_tester",
         "db": "bots",
         "db_pwd": "qw12cv90",
         "db_host": "45.132.17.148",

@@ -57,8 +57,15 @@ namespace Bot.Core.Services
                                 {
                                     PageForSave.position = Page.Position.Middle;
                                 }
+                                try
+                                {
+                                    await searchState.SavePage(user, PageForSave, token);
+                                }
+                                catch (Exception ex) 
+                                { 
+                                
+                                }
 
-                                await searchState.SavePage(user, PageForSave, token);
                                 currentPage.MessageNumber = PageForSave.MessageNumber;
                                 PageForSave = null;
                             }
@@ -68,7 +75,6 @@ namespace Bot.Core.Services
                     {
                         lastExecutionEnable = false;
                     }
-
                     await Task.Delay(50);
                 }
                 await searchState.SavePage(user, currentPage, token);

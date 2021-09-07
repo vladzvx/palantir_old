@@ -238,15 +238,34 @@ namespace Bot.Core.Services
         public partial class FSM
         {
             #region Properties and fields
-            private readonly ConfigProcessor configProcessor;
-            private readonly ReadyProcessor readyProcessor;
+            private readonly IConfigurationProcessor configProcessor;
+            private readonly IReadyProcessor readyProcessor;
             private readonly AsyncTaskExecutor asyncTaskExecutor;
             private readonly DBWorker dBWorker;
 
             public static IServiceProvider serviceProvider;
             private readonly MessagesSender messagesSender;
             private readonly ICommonWriter<Message> writer;
+            private readonly IBotSettings botSettings;
+            public UserStatus UserStatus
+            {
+                get
+                {
+                    lock (stateLocker)
+                    {
+                        return _userStatus;
+                    }
+                }
+                set
+                {
+                    lock (stateLocker)
+                    {
+                        _userStatus = value;
+                    }
+                }
+            }
 
+            private UserStatus _userStatus = UserStatus.common;
 
             public readonly ITelegramBotClient botClient;
             public readonly long chatId;
@@ -284,12 +303,14 @@ namespace Bot.Core.Services
 
                 messagesSender = (MessagesSender)serviceProvider.GetService(typeof(MessagesSender));
                 writer = (ICommonWriter<Message>)serviceProvider.GetService(typeof(ICommonWriter<Message>));
-                configProcessor = (ConfigProcessor)serviceProvider.GetService(typeof(ConfigProcessor));
-                readyProcessor = (ReadyProcessor)serviceProvider.GetService(typeof(ReadyProcessor));
+                configProcessor = (IConfigurationProcessor)serviceProvider.GetService(typeof(IConfigurationProcessor));
+                readyProcessor = (IReadyProcessor)serviceProvider.GetService(typeof(IReadyProcessor));
                 asyncTaskExecutor = (AsyncTaskExecutor)serviceProvider.GetService(typeof(AsyncTaskExecutor));
                 dBWorker = (DBWorker)serviceProvider.GetService(typeof(DBWorker));
+                botSettings = (IBotSettings)serviceProvider.GetService(typeof(IBotSettings));
                 if (settings != null)
                 {
+                    UserStatus = settings.Status;
                     BotState = settings.BotState;
                     readyProcessor.SetConfig(settings);
                 }
@@ -300,6 +321,11 @@ namespace Bot.Core.Services
             }
             public async Task Process(Update update, CancellationToken token)
             {
+                if (this.UserStatus> botSettings.BoundUserStatus)
+                {
+                    messagesSender.AddItem(new TextMessage(null,update.Message.Chat.Id,"Пожалуйста, обратитесь к администратору для выдачи разрешения на продолжение работы.",null));
+                    return;
+                }
                 if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message && update.Message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Private)
                 {
                     writer.PutData(update.Message);
@@ -347,7 +373,7 @@ namespace Bot.Core.Services
             #region private
             private async Task StartedProcessing(Update update)
             {
-                await TryStartConfiguring(update);
+                await TryStartConfiguring(update, true);
             }
             private async Task ReadyProcessing(Update update)
             {
@@ -357,6 +383,7 @@ namespace Bot.Core.Services
                     asyncTaskExecutor.Add(readyProcessor.ProcessUpdate(update, (_) =>
                     {
                         BotState = PrivateChatState.Ready;
+                        messagesSender.AddItem(new TextMessage(null, update.Message.Chat.Id, "Поиск завершен!", null, new ReplyKeyboardRemove()));
                         return Task.CompletedTask;
                     }));
                     messagesSender.AddItem(FSM.CreateOk(update, Bot.Constants.Keyboards.searchingKeyboard));
@@ -375,9 +402,9 @@ namespace Bot.Core.Services
                     messagesSender.AddItem(CreateImBusy(update));
                 }
             }
-            private async Task<bool> TryStartConfiguring(Update update)
+            private async Task<bool> TryStartConfiguring(Update update, bool force = false)
             {
-                if (Constants.CallSettings.Contains(update.Message.Text.ToLower()))
+                if (force||Constants.CallSettings.Contains(update.Message.Text.ToLower()))
                 {
                     BotState = PrivateChatState.Configuring;
                     await configProcessor.ProcessUpdate(update, CancellationToken.None);

@@ -16,6 +16,7 @@ namespace Bot.Core.Models
             First,
             Middle,
             Last,
+            Single,
             Empty
         }
         public static Page Empty = new Page(new Guid(), 0) { position = Position.Empty };
@@ -28,6 +29,8 @@ namespace Bot.Core.Models
         public int offset { get; set; } = 0;
         public int count { get; set; } = 0;
 
+        public const int PageMaxSize = 1500;
+
         public List<SearchResult> results = new List<SearchResult>();
         public Page(Guid SearchGuid, int Number)
         {
@@ -36,7 +39,7 @@ namespace Bot.Core.Models
         }
         public bool TryAddResult(SearchResult res)
         {
-            if (Text.Length < 1500)
+            if (Text.Length < PageMaxSize)
             {
                 string line = count.ToString() + ". " + (res.Text.Length > 100 ? res.Text.Substring(0, 99) + "..." : res.Text) + "\n\n";
                 MessageEntity formatting = new MessageEntity() { Length = count.ToString().Length, Url = res.Link, Offset = offset, Type = MessageEntityType.TextLink };
@@ -62,6 +65,11 @@ namespace Bot.Core.Models
             InlineKeyboardButton Prev = new InlineKeyboardButton();
             Prev.Text = "Назад";
             Prev.CallbackData = SearchGuid.ToString() + "_" + (Number - 1).ToString();
+            
+            if ((Text.Length <= PageMaxSize) && !(position == Position.Last))
+            {
+                position = Position.Single;
+            }
 
             InlineKeyboardMarkup keyb;
             if (position == Position.First)
@@ -75,6 +83,10 @@ namespace Bot.Core.Models
             else if (position == Position.Last)
             {
                 keyb = new InlineKeyboardMarkup(Prev);
+            }
+            else if (position==Position.Single)
+            {
+                keyb = null;
             }
             else
             {
@@ -95,6 +107,8 @@ namespace Bot.Core.Models
             Prev.CallbackData = SearchGuid.ToString() + "_" + (Number - 1).ToString();
 
             InlineKeyboardMarkup keyb;
+
+
             if (position == Position.First)
             {
                 keyb = new InlineKeyboardMarkup(Next);
