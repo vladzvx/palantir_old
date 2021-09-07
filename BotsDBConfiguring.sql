@@ -51,7 +51,7 @@ create table messages (
     chat_id bigint,
     message_number bigint,
     text text,
-    primary key (message_db_id,db_time),
+    primary key (message_db_id,db_time)
 ) partition by RANGE (db_time);
 
 
@@ -90,7 +90,6 @@ $$
 $$ LANGUAGE plpgsql;
 
 
-select log_user(0,'1','343',null,null,null);
 
 CREATE OR REPLACE FUNCTION add_message(_user_id bigint, _chat_id bigint,_message_number bigint,_text text,_tg_time timestamp) RETURNS void as
 $$

@@ -842,3 +842,6 @@ $$
 $$ LANGUAGE plpgsql;
 drop trigger on_insert_to_spotter on spotter;
 CREATE TRIGGER on_insert_to_spotter before INSERT on public.spotter FOR EACH ROW execute PROCEDURE spotter_protect();
+
+
+CREATE TRIGGER on_insert_to_spotter before INSERT on public.spotter FOR EACH ROW execute PROCEDURE spotter_protect();

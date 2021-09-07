@@ -29,7 +29,7 @@ namespace Common
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql(Options.ConnectionString);
+            optionsBuilder.UseNpgsql(Options.ConnectionString1);
         }
     }
 }

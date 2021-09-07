@@ -22,7 +22,8 @@ namespace Bot.Core.Services
         }
         public void AddItem(ISendedItem sendedItem)
         {
-            sendedItems.Enqueue(sendedItem);
+            if (sendedItem!=null)
+                sendedItems.Enqueue(sendedItem);
         }
 
         private async Task Executor(CancellationToken token)

@@ -34,6 +34,8 @@ namespace Bot.Core.Services
         public PrivateChatState BotState { get; set; }
         public RequestDepth RequestDepth { get; set; }
         public bool Finished { get; set; }
+
+        public long Id { get; set; }
     }
     public enum ConfiguringSubstates
     {

@@ -57,7 +57,7 @@ namespace Common.Services.DataBase
         }
         private async Task<ConnectionWrapper> CreateConnectionAsync(CancellationToken token)
         {
-            ConnectionWrapper connection = new ConnectionWrapper(settings.ConnectionString, this);
+            ConnectionWrapper connection = new ConnectionWrapper(settings.ConnectionString1, this);
             await connection.Connection.OpenAsync(token);
             PoolRepo.TryAdd(connection.Id, connection);
             return connection;

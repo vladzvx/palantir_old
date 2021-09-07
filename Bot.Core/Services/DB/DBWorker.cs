@@ -3,6 +3,7 @@ using Bot.Core.Models;
 using Common.Services.DataBase;
 using Npgsql;
 using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
@@ -121,6 +122,54 @@ namespace Bot.Core
                     }
                 }
                 return Page.Empty;
+            }
+        }
+
+        public async Task<List<Services.SearchBotConfig>> GetAllUsers(CancellationToken token)
+        {
+            List<Services.SearchBotConfig> res = new List<Services.SearchBotConfig>();
+            using (var conn = await connectionsFactory.GetConnectionAsync(token))
+            {
+                DbCommand command = conn.Connection.CreateCommand();
+                command.CommandType = System.Data.CommandType.Text;
+                command.CommandText = "select status,state,search_in_groups,search_in_channels,depth,id from users;";
+                try
+                {
+                    using (var reader = await command.ExecuteReaderAsync(token))
+                    {
+                        while (await reader.ReadAsync(token))
+                        {
+                            if (!await reader.IsDBNullAsync(0))
+                            {
+                                long id = reader.GetInt64(5);
+                                int status = reader.GetInt32(0);
+                                int state = reader.GetInt32(1);
+                                int depth = reader.GetInt32(4);
+                                bool searchInGroups = reader.GetBoolean(2);
+                                bool searchInChannels = reader.GetBoolean(3);
+                                if (Enum.IsDefined(typeof(UserStatus), status) &&
+                                    Enum.IsDefined(typeof(PrivateChatState), state) &&
+                                    Enum.IsDefined(typeof(RequestDepth), depth))
+                                {
+                                    Services.SearchBotConfig result = new Services.SearchBotConfig();
+                                    result.BotState = (PrivateChatState)state;
+                                    result.Status = (UserStatus)status;
+                                    result.RequestDepth = (RequestDepth)depth;
+                                    result.SearchInChannels = searchInChannels;
+                                    result.SearchInGroups = searchInGroups;
+                                    result.Id = id;
+                                    res.Add( result);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+
+                }
+
+                return res;
             }
         }
     }

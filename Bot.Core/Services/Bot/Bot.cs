@@ -8,7 +8,7 @@ namespace Bot.Core.Services
 {
     public partial class Bot : IDisposable
     {
-        private readonly protected TelegramBotClient botClient;
+        public readonly TelegramBotClient botClient;
         private readonly CancellationToken cancellationToken;
         public Bot(IBotSettings settings, CancellationTokenSource cancellationTokenSource)
         {

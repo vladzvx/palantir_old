@@ -12,7 +12,7 @@ namespace NotificationTest
     public class Notifire : IHostedService
     {
         private Task waitingTask;
-        private readonly NpgsqlConnection connection = new NpgsqlConnection(Environment.GetEnvironmentVariable("ConnectionString"));
+        private readonly NpgsqlConnection connection = new NpgsqlConnection(Environment.GetEnvironmentVariable("ConnectionString2"));
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             await connection.OpenAsync();

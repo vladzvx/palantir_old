@@ -14,7 +14,7 @@ namespace Common.Services
         private DbCommand AddUserCommand;
         private DbCommand DelMessageCommand;
 
-        public string ConnectionString => Options.ConnectionString;
+        public string ConnectionString => Options.ConnectionString1;
 
         public int TrasactionSize => Options.WriterTransactionSize;
 
