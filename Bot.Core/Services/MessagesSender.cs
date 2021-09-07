@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 
 namespace Bot.Core.Services
 {
-    public class MessagesSender : IMessagesSender
+    public class MessagesSenderSimle : IMessagesSender
     {
         private readonly ConcurrentQueue<ISendedItem> sendedItems = new ConcurrentQueue<ISendedItem>();
         private readonly CancellationTokenSource cancellationTokenSource;
         private Task SendingTask;
-        public MessagesSender()
+        public MessagesSenderSimle()
         {
             cancellationTokenSource = new CancellationTokenSource();
         }
