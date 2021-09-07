@@ -1,4 +1,5 @@
-﻿using Bot.Core.Models;
+﻿using Bot.Core.Interfaces;
+using Bot.Core.Models;
 using Common;
 using Common.Services.gRPC;
 using System;
@@ -12,9 +13,9 @@ namespace Bot.Core.Services
     {
         private readonly SearchClient searchClient;
         private readonly SearchState searchState;
-        private readonly MessagesSender messagesSender;
+        private readonly IMessagesSender messagesSender;
 
-        public SearchReciever(SearchClient searchClient, SearchState searchState, MessagesSender messagesSender)
+        public SearchReciever(SearchClient searchClient, SearchState searchState, IMessagesSender messagesSender)
         {
             this.searchClient = searchClient;
             this.searchState = searchState;

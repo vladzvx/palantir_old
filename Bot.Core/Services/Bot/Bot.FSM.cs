@@ -58,16 +58,16 @@ namespace Bot.Core.Services
     public class ReadyProcessor : IReadyProcessor
     {
         public SearchBotConfig config { get; private set; }
-        private readonly AsyncTaskExecutor asyncTaskExecutor;
-        private readonly MessagesSender messagesSender;
+        //private readonly AsyncTaskExecutor asyncTaskExecutor;
+       // private readonly IMessagesSender messagesSender;
         private CancellationTokenSource CancellationTokenSource;
         private Task SearchingTask;
         private readonly IServiceProvider serviceProvider;
-        public ReadyProcessor(IServiceProvider serviceProvider,  AsyncTaskExecutor asyncTaskExecutor, MessagesSender messagesSender)
+        public ReadyProcessor(IServiceProvider serviceProvider)
         {
-            this.asyncTaskExecutor = asyncTaskExecutor;
+            //this.asyncTaskExecutor = asyncTaskExecutor;
             this.serviceProvider = serviceProvider;
-            this.messagesSender = messagesSender;
+            //this.messagesSender = messagesSender;
         }
         public void SetConfig(IConfig config)
         {
@@ -155,10 +155,10 @@ namespace Bot.Core.Services
     public class ConfigProcessor : IConfigurationProcessor
     {
         private ConfiguringSubstates state;
-        private readonly MessagesSender messagesSender;
+        private readonly IMessagesSender messagesSender;
 
         private SearchBotConfig current = new SearchBotConfig();
-        public ConfigProcessor(MessagesSender messagesSender)
+        public ConfigProcessor(IMessagesSender messagesSender)
         {
             this.messagesSender = messagesSender;
         }
@@ -244,7 +244,7 @@ namespace Bot.Core.Services
             private readonly DBWorker dBWorker;
 
             public static IServiceProvider serviceProvider;
-            private readonly MessagesSender messagesSender;
+            private readonly IMessagesSender messagesSender;
             private readonly ICommonWriter<Message> writer;
             private readonly IBotSettings botSettings;
             public UserStatus UserStatus
@@ -301,7 +301,7 @@ namespace Bot.Core.Services
                 this.botClient = botClient;
                 this.chatId = chatId;
 
-                messagesSender = (MessagesSender)serviceProvider.GetService(typeof(MessagesSender));
+                messagesSender = (IMessagesSender)serviceProvider.GetService(typeof(IMessagesSender));
                 writer = (ICommonWriter<Message>)serviceProvider.GetService(typeof(ICommonWriter<Message>));
                 configProcessor = (IConfigurationProcessor)serviceProvider.GetService(typeof(IConfigurationProcessor));
                 readyProcessor = (IReadyProcessor)serviceProvider.GetService(typeof(IReadyProcessor));

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Bot.Core.Services
 {
-    public class MessagesSender
+    public class MessagesSender : IMessagesSender
     {
         private readonly ConcurrentQueue<ISendedItem> sendedItems = new ConcurrentQueue<ISendedItem>();
         private readonly CancellationTokenSource cancellationTokenSource;
@@ -28,7 +28,7 @@ namespace Bot.Core.Services
             }
         }
 
-        public async Task Send()
+        private async Task Send()
         {
             while (sendedItems.TryDequeue(out ISendedItem item))
             {

@@ -1,4 +1,5 @@
-﻿using Bot.Core.Models;
+﻿using Bot.Core.Interfaces;
+using Bot.Core.Models;
 using System;
 using System.Threading;
 using System.Threading.Channels;
@@ -9,11 +10,11 @@ namespace Bot.Core.Services
 {
     public class SearchState
     {
-        private readonly MessagesSender messagesSender;
+        private readonly IMessagesSender messagesSender;
         private readonly DBWorker dBWorker;
         private readonly ITelegramBotClient client;
 
-        public SearchState(MessagesSender messagesSender, DBWorker dBWorker)
+        public SearchState(IMessagesSender messagesSender, DBWorker dBWorker)
         {
             this.messagesSender = messagesSender;
             this.dBWorker = dBWorker;
