@@ -23,6 +23,7 @@ namespace Common.Tests
         [TestMethod]
         public void TestMethod1()
         {
+            manager.heavyOrdersDone = false;
             Thread.Sleep(100);
             Assert.IsTrue(manager.executingState == ExecutingState.UpdatesLoading);
             state.TryGetOrder(new OrderRequest() { Banned = false, Finder = "1" }, out Order order1);

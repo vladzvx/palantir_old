@@ -29,7 +29,8 @@ namespace Bot.Service
             services.AddSingleton(GrpcChannel.ForAddress(grpcSettings.Url));
             services.AddHostedService<BotsEntryPoint>();
             services.AddSingleton<DBWorker>();
-            services.AddSingleton<IMessagesSender, MessagesSenderSimle>();
+            services.AddSingleton<ISenderSettings, SenderSettings>();
+            services.AddSingleton<IMessagesSender, MessagesSender>();
             services.AddSingleton<ConnectionsFactory>();
             services.AddSingleton(new CancellationTokenSource());
             services.AddSingleton<IDataBaseSettings, DataBaseSettings>();
