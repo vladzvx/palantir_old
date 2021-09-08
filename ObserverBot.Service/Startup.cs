@@ -39,6 +39,8 @@ namespace ObserverBot.Service
             services.AddSingleton<ICommonWriter<Message>, CommonWriter<Message>>();
             services.AddSingleton<IWriterCore<Message>, BotMessagesWriterCore>();
             services.AddTransient<IDataBaseSettings, DataBaseSettings>();
+            services.AddSingleton<IStartedProcessor, ObsStartedProcessor>();
+            //services.AddSingleton<AsyncTaskExecutor>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

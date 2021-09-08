@@ -38,6 +38,7 @@ namespace Bot.Service
             services.AddSingleton<IWriterCore<Message>, BotMessagesWriterCore>();
             services.AddTransient<SearchClient>();
             services.AddTransient<SearchReciever>();
+            services.AddSingleton<IStartedProcessor, StartedProcessor>();
             services.AddSingleton<IConfigurationProcessor, ConfigProcessor>();
             services.AddSingleton<IReadyProcessor, ReadyProcessor>();
             services.AddSingleton<SearchState>();
