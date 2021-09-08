@@ -19,7 +19,7 @@ namespace ObserverBot.Service.Services
         }
         public async Task ProcessUpdate(Update update, Func<object, Task> func)
         {
-            messagesSender.AddItem(new TextMessage(null,update.Message.Chat.Id,"Оповещаю о появляющихся в телеграме упоминаниях космической тематики. \nЕсли ничего не приходит - просто подождите какое-то время (возможно - несколько часов), космос обязательно упомянут, а я сообщу вам об этом. \n\nНе выключайте оповещения!",null));
+            messagesSender.AddItem(new TextMessage(null,update.Message.Chat.Id, "Оповещаю о появляющихся в телеграме упоминаниях космической тематики. \n\nЕсли ничего не приходит - просто подождите какое-то время (возможно - несколько часов), космос обязательно упомянут, а я сообщу вам об этом. \n\nНе выключайте оповещения!", null));
         }
 
         public void SetConfig(IConfig config)
