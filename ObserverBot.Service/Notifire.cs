@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,6 +18,9 @@ namespace ObserverBot.Service
 {
     public class Notifire : IHostedService
     {
+        private Regex GetLinkReg = new Regex("\"link\":(.+);");
+        private Regex GetTextReg = new Regex("\"text\": (.+)\"client\":");
+        private Regex GetUser = new Regex("\"client\":(\\d+)\"requester\"");
         private Task waitingTask;
         private readonly IMessagesSender messagesSender;
         private readonly ConnectionsFactory connectionsFactory;
@@ -47,10 +51,26 @@ namespace ObserverBot.Service
 
         private void Connection_Notification(object sender, NpgsqlNotificationEventArgs e)
         {
-            foreach (long key in Bot.Core.Services.Bot.FSM.Factory.state.Keys)
+            Match user = GetUser.Match(e.Payload);
+            Match link = GetLinkReg.Match(e.Payload);
+            Match text = GetTextReg.Match(e.Payload);
+            if (user.Success && link.Success && text.Success && long.TryParse(user.Groups[1].Value, out long id))
             {
-                messagesSender.AddItem(new TextMessage(null, key, e.Payload, null));
+                string txt = string.Format("{0}\n\n{1}", link.Groups[1].Value, text.Groups[1].Value);
+                if (id == 0)
+                {
+                    foreach (long key in Bot.Core.Services.Bot.FSM.Factory.state.Keys)
+                    {
+                        messagesSender.AddItem(new TextMessage(null, key, txt, null));
+                    }
+                }
+                else
+                {
+                    messagesSender.AddItem(new TextMessage(null, id, txt, null));
+                }
+
             }
+
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
