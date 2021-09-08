@@ -379,7 +379,7 @@ namespace Bot.Core.Services
             }
             private async Task ReadyProcessing(Update update)
             {
-                if (!await TryStartConfiguring(update))
+                if (!(asyncTaskExecutor==null)&&!await TryStartConfiguring(update))
                 {
                     BotState = PrivateChatState.Busy;
                     asyncTaskExecutor.Add(readyProcessor.ProcessUpdate(update, (_) =>
