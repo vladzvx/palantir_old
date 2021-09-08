@@ -21,7 +21,7 @@ namespace ObserverBot.Service.Services
         }
         public async Task<IConfig> ProcessUpdate(Update update, CancellationToken token)
         {
-            messagesSender.AddItem(new TextMessage(null, update.Message.Chat.Id, "Оповещаю о появляющихся в телеграме упоминаниях В.В. Путина. \nЕсли ничего не приходит - просто подождите какое-то время (возможно - несколько часов), его обязательно упомянут, а я сообщу вам об этом. \n\nНе выключайте оповещения!", null,new ReplyKeyboardRemove()));
+            messagesSender.AddItem(new TextMessage(null, update.Message.Chat.Id, "Оповещаю о появляющихся в телеграме упоминаниях космической тематики. \nЕсли ничего не приходит - просто подождите какое-то время (возможно - несколько часов), космос обязательно упомянут, а я сообщу вам об этом. \n\nНе выключайте оповещения!", null,new ReplyKeyboardRemove()));
             return new SearchBotConfig() {Finished=false };
         }
     }
