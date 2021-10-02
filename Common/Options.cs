@@ -5,7 +5,7 @@ namespace Common
 {
     public static class Options
     {
-        internal static string GetConnectionString()
+        internal static string GetConnectionString(string format)
         {
             try
             {
@@ -13,8 +13,8 @@ namespace Common
                 string db = Environment.GetEnvironmentVariable("db");
                 string user = Environment.GetEnvironmentVariable("user");
                 string host = Environment.GetEnvironmentVariable("db_host");
-                string result = string.Format("User ID={2};Password={0};Host={3};Port=5432;Database={1};Pooling=true;Timeout=30;CommandTimeout=0;", pwd, db, user, host);
-
+                string port = Environment.GetEnvironmentVariable("port");
+                string result = string.Format(format, pwd, db, user, host, port);
                 return pwd != null && db != null && user != null ? result : null;
             }
             catch 
@@ -44,7 +44,9 @@ namespace Common
         }
 
         internal static readonly string SettingsFilename = "settings.txt";
-        internal static readonly string ConnectionString1 = Environment.GetEnvironmentVariable("ConnectionString") ?? GetConnectionString()??(File.ReadAllText(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), Options.SettingsFilename)));
+        internal static readonly string ConnectionString1 = Environment.GetEnvironmentVariable("ConnectionString") ?? GetConnectionString("User ID={2};Password={0};Host={3};Port=5432;Database={1};Pooling=true;Timeout=30;CommandTimeout=0;") ??(File.ReadAllText(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), Options.SettingsFilename)));
+
+        public static readonly string MongoConnectionString = GetConnectionString("mongodb://{2}:{0}@{3}:{4}/?authSource=admin");
 
         internal static TimeSpan OrderGenerationTimeSpan = -new TimeSpan(1, 10, 0);
         internal static double StartWritingInterval = 20000;

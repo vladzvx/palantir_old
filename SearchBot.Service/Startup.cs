@@ -1,7 +1,10 @@
 using Bot.Core;
 using Bot.Core.Interfaces;
+using Bot.Core.Interfaces.BotFSM;
+using Bot.Core.Models;
 using Bot.Core.Services;
 using Bot.Service.Services;
+using Common;
 using Common.Services;
 using Common.Services.DataBase;
 using Common.Services.DataBase.Interfaces;
@@ -13,6 +16,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MongoDB.Driver;
 using System;
 using System.Threading;
 using Telegram.Bot.Types;
@@ -27,21 +31,24 @@ namespace Bot.Service
             services.AddSingleton<IBotSettings, BotSettings>();
             IGrpcSettings grpcSettings = new GrpcSettings();
             services.AddSingleton(GrpcChannel.ForAddress(grpcSettings.Url));
-            services.AddHostedService<BotsEntryPoint>();
-            services.AddSingleton<DBWorker>();
+
+
+            services.AddHostedService<BotsEntryPoint<SearchBot>>();
             services.AddSingleton<ISenderSettings, SenderSettings>();
             services.AddSingleton<IMessagesSender, MessagesSender>();
-            services.AddSingleton<ConnectionsFactory>();
-            services.AddSingleton(new CancellationTokenSource());
-            services.AddSingleton<IDataBaseSettings, DataBaseSettings>();
-            services.AddSingleton<ICommonWriter<Message>, CommonWriter<Message>>();
-            services.AddSingleton<IWriterCore<Message>, BotMessagesWriterCore>();
+            services.AddSingleton<ICommonWriter<Update>, MongoWriter>();
+            services.AddSingleton<IDataStorage<SearchBot>, DataStorage<SearchBot>>();
+            services.AddSingleton(new MongoClient(Options.MongoConnectionString));
+
             services.AddTransient<SearchClient>();
             services.AddTransient<SearchReciever>();
-            services.AddSingleton<IStartedProcessor, StartedProcessor>();
-            services.AddSingleton<IConfigurationProcessor, ConfigProcessor>();
-            services.AddSingleton<IReadyProcessor, ReadyProcessor>();
-            services.AddSingleton<SearchState>();
+
+            services.AddTransient<IFSMFactory<SearchBot>, SubFSMFactory>();
+            services.AddTransient<IReadyProcessor<SearchBot>, SearchReadyProcessor>();
+            services.AddTransient<IBusyProcessor, BusyProcessor>();
+            services.AddTransient<IRightChecker, RightChecker>();
+
+            services.AddTransient<SearchState>();
             services.AddSingleton<AsyncTaskExecutor>();
             services.AddTransient<ISearchResultReciever, StreamSearchResiever>();
             services.AddTransient<Bot.Core.Services.Bot>();

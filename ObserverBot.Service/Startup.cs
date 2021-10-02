@@ -34,7 +34,7 @@ namespace ObserverBot.Service
             services.AddSingleton<ISenderSettings, SenderSettings>();
             services.AddSingleton<IMessagesSender, MessagesSender>();
             services.AddTransient<Bot.Core.Services.Bot>();
-            services.AddSingleton<IConfigurationProcessor, ConfigurationProcessor>();
+            services.AddSingleton<ISubFSM, ConfigurationProcessor>();
             services.AddSingleton<IReadyProcessor, EmptyReadyProcessor>();
             services.AddSingleton<ICommonWriter<Message>, CommonWriter<Message>>();
             services.AddSingleton<IWriterCore<Message>, BotMessagesWriterCore>();

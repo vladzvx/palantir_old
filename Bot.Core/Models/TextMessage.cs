@@ -1,5 +1,6 @@
 ﻿using Bot.Core.Interfaces;
 using Common.Services.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -51,7 +52,10 @@ namespace Bot.Core.Models
                     commonWriter?.PutData(result);
                 }
             }
-            catch { }
+            catch (Exception ex) 
+            { 
+            
+            }
             if (ReadyWriter != null && result != null)
             {
                 await ReadyWriter.WriteAsync(result.MessageId);

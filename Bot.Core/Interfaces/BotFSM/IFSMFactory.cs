@@ -5,10 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
 
-namespace Bot.Core.Interfaces
+namespace Bot.Core.Interfaces.BotFSM
 {
-    public interface IStartedProcessor
+    public interface IFSMFactory<TBot> where TBot: IConfig
     {
-        public Task Process(Update update, Func<object, Task> func);
+        public Task<ISubFSM<TBot>> Get(Update update);
+
     }
 }

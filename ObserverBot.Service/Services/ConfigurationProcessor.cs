@@ -12,7 +12,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ObserverBot.Service.Services
 {
-    public class ConfigurationProcessor : IConfigurationProcessor
+    public class ConfigurationProcessor : ISubFSM
     {
         private readonly IMessagesSender messagesSender;
         public ConfigurationProcessor(IMessagesSender messagesSender)

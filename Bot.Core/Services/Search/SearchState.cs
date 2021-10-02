@@ -1,6 +1,11 @@
 ﻿using Bot.Core.Interfaces;
 using Bot.Core.Models;
+using MongoDB.Bson;
 using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Text.Unicode;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -11,33 +16,47 @@ namespace Bot.Core.Services
     public class SearchState
     {
         private readonly IMessagesSender messagesSender;
-        private readonly DBWorker dBWorker;
-        private readonly ITelegramBotClient client;
-
-        public SearchState(IMessagesSender messagesSender, DBWorker dBWorker)
+        private readonly IDataStorage<SearchBot> dBWorker;
+        public SearchState(IMessagesSender messagesSender, IDataStorage<SearchBot> dBWorker)
         {
             this.messagesSender = messagesSender;
             this.dBWorker = dBWorker;
         }
-        public async Task SavePage(long user, Page page, CancellationToken token)
+        public void SendPage(long user, Page page, CancellationToken token, Channel<int> channel=null)
         {
             if (!string.IsNullOrEmpty(page.Text))
             {
-                if (page.Number == 0)
-                {
-                    Channel<int> channel = Channel.CreateBounded<int>(1);
-                    TextMessage textMessage = page.GetTextMessage(client, user, channel);
-                    messagesSender.AddItem(textMessage);
-                    page.MessageNumber = await channel.Reader.ReadAsync();
-                }
-                await dBWorker.SavePage(page, token);
+                TextMessage textMessage = page.GetTextMessage(null, user, channel);
+                messagesSender.AddItem(textMessage);
             }
         }
 
-        public async Task TrySendPage(long user, Guid guid, int Number, CancellationToken token)
+        public async Task SavePages(List<Page> pages, CancellationToken token)
         {
-            Page page = await dBWorker.GetPage(guid, Number, token);
-            messagesSender.AddItem(page.GetEditTextMessage(client, user));
+
+            try
+            {
+                foreach (Page page in pages)
+                {
+                    page.Text = Encoding.UTF8.GetString(
+                        Encoding.Convert(
+                            Encoding.Unicode, Encoding.UTF8,
+                            Encoding.Unicode.GetBytes(page.Text)
+                        ));
+                }
+                await dBWorker.SavePages(pages, token);
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+        public async Task TryEdit(long chat,int messageId, ObjectId guid, CancellationToken token)
+        {
+            Page page = await dBWorker.GetPage(guid, token);
+            if (page!=null)
+                messagesSender.AddItem(page.GetEditTextMessage(null, chat, messageId));
         }
 
     }

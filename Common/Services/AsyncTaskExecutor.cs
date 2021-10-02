@@ -19,10 +19,12 @@ namespace Common.Services
                  {
                      while (!ct.IsCancellationRequested)
                      {
+                         int i = 0;
                          buffer.RemoveAll(item => item.IsCompleted);
-                         if (queue.TryDequeue(out Task task))
+                         while (i<150 && queue.TryDequeue(out Task task))
                          {
                              buffer.Add(task);
+                             i++;
                          }
                          Task t = Task.Delay(100);
                          buffer.Add(t);

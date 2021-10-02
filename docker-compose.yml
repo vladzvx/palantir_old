@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  searchbot.service:
+    image: ${DOCKER_REGISTRY-}searchbotservice
+    build:
+      context: .
+      dockerfile: SearchBot.Service/Dockerfile

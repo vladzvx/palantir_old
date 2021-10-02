@@ -18,7 +18,7 @@ namespace Bot.Core.Services
         public MessagesSender(ISenderSettings senderSettings)
         {
             this.senderSettings = senderSettings;
-            sender = Executor(CancellationToken.None);
+            sender = Task.Factory.StartNew(Executor, CancellationToken.None,TaskCreationOptions.LongRunning);
         }
         public void AddItem(ISendedItem sendedItem)
         {
@@ -26,59 +26,63 @@ namespace Bot.Core.Services
                 sendedItems.Enqueue(sendedItem);
         }
 
-        private async Task Executor(CancellationToken token)
+        private void Executor(object token)
         {
-            Dictionary<long, Task> Buffer = new Dictionary<long, Task>();
-            Queue<ISendedItem> Buffer2 = new Queue<ISendedItem>();
-            List<ISendedItem> Buffer3 = new List<ISendedItem>();
-            List<Task> tasks = new List<Task>();
-            while (!token.IsCancellationRequested)
+            if (token is CancellationToken _token)
             {
-                var keys = Buffer.Keys;
-                tasks.RemoveAll(item => item.IsCompleted);
-                foreach (var key in keys)
+                Dictionary<long, Task> Buffer = new Dictionary<long, Task>();
+                Queue<ISendedItem> Buffer2 = new Queue<ISendedItem>();
+                List<ISendedItem> Buffer3 = new List<ISendedItem>();
+                List<Task> tasks = new List<Task>();
+                while (!_token.IsCancellationRequested)
                 {
-                    if (Buffer[key].IsCompleted)
+                    var keys = Buffer.Keys;
+                    tasks.RemoveAll(item => item.IsCompleted);
+                    foreach (var key in keys)
                     {
-                        Buffer.Remove(key);
+                        if (Buffer[key].IsCompleted)
+                        {
+                            Buffer.Remove(key);
+                        }
+                        else
+                        {
+                            tasks.Add(Buffer[key]);
+                        }
                     }
-                    else
+                    while (Buffer.Count < senderSettings.BufferSize && Buffer2.TryDequeue(out var item))
                     {
-                        tasks.Add(Buffer[key]);
+                        if (!Buffer.ContainsKey(item.ChatId))
+                        {
+                            Task t = item.Send();
+                            Buffer.Add(item.ChatId, t);
+                            tasks.Add(t);
+                        }
+                        else
+                        {
+                            Buffer3.Add(item);
+                        }
                     }
+                    Buffer3.ForEach(item => Buffer2.Enqueue(item));
+                    Buffer3.Clear();
+                    while (Buffer.Count < senderSettings.BufferSize && sendedItems.TryDequeue(out var item))
+                    {
+                        if (!Buffer.ContainsKey(item.ChatId))
+                        {
+                            Task t = item.Send();
+                            Buffer.Add(item.ChatId, t);
+                            tasks.Add(t);
+                        }
+                        else
+                        {
+                            Buffer2.Enqueue(item);
+                        }
+                    }
+                    if (Buffer2.Count > senderSettings.MaxQueueSize) Buffer2.Clear();
+                    if (sendedItems.Count > senderSettings.MaxQueueSize) sendedItems.Clear();
+                    Task.WhenAll(Task.Delay(senderSettings.MainPeriod), tasks.Count > 0 ? Task.WhenAny(tasks) : Task.CompletedTask).Wait();
                 }
-                while (Buffer.Count < senderSettings.BufferSize && Buffer2.TryDequeue(out var item))
-                {
-                    if (!Buffer.ContainsKey(item.ChatId))
-                    {
-                        Task t = item.Send();
-                        Buffer.Add(item.ChatId, t);
-                        tasks.Add(t);
-                    }
-                    else
-                    {
-                        Buffer3.Add(item);
-                    }
-                }
-                Buffer3.ForEach(item => Buffer2.Enqueue(item));
-                Buffer3.Clear();
-                while (Buffer.Count < senderSettings.BufferSize && sendedItems.TryDequeue(out var item))
-                {
-                    if (!Buffer.ContainsKey(item.ChatId))
-                    {
-                        Task t = item.Send();
-                        Buffer.Add(item.ChatId,t);
-                        tasks.Add(t);
-                    }
-                    else
-                    {
-                        Buffer2.Enqueue(item);
-                    }
-                }
-                if (Buffer2.Count > senderSettings.MaxQueueSize) Buffer2.Clear();
-                if (sendedItems.Count > senderSettings.MaxQueueSize) sendedItems.Clear();
-                await Task.WhenAll(Task.Delay(senderSettings.MainPeriod), tasks.Count>0?Task.WhenAny(tasks):Task.CompletedTask);
             }
+
         }
     }
 }

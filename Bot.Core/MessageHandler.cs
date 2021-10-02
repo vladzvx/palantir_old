@@ -1,6 +1,7 @@
 ﻿using Bot.Core.Interfaces;
 using Common.Services;
 using Common.Services.Interfaces;
+using MongoDB.Bson;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ using Message = Telegram.Bot.Types.Message;
 
 namespace Bot.Core.Services
 {
-    public class MessageHandler : IUpdateHandler
+    public class MessageHandler<TBot> : IUpdateHandler where TBot:IConfig,new()
     {
         public static ICommonWriter<Message> writer;
         public static AsyncTaskExecutor asyncTaskExecutor;
@@ -29,24 +30,17 @@ namespace Bot.Core.Services
         {
             if (update.Type == UpdateType.Message)
             {
-                Bot.FSM processor = await Bot.FSM.Factory.Get(botClient, update, cancellationToken);
+                Bot.FSM<TBot> processor = await Bot.FSM<TBot>.Factory.Get(update, cancellationToken);
                 await processor.Process(update, cancellationToken);
             }
             else if (update.Type == UpdateType.CallbackQuery)
             {
-                string[] splittedId = update.CallbackQuery.Data.Split('_');
-                if (splittedId.Length == 2 &&
-                    int.TryParse(splittedId[1], out int id) &&
-                    Guid.TryParse(splittedId[0], out Guid guid))
+                if (ObjectId.TryParse(update.CallbackQuery.Data, out ObjectId guid))
                 {
-                    if (id >= 0)
-                    {
-                        Task sending = searchState.TrySendPage(update.CallbackQuery.From.Id, guid, id, cancellationToken);
-                        asyncTaskExecutor.Add(sending);
-                    }
+                    Task sending = searchState.TryEdit(update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId, guid, cancellationToken);
+                    asyncTaskExecutor.Add(sending);
                 }
             }
-
         }
     }
 }

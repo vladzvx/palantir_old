@@ -2,9 +2,8 @@
 {
     public enum PrivateChatState : int
     {
-        Started = 0,
-        Configuring = 1,
         Ready = 2,
+        SubFSMWorking = 1,
         Busy = 3
     }
 }

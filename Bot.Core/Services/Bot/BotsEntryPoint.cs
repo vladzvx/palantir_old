@@ -1,4 +1,5 @@
-﻿using Common.Services;
+﻿using Bot.Core.Interfaces;
+using Common.Services;
 using Common.Services.Interfaces;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -8,22 +9,22 @@ using Message = Telegram.Bot.Types.Message;
 
 namespace Bot.Core.Services
 {
-    public class BotsEntryPoint : IHostedService
+    public class BotsEntryPoint<TBot> : IHostedService where TBot:IConfig, new()
     {
         private readonly Bot mainBot;
 
-        public BotsEntryPoint(Bot bot, IServiceProvider serviceProvider, DBWorker dBWorker)
+        public BotsEntryPoint(Bot bot, IServiceProvider serviceProvider, IDataStorage<TBot> dBWorker)
         {
             mainBot = bot;
-            if (Bot.FSM.serviceProvider == null)
+            if (Bot.FSM<TBot>.serviceProvider == null)
             {
-                Bot.FSM.serviceProvider = serviceProvider;
+                Bot.FSM<TBot>.serviceProvider = serviceProvider;
             }
 
-            Bot.FSM.Factory.dBWorker = dBWorker;
-            MessageHandler.writer = (ICommonWriter<Message>)serviceProvider.GetService(typeof(ICommonWriter<Message>));
-            MessageHandler.asyncTaskExecutor = (AsyncTaskExecutor)serviceProvider.GetService(typeof(AsyncTaskExecutor));
-            MessageHandler.searchState = (SearchState)serviceProvider.GetService(typeof(SearchState));
+            Bot.FSM<TBot>.Factory.dBWorker = dBWorker;
+            MessageHandler<TBot>.writer = (ICommonWriter<Message>)serviceProvider.GetService(typeof(ICommonWriter<Message>));
+            MessageHandler<TBot>.asyncTaskExecutor = (AsyncTaskExecutor)serviceProvider.GetService(typeof(AsyncTaskExecutor));
+            MessageHandler<TBot>.searchState = (SearchState)serviceProvider.GetService(typeof(SearchState));
         }
         public Task StartAsync(CancellationToken cancellationToken)
         {

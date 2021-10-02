@@ -860,3 +860,25 @@ $$
 $$ LANGUAGE plpgsql;
 drop trigger after_messages_insert on public.messages ;
 CREATE TRIGGER after_messages_insert after INSERT on public.messages FOR EACH ROW execute PROCEDURE after_messages();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

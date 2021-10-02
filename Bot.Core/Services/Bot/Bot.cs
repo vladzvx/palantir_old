@@ -6,7 +6,7 @@ using Telegram.Bot;
 
 namespace Bot.Core.Services
 {
-    public partial class Bot : IDisposable
+    public partial class Bot : IDisposable 
     {
         public readonly TelegramBotClient botClient;
         private readonly CancellationToken cancellationToken;
@@ -19,19 +19,12 @@ namespace Bot.Core.Services
         }
         public void Start()
         {
-            botClient.StartReceiving<MessageHandler>(cancellationToken);
+            botClient.StartReceiving<MessageHandler<SearchBot>>(cancellationToken);
             //botClient.StartReceiving<KeyboardHandler>(cancellationToken);
         }
         public void Dispose()
         {
 
         }
-
-        #region subclasses
-
-
-
-
-        #endregion
     }
 }
