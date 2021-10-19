@@ -44,7 +44,7 @@ namespace Common
         }
 
         internal static readonly string SettingsFilename = "settings.txt";
-        internal static readonly string ConnectionString1 = Environment.GetEnvironmentVariable("ConnectionString") ?? GetConnectionString("User ID={2};Password={0};Host={3};Port=5432;Database={1};Pooling=true;Timeout=30;CommandTimeout=0;") ??(File.ReadAllText(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), Options.SettingsFilename)));
+        internal static readonly string ConnectionString1 = Environment.GetEnvironmentVariable("ConnectionString") ?? GetConnectionString("User ID={2};Password={0};Host={3};Port=5432;Database={1};Pooling=true;Timeout=30;CommandTimeout=0;Maximum Pool Size=1400") ??(File.ReadAllText(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), Options.SettingsFilename)));
 
         public static readonly string MongoConnectionString = GetConnectionString("mongodb://{2}:{0}@{3}:{4}/?authSource=admin");
 
