@@ -3,6 +3,7 @@ using Common.Services.gRPC;
 using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Mvc;
 using SearchLoader.Models;
+using SearchLoader.Services;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -34,33 +35,39 @@ namespace SearchLoader.Controllers
             { 
                 if (_token is CancellationToken tok)
                 {
-                    while (!tok.IsCancellationRequested && searchRequests.Count<1000)
+                    while (!tok.IsCancellationRequested)
                     {
-                        HashSet<string> words = new HashSet<string>();
-                        words.Add(WordsPool[rnd.Next(0, WordsPool.Count)]);
-                        while (rnd.NextDouble() > 0.7)
+                        while (searchRequests.Count < 1000)
                         {
+                            HashSet<string> words = new HashSet<string>();
                             words.Add(WordsPool[rnd.Next(0, WordsPool.Count)]);
-                        }
-                        string req = "";
-                        foreach (string w in words)
-                        {
-                            req += w + '&';
-                        }
-                        req = req.Substring(0, req.Length - 2);
-                        SearchRequest sr = new SearchRequest()
-                        {
-                            IsChannel = true,
-                            IsGroup = true,
-                            Request = req,
-                            StartTime = Timestamp.FromDateTime(DateTime.UtcNow.AddDays(-rnd.Next(1, 1000))),
-                            EndTime = Timestamp.FromDateTime(DateTime.UtcNow)
-                        };
+                            while (rnd.NextDouble() > 0.7)
+                            {
+                                words.Add(WordsPool[rnd.Next(0, WordsPool.Count)]);
+                            }
+                            string req = "";
+                            foreach (string w in words)
+                            {
+                                req += w + '&';
+                            }
+                            req = req.Substring(0, req.Length - 2);
+                            SearchRequest sr = new SearchRequest()
+                            {
+                                IsChannel = true,
+                                IsGroup = true,
+                                Request = req,
+                                StartTime = Timestamp.FromDateTime(DateTime.UtcNow.AddDays(-rnd.Next(1, 1000))),
+                                EndTime = Timestamp.FromDateTime(DateTime.UtcNow),
+                                SearchType = SearchType.SearchNamePeriod,
+                                Limit = 100
+                            };
 
-                        searchRequests.Enqueue(sr);
-                        
+                            searchRequests.Enqueue(sr);
+                        }
+                        Task.Delay(100);
+
                     }
-                    Task.Delay(100);
+
                 }
             }, token);
             List<Task> tasks = new List<Task>() {t };
@@ -94,16 +101,32 @@ namespace SearchLoader.Controllers
             }
             else
             {
-                requests.Enqueue(new SearchRequest() {IsChannel=true,IsGroup=true,Request=runSampleModel.Request,StartTime=Timestamp.FromDateTime( DateTime.UtcNow.AddDays(-365)),EndTime=Timestamp.FromDateTime(DateTime.UtcNow) });
+                requests.Enqueue(new SearchRequest() 
+                {
+                    IsChannel=true,
+                    IsGroup=true,
+                    Request=runSampleModel.Request,
+                    StartTime=Timestamp.FromDateTime( DateTime.UtcNow.AddDays(-365)),
+                    EndTime=Timestamp.FromDateTime(DateTime.UtcNow),
+                    SearchType=SearchType.SearchNamePeriod,
+                    Limit=100
+                });
             }
 
             DateTime dateTime = DateTime.UtcNow;
-            while(requests.TryDequeue(out var req))
+            SearchClient searchClient = (SearchClient)serviceProvider.GetService(typeof(SearchClient));
+            while (requests.TryDequeue(out var req))
             {
-                SearchClient searchClient = (SearchClient)serviceProvider.GetService(typeof(SearchClient));
                 await searchClient.Search(req, token);
             }
-            return Math.Round(DateTime.UtcNow.Subtract(dateTime).TotalSeconds / runSampleModel.Count,3).ToString();
+            string result = "";
+            if (searchClient.searchResultReciever is SearchResultsReciever srr && srr.FirstRecieved.HasValue)
+            {
+                result += "Results: "+srr.count;
+                result+="First recieved: "+Math.Round(DateTime.UtcNow.Subtract(srr.FirstRecieved.Value).TotalSeconds / runSampleModel.Count, 3).ToString();
+            }
+            
+            return result+="Total: " +Math.Round(DateTime.UtcNow.Subtract(dateTime).TotalSeconds / runSampleModel.Count,3).ToString();
 
         }
     }
