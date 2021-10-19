@@ -85,10 +85,18 @@ namespace SearchLoader.Controllers
         public async Task<string> Run(RunSampleModel runSampleModel ,CancellationToken token)
         {
             Queue<SearchRequest> requests = new Queue<SearchRequest>();
-            while (searchRequests.TryDequeue(out var sr)&&requests.Count< runSampleModel.Count)
+            if (runSampleModel.Request == null)
             {
-                requests.Enqueue(sr); 
+                while (searchRequests.TryDequeue(out var sr) && requests.Count < runSampleModel.Count)
+                {
+                    requests.Enqueue(sr);
+                }
             }
+            else
+            {
+                requests.Enqueue(new SearchRequest() {IsChannel=true,IsGroup=true,Request=runSampleModel.Request,StartTime=Timestamp.FromDateTime( DateTime.UtcNow.AddDays(-365)),EndTime=Timestamp.FromDateTime(DateTime.UtcNow) });
+            }
+
             DateTime dateTime = DateTime.UtcNow;
             while(requests.TryDequeue(out var req))
             {

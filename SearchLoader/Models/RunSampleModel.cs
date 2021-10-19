@@ -7,6 +7,7 @@ namespace SearchLoader.Models
 {
     public class RunSampleModel
     {
+        public string Request { get; set; }
         public int Count { get; set; }
     }
 }
