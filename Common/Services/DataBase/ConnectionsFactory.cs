@@ -44,16 +44,16 @@ namespace Common.Services.DataBase
                 catch { }
             }
 
-            //while (Pool.Count < settings.ConnectionPoolHotReserve && PoolRepo.Count <settings.ConnectionPoolMaxSize)
-            //{
-            //    try
-            //    {
-            //        Task<ConnectionWrapper> t = CreateConnectionAsync(CancellationToken.None);
-            //        Pool.Add(t.Result);
-            //        PoolRepo.TryAdd(t.Result.Id, t.Result);
-            //    }
-            //    catch { }
-            //}
+            while (Pool.Count < settings.ConnectionPoolHotReserve && PoolRepo.Count < settings.ConnectionPoolMaxSize)
+            {
+                try
+                {
+                    Task<ConnectionWrapper> t = CreateConnectionAsync(CancellationToken.None);
+                    Pool.Add(t.Result);
+                    PoolRepo.TryAdd(t.Result.Id, t.Result);
+                }
+                catch { }
+            }
         }
         private async Task<ConnectionWrapper> CreateConnectionAsync(CancellationToken token)
         {
