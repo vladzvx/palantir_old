@@ -23,7 +23,7 @@ namespace DataFair
         {
             services.AddSingleton<CancellationTokenSource>();
             services.AddSingleton<State>();
-            services.AddSingleton<IDataBaseSettings, DataBaseSettings>();
+
             services.AddSingleton<ICommonWriter, CommonWriter>();
             services.AddSingleton<ILoadManager, LoadManager>();
             services.AddSingleton<ISettings, Settings>();
@@ -35,7 +35,7 @@ namespace DataFair
 
 
             services.AddTransient<DataPreparator>();
-
+            services.AddTransient<IDataBaseSettings, DataBaseSettings>();
             services.AddTransient<IWriterCore<Message>, MessagesWriterCore>();
             services.AddTransient<IWriterCore<Entity>, EntityWriterCore>();
             services.AddTransient<IWriterCore, WriterCore>();
