@@ -12,7 +12,7 @@ namespace Common.Services.DataBase
         //private readonly System.Timers.Timer timer = new System.Timers.Timer();
         public readonly IDataBaseSettings settings;
         public readonly ConcurrentQueue<ConnectionWrapper> CancellationQueue = new ConcurrentQueue<ConnectionWrapper>();
-        public readonly ConcurrentQueue<ConnectionWrapper> Pool = new ConcurrentQueue<ConnectionWrapper>();
+        public readonly ConcurrentStack<ConnectionWrapper> Pool = new ConcurrentStack<ConnectionWrapper>();
         internal readonly ConcurrentDictionary<DateTime, ConnectionWrapper> PoolRepo = new ConcurrentDictionary<DateTime, ConnectionWrapper>();
         private readonly object locker = new object();
         private readonly Thread worker;
@@ -54,7 +54,7 @@ namespace Common.Services.DataBase
                 {
 
                     while (Pool.Count > settings.ConnectionPoolHotReserve &&
-                        Pool.TryDequeue(out ConnectionWrapper connection) &&
+                        Pool.TryPop(out ConnectionWrapper connection) &&
                         PoolRepo.TryRemove(connection.CreationTime, out _))
                     {
                         try
@@ -104,7 +104,7 @@ namespace Common.Services.DataBase
             return connection;
         }
 
-        private ConnectionWrapper CreateConnection()
+        private void CreateConnection()
         {
             ConnectionWrapper connection = new ConnectionWrapper(settings.ConnectionString1, this);
             connection.Connection.Open();
@@ -112,9 +112,8 @@ namespace Common.Services.DataBase
             {
                 connection.CreationTime = DateTime.UtcNow;
             }
-            Pool.Enqueue(connection);
+            Pool.Push(connection);
             PoolRepo.TryAdd(connection.CreationTime, connection);
-            return connection;
         }
 
         public async Task<ConnectionWrapper> GetConnectionAsync(CancellationToken token)
@@ -122,7 +121,7 @@ namespace Common.Services.DataBase
             ConnectionWrapper connection = null;
             while (!token.IsCancellationRequested)
             {
-                if (Pool.TryDequeue(out connection))
+                if (Pool.TryPop(out connection))
                 {
                     if (connection.Connection.FullState == System.Data.ConnectionState.Open)
                     {

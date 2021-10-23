@@ -31,7 +31,7 @@ namespace Common.Services.DataBase
             }
             else
             {
-                connectionPoolManager.Pool.Enqueue(this);
+                connectionPoolManager.Pool.Push(this);
             }
 
         }
