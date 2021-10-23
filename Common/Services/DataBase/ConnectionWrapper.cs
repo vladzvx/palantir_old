@@ -22,14 +22,16 @@ namespace Common.Services.DataBase
         }
         public void Dispose()
         {
-            if (DateTime.UtcNow.Subtract(this.CreationTime) > connectionPoolManager.settings.ConnectionLifetime && connectionPoolManager.Pool.Count>1)
+            if (DateTime.UtcNow.Subtract(this.CreationTime) > connectionPoolManager.settings.ConnectionLifetime)
             {
-                Connection.Close();
-                Connection.Dispose();
+                connectionPoolManager.CancellationQueue.Enqueue(this);
+                //Connection.Close();
+                //Connection.Dispose();
+                //connectionPoolManager.PoolRepo.TryRemove(this.CreationTime, out _);
             }
             else
             {
-                connectionPoolManager.Pool.Add(this);
+                connectionPoolManager.Pool.Enqueue(this);
             }
 
         }

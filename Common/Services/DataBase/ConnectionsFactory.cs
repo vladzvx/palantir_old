@@ -1,6 +1,7 @@
 ﻿using Common.Services.DataBase.Interfaces;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,10 +11,12 @@ namespace Common.Services.DataBase
     {
         //private readonly System.Timers.Timer timer = new System.Timers.Timer();
         public readonly IDataBaseSettings settings;
-        public readonly ConcurrentBag<ConnectionWrapper> Pool = new ConcurrentBag<ConnectionWrapper>();
+        public readonly ConcurrentQueue<ConnectionWrapper> CancellationQueue = new ConcurrentQueue<ConnectionWrapper>();
+        public readonly ConcurrentQueue<ConnectionWrapper> Pool = new ConcurrentQueue<ConnectionWrapper>();
         internal readonly ConcurrentDictionary<DateTime, ConnectionWrapper> PoolRepo = new ConcurrentDictionary<DateTime, ConnectionWrapper>();
         private readonly object locker = new object();
         private readonly Thread worker;
+        private readonly Thread Canceller;
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
         public int TotalConnections
         {
@@ -28,7 +31,9 @@ namespace Common.Services.DataBase
             this.settings = settings;
             settings.Token = cts.Token;
             worker = new Thread(new ParameterizedThreadStart(ThreadAction));
+            Canceller = new Thread(new ParameterizedThreadStart(CancellationThreadAction));
             worker.Start(settings);
+            Canceller.Start(settings);
 
             //timer.Interval = settings.PoolingTimeout;
             //TimerAction(null, null);
@@ -47,8 +52,9 @@ namespace Common.Services.DataBase
             {
                 while (!settings.Token.IsCancellationRequested)
                 {
+
                     while (Pool.Count > settings.ConnectionPoolHotReserve &&
-                        Pool.TryTake(out ConnectionWrapper connection) &&
+                        Pool.TryDequeue(out ConnectionWrapper connection) &&
                         PoolRepo.TryRemove(connection.CreationTime, out _))
                     {
                         try
@@ -74,29 +80,20 @@ namespace Common.Services.DataBase
             }
         }
 
-        private void TimerAction(object sender, System.Timers.ElapsedEventArgs args)
+        private void CancellationThreadAction(object cancellationToken)
         {
-            while (Pool.Count > settings.ConnectionPoolHotReserve &&
-                Pool.TryTake(out ConnectionWrapper connection) &&
-                PoolRepo.TryRemove(connection.CreationTime, out _))
+            if (cancellationToken is IDataBaseSettings settings)
             {
-                try
+                while (!settings.Token.IsCancellationRequested)
                 {
-                    connection.Connection.Close();
-                    connection.Connection.Dispose();
+                    while(CancellationQueue.TryDequeue(out var wrapper))
+                    {
+                        wrapper.Connection.Close();
+                        wrapper.Connection.Dispose();
+                        PoolRepo.TryRemove(wrapper.CreationTime, out _);
+                    }
+                    Thread.Sleep(settings.PoolingTimeout);
                 }
-                catch { }
-            }
-
-            while (Pool.Count < settings.ConnectionPoolHotReserve && PoolRepo.Count < settings.ConnectionPoolMaxSize)
-            {
-                try
-                {
-                    Task<ConnectionWrapper> t = CreateConnectionAsync(CancellationToken.None);
-                    Pool.Add(t.Result);
-                    PoolRepo.TryAdd(t.Result.CreationTime, t.Result);
-                }
-                catch { }
             }
         }
         private async Task<ConnectionWrapper> CreateConnectionAsync(CancellationToken token)
@@ -115,7 +112,7 @@ namespace Common.Services.DataBase
             {
                 connection.CreationTime = DateTime.UtcNow;
             }
-            Pool.Add(connection);
+            Pool.Enqueue(connection);
             PoolRepo.TryAdd(connection.CreationTime, connection);
             return connection;
         }
@@ -125,7 +122,7 @@ namespace Common.Services.DataBase
             ConnectionWrapper connection = null;
             while (!token.IsCancellationRequested)
             {
-                if (Pool.TryTake(out connection))
+                if (Pool.TryDequeue(out connection))
                 {
                     if (connection.Connection.FullState == System.Data.ConnectionState.Open)
                     {
