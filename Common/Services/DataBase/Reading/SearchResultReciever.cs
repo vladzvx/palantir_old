@@ -33,6 +33,7 @@ namespace Common.Services.DataBase.Reading
 
         public void Recieve(SearchResult searchResult)
         {
+            searchResult.Text = "Ы";
             results.Enqueue(searchResult);
         }
 
