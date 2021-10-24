@@ -46,10 +46,20 @@ namespace Bot.Core.Services
                 Page currentPage = new Page(currentId, prevId, nextId) { position = Page.Position.First };
                 Channel<int> channel = Channel.CreateBounded<int>(1);
                 bool sended = false;
+                HashSet<string> texts = new HashSet<string>();
                 while ((!searchTask.IsCompleted || lastExecutionEnable)&&!token1.IsCancellationRequested)
                 {
                     while (searchClient.searchResultReciever.TryDequeueResult(out var result))
                     {
+                        if (texts.Contains(result.Text))
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            texts.Add(result.Text);
+                        }
+
                         if (!currentPage.TryAddResult(result))
                         {
                             int count = currentPage.count;
