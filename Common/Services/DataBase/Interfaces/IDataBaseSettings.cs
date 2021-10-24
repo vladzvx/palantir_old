@@ -14,7 +14,7 @@ namespace Common.Services.DataBase.Interfaces
         public int StartVectorizerCount { get => 1000; }
         public int TrasactionSize { get => 100000; }
         public int ConnectionPoolMaxSize { get => 1300; }
-        public int ConnectionPoolHotReserve { get => 200; }
+        public int ConnectionPoolHotReserve { get => 500; }
         public CancellationToken Token { get; set; }
     }
 }

@@ -35,6 +35,62 @@ namespace SearchLoader.Controllers
         {
             this.serviceProvider = serviceProvider;
         }
+
+        [HttpPost("exec")]
+        public async Task<string> exec(RunLoadModel runModel, CancellationToken token)
+        {
+            searchRequests.Clear();
+            Random rnd = new Random();
+            while (searchRequests.Count < runModel.RequestsNumber)
+            {
+                HashSet<string> words = new HashSet<string>();
+                words.Add(WordsPool[rnd.Next(0, WordsPool.Count)]);
+                while (rnd.NextDouble() > 0.7)
+                {
+                    words.Add(WordsPool[rnd.Next(0, WordsPool.Count)]);
+                }
+                string req = "";
+                foreach (string w in words)
+                {
+                    req += w + '&';
+                }
+                req = req.Substring(0, req.Length - 2);
+                SearchRequest sr = new SearchRequest()
+                {
+                    IsChannel = true,
+                    IsGroup = true,
+                    Request = req,
+                    StartTime = Timestamp.FromDateTime(DateTime.UtcNow.AddDays(-rnd.Next(1, 1000))),
+                    EndTime = Timestamp.FromDateTime(DateTime.UtcNow),
+                    SearchType = SearchType.SearchNamePeriod,
+                    Limit = 100
+                };
+
+                searchRequests.Enqueue(sr);
+            }
+
+
+            DateTime dateTime = DateTime.UtcNow;
+            List<Task> tasks = new List<Task>() {};
+            while (!token.IsCancellationRequested)
+            {
+                tasks.RemoveAll(item => item.IsCompleted);
+                int starti = tasks.Count;
+                for (int i = starti; i < runModel.Threads; i++)
+                {
+                    if (searchRequests.TryDequeue(out var sr))
+                    {
+                        SearchClient searchClient = (SearchClient)serviceProvider.GetService(typeof(SearchClient));
+                        tasks.Add(searchClient.Search(sr, token));
+                    }
+                }
+                if (tasks.Count == 0) break;
+                await Task.WhenAny(tasks);
+            }
+            return DateTime.UtcNow.Subtract(dateTime).TotalSeconds.ToString();
+        }
+
+
         [HttpPost("load")]
         public async Task<string> Run(RunLoadModel runModel, CancellationToken token)
         {

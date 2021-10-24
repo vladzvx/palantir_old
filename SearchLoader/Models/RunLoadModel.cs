@@ -8,5 +8,7 @@ namespace SearchLoader.Models
     public class RunLoadModel
     {
         public int Threads { get; set; }
+
+        public int RequestsNumber { get; set; }
     }
 }
