@@ -5,6 +5,7 @@ using Common.Services.gRPC;
 using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -47,6 +48,8 @@ namespace Bot.Core.Services
                 Channel<int> channel = Channel.CreateBounded<int>(1);
                 bool sended = false;
                 HashSet<string> texts = new HashSet<string>();
+                HashSet<string> texts2 = new HashSet<string>();
+
                 while ((!searchTask.IsCompleted || lastExecutionEnable)&&!token1.IsCancellationRequested)
                 {
                     while (searchClient.searchResultReciever.TryDequeueResult(out var result))
@@ -58,6 +61,32 @@ namespace Bot.Core.Services
                         else
                         {
                             texts.Add(result.Text);
+                            try
+                            {
+                                var words = result.Text.Split(' ','\n').Select(item=>item.ToLower()).Distinct().ToList();
+                                if (words.Count < 10)
+                                {
+                                    words.Sort((item1, item2) => item1.Length == item2.Length ? 0 : item1.Length < item2.Length ? -1 : 1);
+                                    string str = "";
+                                    foreach (string st in words)
+                                    {
+                                        str += st;
+                                    }
+                                    if (texts2.Contains(str))
+                                    {
+                                        continue;
+                                    }
+                                    else
+                                    {
+                                        texts2.Add(str);
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+
+                            }
+
                         }
 
                         if (!currentPage.TryAddResult(result))
