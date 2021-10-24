@@ -97,7 +97,6 @@ namespace Common.Services.DataBase
             }
             catch (Exception)
             {
-                //return new List<SearchResult>() { new SearchResult() {Link=ex.StackTrace, Text=ex.Message } };
             }
         }
         public async Task CommonSearch(SearchType storedProcedure,
