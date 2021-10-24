@@ -68,8 +68,13 @@ namespace Bot.Core.Models
             }
         }
 
-        public TextMessage GetTextMessage(ITelegramBotClient client, long chatId, Channel<int> channel=null)
+        public TextMessage GetTextMessage(ITelegramBotClient client, long chatId, Channel<int> channel=null, bool firstPage = false)
         {
+            
+            InlineKeyboardButton Empty = new InlineKeyboardButton();
+            Empty.Text = " - ";
+            Empty.CallbackData = "-";
+
             InlineKeyboardButton Next = new InlineKeyboardButton();
             Next.Text = "Далее";
             Next.CallbackData = NextId.HasValue ? NextId.Value.ToString() : string.Empty;
@@ -103,6 +108,11 @@ namespace Bot.Core.Models
             else
             {
                 keyb = null;
+            }
+
+            if (firstPage)
+            {
+                keyb = new InlineKeyboardMarkup(Empty);
             }
             return new TextMessage(client, chatId, Text, channel, new ReplyKeyboardRemove(), formattings: new List<MessageEntity>(Formatting),
                 inlineKeyboard: keyb);

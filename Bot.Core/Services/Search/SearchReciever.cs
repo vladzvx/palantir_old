@@ -116,7 +116,7 @@ namespace Bot.Core.Services
                                     {
                                         if (!string.IsNullOrEmpty(pages[0].Text))
                                         {
-                                            TextMessage textMessage = pages[0].GetTextMessage(null, user, channel);
+                                            TextMessage textMessage = pages[0].GetTextMessage(null, user, channel,true);
                                             messagesSender.AddItem(textMessage);
                                         }
                                         sended = true;
@@ -157,7 +157,8 @@ namespace Bot.Core.Services
 
                 if (sended)
                 {
-                    messagesSender.AddItem(pages[0].GetEditTextMessage(null, user, await channel.Reader.ReadAsync()));
+                    int messNumber = await channel.Reader.ReadAsync();
+                    messagesSender.AddItem(pages[0].GetEditTextMessage(null, user, messNumber));
                 }
                 else
                 {
