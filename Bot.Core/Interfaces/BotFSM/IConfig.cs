@@ -13,8 +13,10 @@ namespace Bot.Core.Interfaces
         [BsonId]
         public long Id { get; set; }
         public UserStatus Status { get; set; }
+        public UserType userType { get; set; }
         public PrivateChatState BotState { get; set; }
-
+        public string Username { get; set; }
+        public string Name { get; set; }
 
     }
 }

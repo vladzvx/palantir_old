@@ -32,9 +32,35 @@ namespace Bot.Core.Services
                         var temp = await dBWorker.GetChat(update.Message.Chat.Id, token);
                         if (temp == null)
                         {
-                            temp = new TBot() { Id = update.Message.Chat.Id };
-                            await dBWorker.SaveChat(temp, token);
+                            temp = new TBot() { Id = update.Message.Chat.Id};
                         }
+
+                        if (update.Message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Private)
+                        {
+                            temp.Username = update.Message.From.Username;
+                            temp.Name = update.Message.From.FirstName;
+                            temp.userType = Enums.UserType.User;
+                        }
+                        else if (update.Message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Group || update.Message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Supergroup)
+                        {
+                            try
+                            {
+                                temp.Username = update.Message.Chat.Username;
+                                temp.Name = update.Message.Chat.FirstName;
+                                temp.userType = Enums.UserType.Group;
+                                var temp2 = new TBot() { Id = update.Message.From.Id };
+                                temp2.Username = update.Message.From.Username;
+                                temp2.Name = update.Message.From.FirstName;
+                                temp2.userType = Enums.UserType.User;
+                                await dBWorker.SaveChat(temp2, token);
+                            }
+                            catch (Exception ex)
+                            {
+
+                            }
+                        }
+
+                        await dBWorker.SaveChat(temp, token);
                         FSM<TBot> fSM = new FSM<TBot>(update.Message.Chat.Id, temp);
                         state.TryAdd(update.Message.From.Id, fSM);
                         return fSM;
