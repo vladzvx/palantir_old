@@ -109,6 +109,7 @@ namespace Common.Services.DataBase
             CancellationToken token,
             params long[] chat_ids)
         {
+            await Search(storedProcedure, request, startDt, endDt, 15, is_channel, is_group, token, chat_ids);
             await Search(storedProcedure, request, startDt, endDt, limit, is_channel, is_group, token, chat_ids);
 
 
