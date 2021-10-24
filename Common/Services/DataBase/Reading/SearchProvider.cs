@@ -75,11 +75,20 @@ namespace Common.Services.DataBase
                     {
                         if (!reader.IsDBNull(0) && !reader.IsDBNull(1))
                         {
+                            string name = "";
+                            if (reader.FieldCount >= 3)
+                            {
+                                if (!reader.IsDBNull(2))
+                                {
+                                    name = reader.GetString(2);
+                                }
+                            }
                             searchResultReciever.Recieve(new SearchResult()
                             {
                                 Link = reader.GetString(0),
-                                Text = reader.GetString(1)
-                            });
+                                Text = reader.GetString(1),
+                                Name = name
+                            }) ;
                         }
                     }
                     //searchResultReciever.IsComplited = true;
