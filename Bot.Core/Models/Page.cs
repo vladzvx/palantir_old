@@ -14,6 +14,7 @@ namespace Bot.Core.Models
     public class Page
     {
         public const int PageMaxSize = 1500;
+        public const int PreviewSize = 150;
         public static Page Empty = new Page(ObjectId.Empty) { position = Position.Empty };
 
 
@@ -46,13 +47,14 @@ namespace Bot.Core.Models
             this.NextId = nextId;
             this.PreviousId = previousId;
         }
-        public bool TryAddResult(SearchResult res)
+        public bool TryAddResult(SearchResult res, int pageSize= PageMaxSize, int previewSize = PreviewSize)
         {
-            if (Text.Length < PageMaxSize)
+            if (Text.Length < pageSize)
             {
-                string line = count.ToString() + ". " + (res.Text.Length > 100 ? res.Text.Substring(0, 99) + "..." : res.Text) + "\n\n";
+                string link = !string.IsNullOrEmpty(res.Name) ? res.Name :"Ссылка №" +count.ToString();
+                string line = link + ":\n" + (res.Text.Length > previewSize ? res.Text.Substring(0, previewSize - 1) + "..." : res.Text) + "\n\n";
 
-                MessageEntity formatting = new MessageEntity() { Length = count.ToString().Length, Url = res.Link, Offset = offset, Type = MessageEntityType.TextLink };
+                MessageEntity formatting = new MessageEntity() { Length = link.Length+1, Url = res.Link, Offset = offset, Type = MessageEntityType.TextLink };
                 offset += line.Length;
                 count++;
                 Text += line;
