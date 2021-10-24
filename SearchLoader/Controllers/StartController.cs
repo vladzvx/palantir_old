@@ -39,7 +39,7 @@ namespace SearchLoader.Controllers
         [HttpPost("exec")]
         public async Task<string> exec(RunLoadModel runModel, CancellationToken token)
         {
-            searchRequests.Clear();
+            ConcurrentQueue<SearchRequest> searchRequests = new ConcurrentQueue<SearchRequest>();
             Random rnd = new Random();
             while (searchRequests.Count < runModel.RequestsNumber)
             {
