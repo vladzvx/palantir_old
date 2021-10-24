@@ -45,7 +45,7 @@ namespace SearchLoader.Controllers
             {
                 HashSet<string> words = new HashSet<string>();
                 words.Add(WordsPool[rnd.Next(0, WordsPool.Count)]);
-                while (rnd.NextDouble() > 0.7)
+                while (rnd.NextDouble() > 0.5)
                 {
                     words.Add(WordsPool[rnd.Next(0, WordsPool.Count)]);
                 }
@@ -85,6 +85,7 @@ namespace SearchLoader.Controllers
                         SearchClient searchClient = (SearchClient)serviceProvider.GetService(typeof(SearchClient));
                         if (searchClient.searchResultReciever is SearchResultsTestReciever srtr)
                         {
+                            srtr.CreationTime = DateTime.UtcNow;
                             srtrs.Add(srtr);
                             tasks.Add(searchClient.Search(sr, token));
                             //tasks2.Add();
@@ -101,7 +102,14 @@ namespace SearchLoader.Controllers
                 await Task.WhenAny(tasks);
             }
             var data = srtrs.Where(item => item.FirstRecieved.HasValue).Select(item => item.FirstRecieved.Value.Subtract(item.CreationTime).TotalSeconds);
-            string message = "ForFirstResult: " + data.Sum() / data.Count() ; 
+            double sum = data.Sum();
+            double count = data.Count();
+            double mean = sum / count;
+            var data2 = data.Select(item =>(Math.Pow(item - mean,2)/ count));
+            double std = Math.Pow(data2.Sum(), 0.5);
+            var data2sigma = data.Where(item => Math.Abs(item - mean) < 2 * std);
+            var data3sigma = data.Where(item => Math.Abs(item - mean) < 3 * std);
+            string message = string.Format("ForFirstResult. Count: {0}; Mean: {1}; std: {2}; min: {3}; max: {4}; 2sigmaMean: {5}; 2sigmaCount: {6}; 3sigmaMean: {7}; 3sigma Count: {8};", Math.Round(count,3), Math.Round(mean, 3), Math.Round(std, 3), data.Min(), data.Max(), data2sigma.Average(), data2sigma.Count(), data3sigma.Average(), data3sigma.Count()) ; 
             return message+=" "+ "ForFullResult: " + DateTime.UtcNow.Subtract(dateTime).TotalSeconds.ToString();
         }
 
