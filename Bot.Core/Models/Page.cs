@@ -133,6 +133,10 @@ namespace Bot.Core.Models
             {
                 keyb = new InlineKeyboardMarkup(Prev);
             }
+            else if (position == Position.Single)
+            {
+                keyb = null;
+            }
             else
             {
                 keyb = null;
