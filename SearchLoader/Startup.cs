@@ -20,7 +20,7 @@ namespace SearchLoader
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddTransient<ISearchResultReciever, SearchResultsReciever>();
+            services.AddTransient<ISearchResultReciever, SearchResultsTestReciever>();
             services.AddTransient<SearchClient>();
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             IGrpcSettings grpcSettings = new GrpcSettings();

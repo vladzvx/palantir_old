@@ -72,22 +72,37 @@ namespace SearchLoader.Controllers
 
             DateTime dateTime = DateTime.UtcNow;
             List<Task> tasks = new List<Task>() {};
+            List<SearchResultsTestReciever> srtrs = new List<SearchResultsTestReciever>() {};
             while (!token.IsCancellationRequested)
             {
                 tasks.RemoveAll(item => item.IsCompleted);
+                //tasks2.RemoveAll(item => item.IsCompleted);
                 int starti = tasks.Count;
                 for (int i = starti; i < runModel.Threads; i++)
                 {
                     if (searchRequests.TryDequeue(out var sr))
                     {
                         SearchClient searchClient = (SearchClient)serviceProvider.GetService(typeof(SearchClient));
-                        tasks.Add(searchClient.Search(sr, token));
+                        if (searchClient.searchResultReciever is SearchResultsTestReciever srtr)
+                        {
+                            srtrs.Add(srtr);
+                            tasks.Add(searchClient.Search(sr, token));
+                            //tasks2.Add();
+                        }
+                        else
+                        {
+                            tasks.Add(searchClient.Search(sr, token));
+                        }
                     }
                 }
-                if (tasks.Count == 0) break;
+                //tasks2.AddRange(tasks);
+                //tasks2 = tasks2.Distinct().ToList();
+                if (tasks.Count==0) break;
                 await Task.WhenAny(tasks);
             }
-            return DateTime.UtcNow.Subtract(dateTime).TotalSeconds.ToString();
+            var data = srtrs.Where(item => item.FirstRecieved.HasValue).Select(item => item.FirstRecieved.Value.Subtract(item.CreationTime).TotalSeconds);
+            string message = "ForFirstResult: " + data.Sum() / data.Count() ; 
+            return message+=" "+ "ForFullResult: " + DateTime.UtcNow.Subtract(dateTime).TotalSeconds.ToString();
         }
 
 
@@ -185,7 +200,7 @@ namespace SearchLoader.Controllers
                 await searchClient.Search(req, token);
             }
             string result = "";
-            if (searchClient.searchResultReciever is SearchResultsReciever srr && srr.FirstRecieved.HasValue)
+            if (searchClient.searchResultReciever is SearchResultsTestReciever srr && srr.FirstRecieved.HasValue)
             {
                 result += "Results: "+srr.count;
                 result+="First recieved: "+Math.Round(DateTime.UtcNow.Subtract(srr.FirstRecieved.Value).TotalSeconds / runSampleModel.Count, 3).ToString();
