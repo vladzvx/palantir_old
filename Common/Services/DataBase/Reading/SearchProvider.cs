@@ -57,7 +57,7 @@ namespace Common.Services.DataBase
                     searchCommand.Parameters.Add(new NpgsqlParameter("dt2", NpgsqlTypes.NpgsqlDbType.Timestamp));
 
                     searchCommand.Parameters["request"].Value = request;
-                    searchCommand.Parameters["lim"].Value = 5;
+                    searchCommand.Parameters["lim"].Value = limit;
                     searchCommand.Parameters["dt1"].Value = startDt;
                     searchCommand.Parameters["dt2"].Value = endDt;
                     searchCommand.Parameters["_is_group"].Value = is_group;
@@ -69,30 +69,6 @@ namespace Common.Services.DataBase
                         searchCommand.Parameters["ids"].Value = chat_ids;
                     }
 
-                    using (NpgsqlDataReader reader = await searchCommand.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            if (!reader.IsDBNull(0) && !reader.IsDBNull(1))
-                            {
-                                string name = "";
-                                if (reader.FieldCount >= 3)
-                                {
-                                    if (!reader.IsDBNull(2))
-                                    {
-                                        name = reader.GetString(2);
-                                    }
-                                }
-                                searchResultReciever.Recieve(new SearchResult()
-                                {
-                                    Link = reader.GetString(0),
-                                    Text = reader.GetString(1),
-                                    Name = name
-                                });
-                            }
-                        }
-                    }
-                    searchCommand.Parameters["lim"].Value = limit;
                     using (NpgsqlDataReader reader = await searchCommand.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
@@ -135,7 +111,7 @@ namespace Common.Services.DataBase
             CancellationToken token,
             params long[] chat_ids)
         {
-            await Search(storedProcedure, request, startDt, endDt, 15, is_channel, is_group, token, chat_ids);
+            //await Search(storedProcedure, request, startDt, endDt, 15, is_channel, is_group, token, chat_ids);
             await Search(storedProcedure, request, startDt, endDt, limit, is_channel, is_group, token, chat_ids);
 
 
