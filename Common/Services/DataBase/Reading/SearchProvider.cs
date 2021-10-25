@@ -148,9 +148,7 @@ namespace Common.Services.DataBase
             params long[] chat_ids)
         {
             List<Task> tasks = new List<Task>();
-            tasks.Add(Search(storedProcedure, request, startDt, endDt, 5, is_channel, is_group, token, chat_ids));
-            tasks.Add(Search(storedProcedure, request, startDt, endDt, 100, is_channel, is_group, token, chat_ids));
-            tasks.Add(Search(storedProcedure, request, startDt, endDt, 1000, is_channel, is_group, token, chat_ids));
+            tasks.Add(Search(storedProcedure, request, startDt, endDt, limit, is_channel, is_group, token, chat_ids));
             await Task.WhenAny(tasks);
             return Task.WhenAll(tasks);
 
