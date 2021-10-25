@@ -57,7 +57,7 @@ namespace Common.Services.DataBase
                     searchCommand.Parameters.Add(new NpgsqlParameter("dt2", NpgsqlTypes.NpgsqlDbType.Timestamp));
 
                     searchCommand.Parameters["request"].Value = request;
-                    searchCommand.Parameters["lim"].Value = 15;
+                    searchCommand.Parameters["lim"].Value = 5;
                     searchCommand.Parameters["dt1"].Value = startDt;
                     searchCommand.Parameters["dt2"].Value = endDt;
                     searchCommand.Parameters["_is_group"].Value = is_group;
