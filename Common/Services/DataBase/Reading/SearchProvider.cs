@@ -99,6 +99,7 @@ namespace Common.Services.DataBase
             {
             }
         }
+
         public async Task CommonSearch(SearchType storedProcedure,
             string request,
             DateTime startDt,
@@ -146,6 +147,7 @@ namespace Common.Services.DataBase
             params long[] chat_ids)
         {
             List<Task> tasks = new List<Task>();
+            tasks.Add(Search(storedProcedure, request, startDt, endDt, 15, is_channel, is_group, token, chat_ids));
             tasks.Add(Search(storedProcedure, request, startDt, endDt, limit, is_channel, is_group, token, chat_ids));
             await Task.WhenAny(tasks);
             return Task.WhenAll(tasks);
