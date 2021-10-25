@@ -137,7 +137,7 @@ namespace Common.Services.DataBase
         }
 
 
-        public async Task<Task> AsyncSearch(SearchType storedProcedure,
+        public async Task AsyncSearch(SearchType storedProcedure,
             string request,
             DateTime startDt,
             DateTime endDt,
@@ -148,10 +148,11 @@ namespace Common.Services.DataBase
             params long[] chat_ids)
         {
             List<Task> tasks = new List<Task>();
-            tasks.Add(Search(storedProcedure, request, startDt, endDt, 7, is_channel, is_group, token, chat_ids));
-            tasks.Add(Search(storedProcedure, request, startDt, endDt, limit, is_channel, is_group, token, chat_ids));
-            await Task.WhenAny(tasks);
-            return Task.WhenAll(tasks);
+            await Search(storedProcedure, request, startDt, endDt, 7, is_channel, is_group, token, chat_ids);
+            await Search(storedProcedure, request, startDt, endDt, limit, is_channel, is_group, token, chat_ids);
+            //tasks.Add(Search(storedProcedure, request, startDt, endDt, limit, is_channel, is_group, token, chat_ids));
+            //await Task.WhenAny(tasks);
+            //return Task.WhenAll(tasks);
 
             //double days = Math.Round(endDt.Subtract(startDt).TotalDays);
 

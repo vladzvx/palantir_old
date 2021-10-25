@@ -18,7 +18,7 @@ namespace Common.Services.gRPC
         }
         public async override Task Search(SearchRequest request, IServerStreamWriter<SearchResult> responseStream, ServerCallContext context)
         {
-            SearchingTask = await searchProvider.AsyncSearch(request.SearchType, request.Request, request.StartTime.ToDateTime(), request.EndTime.ToDateTime(), request.Limit == 0 ? 1500 : request.Limit, request.IsChannel, request.IsGroup, tokenSource.Token, request.Ids != null && request.Ids.Count > 0 ? request.Ids.ToArray() : null);
+            SearchingTask = searchProvider.AsyncSearch(request.SearchType, request.Request, request.StartTime.ToDateTime(), request.EndTime.ToDateTime(), request.Limit == 0 ? 1500 : request.Limit, request.IsChannel, request.IsGroup, tokenSource.Token, request.Ids != null && request.Ids.Count > 0 ? request.Ids.ToArray() : null);
             bool lastExecutionEnable = true;
             while (!SearchingTask.IsCompleted || lastExecutionEnable)
             {
@@ -26,7 +26,7 @@ namespace Common.Services.gRPC
                 {
                     await responseStream.WriteAsync(res);
                 }
-                await Task.Delay(50);
+                await Task.WhenAny(Task.Delay(30), SearchingTask);
                 if (SearchingTask.IsCompleted && lastExecutionEnable)
                 {
                     lastExecutionEnable = false;
