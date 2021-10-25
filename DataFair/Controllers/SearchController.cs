@@ -26,7 +26,7 @@ namespace DataFair.Controllers
         {
             req.endDT = DateTime.UtcNow;
             req.startDT = DateTime.UtcNow.AddDays(-7);
-            await await searchProvider.AsyncSearch(req.searchType,
+            await searchProvider.AsyncSearch(req.searchType,
                 req.Request, req.startDT, req.endDT, req.Limit, req.isChannel, req.isGroup, token, req.ChatIds);
             return Newtonsoft.Json.JsonConvert.SerializeObject(searchProvider.searchResultReciever.ViewResults());
         }
