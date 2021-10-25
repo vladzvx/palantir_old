@@ -43,6 +43,7 @@ namespace Common.Services.DataBase
                         break;
                     default: return;
                 }
+
                 using (ConnectionWrapper connectionWrapper = await connectionPoolManager.GetConnectionAsync(token))
                 {
                     NpgsqlCommand searchCommand = connectionWrapper.Connection.CreateCommand();
@@ -56,7 +57,7 @@ namespace Common.Services.DataBase
                     searchCommand.Parameters.Add(new NpgsqlParameter("dt2", NpgsqlTypes.NpgsqlDbType.Timestamp));
 
                     searchCommand.Parameters["request"].Value = request;
-                    searchCommand.Parameters["lim"].Value = limit;
+                    searchCommand.Parameters["lim"].Value = 15;
                     searchCommand.Parameters["dt1"].Value = startDt;
                     searchCommand.Parameters["dt2"].Value = endDt;
                     searchCommand.Parameters["_is_group"].Value = is_group;
@@ -68,27 +69,51 @@ namespace Common.Services.DataBase
                         searchCommand.Parameters["ids"].Value = chat_ids;
                     }
 
-                    using NpgsqlDataReader reader = await searchCommand.ExecuteReaderAsync();
-                    //List<SearchResult> results = new List<SearchResult>();
-
-                    while (await reader.ReadAsync())
+                    using (NpgsqlDataReader reader = await searchCommand.ExecuteReaderAsync())
                     {
-                        if (!reader.IsDBNull(0) && !reader.IsDBNull(1))
+                        while (await reader.ReadAsync())
                         {
-                            string name = "";
-                            if (reader.FieldCount >= 3)
+                            if (!reader.IsDBNull(0) && !reader.IsDBNull(1))
                             {
-                                if (!reader.IsDBNull(2))
+                                string name = "";
+                                if (reader.FieldCount >= 3)
                                 {
-                                    name = reader.GetString(2);
+                                    if (!reader.IsDBNull(2))
+                                    {
+                                        name = reader.GetString(2);
+                                    }
                                 }
+                                searchResultReciever.Recieve(new SearchResult()
+                                {
+                                    Link = reader.GetString(0),
+                                    Text = reader.GetString(1),
+                                    Name = name
+                                });
                             }
-                            searchResultReciever.Recieve(new SearchResult()
+                        }
+                    }
+                    searchCommand.Parameters["lim"].Value = limit;
+                    using (NpgsqlDataReader reader = await searchCommand.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            if (!reader.IsDBNull(0) && !reader.IsDBNull(1))
                             {
-                                Link = reader.GetString(0),
-                                Text = reader.GetString(1),
-                                Name = name
-                            }) ;
+                                string name = "";
+                                if (reader.FieldCount >= 3)
+                                {
+                                    if (!reader.IsDBNull(2))
+                                    {
+                                        name = reader.GetString(2);
+                                    }
+                                }
+                                searchResultReciever.Recieve(new SearchResult()
+                                {
+                                    Link = reader.GetString(0),
+                                    Text = reader.GetString(1),
+                                    Name = name
+                                });
+                            }
                         }
                     }
                     //searchResultReciever.IsComplited = true;
@@ -147,7 +172,6 @@ namespace Common.Services.DataBase
             params long[] chat_ids)
         {
             List<Task> tasks = new List<Task>();
-            tasks.Add(Search(storedProcedure, request, startDt, endDt, 15, is_channel, is_group, token, chat_ids));
             tasks.Add(Search(storedProcedure, request, startDt, endDt, limit, is_channel, is_group, token, chat_ids));
             await Task.WhenAny(tasks);
             return Task.WhenAll(tasks);
