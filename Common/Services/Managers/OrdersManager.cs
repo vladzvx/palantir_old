@@ -120,44 +120,44 @@ namespace Common.Services
                 }
                 else
                 {
-                    switch (executingState)
-                    {
-                        case ExecutingState.Started:
-                            {
-                                GoToUpdates();
-                                break;
-                            }
-                        case ExecutingState.UpdatesLoading:
+                    //switch (executingState)
+                    //{
+                    //    case ExecutingState.Started:
+                    //        {
+                    //            GoToUpdates();
+                    //            break;
+                    //        }
+                    //    case ExecutingState.UpdatesLoading:
 
-                            if (isWorkStopped())
-                            {
-                                if (heavyOrdersDone)
-                                {
-                                    GoToHistory();
-                                }
-                                else
-                                {
-                                    GoToHeavy();
-                                }
-                            }
-                            break;
-                        case ExecutingState.HeavyOrdersExecuting:
-                            if (isWorkStopped())
-                            {
-                                heavyOrdersDone = true;
-                                GoToUpdates();
-                            }
-                            break;
-                        case ExecutingState.HistoryLoading:
-                            if (isWorkStopped() || DateTime.UtcNow.Subtract(currentStateStarted).TotalHours > 3)
-                            {
-                                GoToUpdates();
-                            }
-                            break;
-                        default:
-                            break;
+                    //        if (isWorkStopped())
+                    //        {
+                    //            if (heavyOrdersDone)
+                    //            {
+                    //                GoToHistory();
+                    //            }
+                    //            else
+                    //            {
+                    //                GoToHeavy();
+                    //            }
+                    //        }
+                    //        break;
+                    //    case ExecutingState.HeavyOrdersExecuting:
+                    //        if (isWorkStopped())
+                    //        {
+                    //            heavyOrdersDone = true;
+                    //            GoToUpdates();
+                    //        }
+                    //        break;
+                    //    case ExecutingState.HistoryLoading:
+                    //        if (isWorkStopped() || DateTime.UtcNow.Subtract(currentStateStarted).TotalHours > 3)
+                    //        {
+                    //            GoToUpdates();
+                    //        }
+                    //        break;
+                    //    default:
+                    //        break;
 
-                    }
+                    //}
                 }
 
             }

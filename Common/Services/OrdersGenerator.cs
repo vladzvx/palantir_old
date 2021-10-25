@@ -14,10 +14,12 @@ namespace Common.Services
         private readonly State state;
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
         private readonly ConnectionsFactory connectionsFactory;
-        public OrdersGenerator(State state, ConnectionsFactory connectionsFactory)
+        private readonly ISettings settings;
+        public OrdersGenerator(State state, ConnectionsFactory connectionsFactory, ISettings settings)
         {
             this.state = state;
             this.connectionsFactory = connectionsFactory;
+            this.settings = settings;
         }
 
         #region main methods
@@ -133,6 +135,7 @@ namespace Common.Services
                             Link = Username,
                             Offset = Offset,
                             Type = OrderType.History,
+                            repeatInterval = settings.UpdatesCheckingPeriod
                         };
                         foreach (string finder in Finders)
                         {

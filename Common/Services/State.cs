@@ -182,8 +182,17 @@ namespace Common.Services
                             if (order.TryGet())
                             {
                                 TryIncrementCounter(req.Finder);
+                                //TargetedOrders[req.Finder].Enqueue(order);
                                 return true;
                             }
+                        }
+                    }
+                    else if (order.Type==OrderType.History && order.repeatInterval!=null)
+                    {
+                        if (order.TryGet())
+                        {
+                            TargetedOrders[req.Finder].Enqueue(order);
+                            return true;
                         }
                     }
                     else

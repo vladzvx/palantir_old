@@ -1,13 +1,27 @@
-﻿namespace Common
+﻿using System;
+
+namespace Common
 {
     public partial class Order
     {
+        public TimeSpan? repeatInterval { get; init; } = null;
+        private DateTime dateTime = DateTime.UtcNow.AddMinutes(-30);
         public readonly static Order empty = new Order() { Type = OrderType.Empty };
         private readonly object locker = new object();
         public bool TryGet()
         {
             lock (locker)
             {
+                if (repeatInterval != null)
+                {
+                    bool res = DateTime.UtcNow.Subtract(dateTime) > repeatInterval;
+                    if (res)
+                    {
+                        dateTime = DateTime.UtcNow;
+                        return res;
+                    }
+                    return res;
+                }
                 if (stat == Status.Created)
                 {
                     stat = Status.Getted;
