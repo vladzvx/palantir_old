@@ -60,6 +60,7 @@ namespace Common.Services
         private void MainWork(object cancellationToken)
         {
             state.ordersManager = this;
+            GoToUpdates();
             if (cancellationToken is CancellationToken token)
             {
                 while (!token.IsCancellationRequested)
