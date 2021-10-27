@@ -2,6 +2,6 @@
 {
     public interface ILimits
     {
-        public int MaxOrdersNumber => 70;
+        public int MaxOrdersNumber => 150;
     }
 }

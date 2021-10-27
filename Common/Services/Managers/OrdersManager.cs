@@ -72,13 +72,13 @@ namespace Common.Services
             }
         }
 
-        private bool isWorkStopped()
-        {
-            int ordersCountOld = ordersCount;
-            ordersCount = state.CountOrders() + state.CountTargetOrders();
-            bool t = ordersCountOld == ordersCount;
-            return t;
-        }
+        //private bool isWorkStopped()
+        //{
+        //    int ordersCountOld = ordersCount;
+        //    ordersCount = state.CountOrders() + state.CountTargetOrders();
+        //    bool t = ordersCountOld == ordersCount;
+        //    return t;
+        //}
 
         private void GoToUpdates()
         {
@@ -89,24 +89,24 @@ namespace Common.Services
             executingState = ExecutingState.UpdatesLoading;
         }
 
-        private void GoToHistory()
-        {
-            currentStateStarted = DateTime.UtcNow;
-            executingState = ExecutingState.OrdersCreation;
-            state.ClearOrders();
-            ordersGenerator.CreateGetHistoryOrders(CancellationToken.None).Wait();
-            executingState = ExecutingState.HistoryLoading;
-        }
+        //private void GoToHistory()
+        //{
+        //    currentStateStarted = DateTime.UtcNow;
+        //    executingState = ExecutingState.OrdersCreation;
+        //    state.ClearOrders();
+        //    ordersGenerator.CreateGetHistoryOrders(CancellationToken.None).Wait();
+        //    executingState = ExecutingState.HistoryLoading;
+        //}
 
-        private void GoToHeavy()
-        {
-            currentStateStarted = DateTime.UtcNow;
-            state.ClearOrders();
-            executingState = ExecutingState.OrdersCreation;
-            ordersGenerator.CreateGetNewGroupsOrders(CancellationToken.None).Wait();
-            ordersGenerator.CreateGetConsistenceSupportingOrders(CancellationToken.None).Wait();
-            executingState = ExecutingState.HeavyOrdersExecuting;
-        }
+        //private void GoToHeavy()
+        //{
+        //    currentStateStarted = DateTime.UtcNow;
+        //    state.ClearOrders();
+        //    executingState = ExecutingState.OrdersCreation;
+        //    ordersGenerator.CreateGetNewGroupsOrders(CancellationToken.None).Wait();
+        //    ordersGenerator.CreateGetConsistenceSupportingOrders(CancellationToken.None).Wait();
+        //    executingState = ExecutingState.HeavyOrdersExecuting;
+        //}
 
         private void TrySwitchStatus()
         {

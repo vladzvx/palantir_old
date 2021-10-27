@@ -1,5 +1,6 @@
 ﻿using Common.Services.DataBase.Interfaces;
 using System.Collections.Concurrent;
+using System.Security.Cryptography;
 
 namespace Common.Services
 {
@@ -14,6 +15,7 @@ namespace Common.Services
             this.loadManager = loadManager;
             this.limits = limits;
         }
+        private readonly RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
         public OrdersManager ordersManager;
         private readonly ILoadManager loadManager;
         private readonly ILimits limits;
@@ -23,6 +25,7 @@ namespace Common.Services
         public ConcurrentQueue<Order> MaxPriorityOrders = new ConcurrentQueue<Order>();
         public ConcurrentQueue<Order> MiddlePriorityOrders = new ConcurrentQueue<Order>();
         public ConcurrentQueue<Order> Orders = new ConcurrentQueue<Order>();
+        public ConcurrentQueue<Order> ConsistanceOrders = new ConcurrentQueue<Order>();
         public ConcurrentDictionary<string, ConcurrentQueue<Order>> TargetedOrders = new ConcurrentDictionary<string, ConcurrentQueue<Order>>();
         public ConcurrentDictionary<long, Order> OrdersOnExecution = new ConcurrentDictionary<long, Order>();
         public ConcurrentDictionary<string, ConcurrentQueue<Order>> TargetedOrdersHistory = new ConcurrentDictionary<string, ConcurrentQueue<Order>>();
@@ -134,64 +137,42 @@ namespace Common.Services
             }
             order = empty;
 
-            if (!req.Banned)
-            {
-                if (!CheckCounter(req.Finder))
-                {
-                    order = sleep;
-                    return true;
-                }
+            
+            byte[] rndm = new byte[1];
+            rng.GetBytes(rndm);
 
-                while (MaxPriorityOrders.TryDequeue(out Order temp))
+            if (rndm[0] < 30)
+            {
+                if (CheckCounter(req.Finder))
                 {
-                    if (temp.TryGet())
+                    byte[] rndm2 = new byte[1];
+                    rng.GetBytes(rndm2);
+                    int count = 0;
+                    while(ConsistanceOrders.TryDequeue(out var orderTemp) && count< ConsistanceOrders.Count)
                     {
-                        TryIncrementCounter(req.Finder);
-                        order = temp;
-                        return true;
+                        if (!orderTemp.Finders.Contains(req.Finder)&& orderTemp.TryGet())
+                        {
+                            order = orderTemp;
+                            TryIncrementCounter(req.Finder);
+                            return true;
+                        }
+                        else
+                        {
+                            ConsistanceOrders.Enqueue(orderTemp);
+                        }
+                        count++;
                     }
                 }
-                while (MiddlePriorityOrders.TryDequeue(out Order temp))
+                else
                 {
-                    if (temp.TryGet())
-                    {
-                        TryIncrementCounter(req.Finder);
-                        order = temp;
-                        return true;
-                    }
-                }
-                while (Orders.TryDequeue(out Order temp))
-                {
-                    if (temp.TryGet())
-                    {
-                        TryIncrementCounter(req.Finder);
-                        order = temp;
-                        return true;
-                    }
+
                 }
             }
-
             if (!string.IsNullOrEmpty(req.Finder))
             {
                 while (TargetedOrders.ContainsKey(req.Finder) && TargetedOrders[req.Finder].TryDequeue(out order))
                 {
-                    if (order.Type == OrderType.Pair || order.Type == OrderType.GetFullChannel)
-                    {
-                        if (!CheckCounter(req.Finder))
-                        {
-                            continue;
-                        }
-                        else
-                        {
-                            if (order.TryGet())
-                            {
-                                TryIncrementCounter(req.Finder);
-                                //TargetedOrders[req.Finder].Enqueue(order);
-                                return true;
-                            }
-                        }
-                    }
-                    else if (order.Type==OrderType.History && order.repeatInterval!=null)
+                    if (order.Type == OrderType.History && order.repeatInterval != null)
                     {
                         if (order.TryGet())
                         {
@@ -200,16 +181,71 @@ namespace Common.Services
                             return true;
                         }
                     }
-                    else
+                    else if (order.Type == OrderType.History)
                     {
                         if (order.TryGet())
                         {
                             return true;
                         }
                     }
+                    //if (order.Type == OrderType.Pair || order.Type == OrderType.GetFullChannel)
+                    //{
+                    //    if (!CheckCounter(req.Finder))
+                    //    {
+                    //        continue;
+                    //    }
+                    //    else
+                    //    {
+                    //        if (order.TryGet())
+                    //        {
+                    //            TryIncrementCounter(req.Finder);
+                    //            //TargetedOrders[req.Finder].Enqueue(order);
+                    //            return true;
+                    //        }
+                    //    }
+                    //}
                 }
             }
             return false;
+
+            //if (!req.Banned)
+            //{
+            //    if (!CheckCounter(req.Finder))
+            //    {
+            //        order = sleep;
+            //        return true;
+            //    }
+
+            //    while (MaxPriorityOrders.TryDequeue(out Order temp))
+            //    {
+            //        if (temp.TryGet())
+            //        {
+            //            TryIncrementCounter(req.Finder);
+            //            order = temp;
+            //            return true;
+            //        }
+            //    }
+            //    while (MiddlePriorityOrders.TryDequeue(out Order temp))
+            //    {
+            //        if (temp.TryGet())
+            //        {
+            //            TryIncrementCounter(req.Finder);
+            //            order = temp;
+            //            return true;
+            //        }
+            //    }
+            //    while (Orders.TryDequeue(out Order temp))
+            //    {
+            //        if (temp.TryGet())
+            //        {
+            //            TryIncrementCounter(req.Finder);
+            //            order = temp;
+            //            return true;
+            //        }
+            //    }
+            //}
+
+
         }
     }
 }

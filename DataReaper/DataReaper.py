@@ -290,7 +290,12 @@ class TgDataGetter():
 		global last_expensive_operation_time
 		try:
 			logging.debug("Trying get chat (channel) entity by id...")
-			entity = await client.get_entity(order.Id)
+			try:
+				entity = await client.get_entity(order.Id)
+			except TypeError as e2:
+				time.sleep(3);
+				entity = await client.get_entity(order.Id)
+
 		except ValueError as e:
 			if "Could not find the input entity for" in e.args[0]:
 				logging.debug("Failed.")
@@ -331,6 +336,8 @@ class TgDataGetter():
 			else:
 				logging.warn("Unexpected exception! "+e.args[0])
 				raise e;
+		except TypeError as e2:
+			ddddd=0
 			
 		limit_msg=80
 		old_offset = offset;
@@ -441,6 +448,7 @@ class TgDataGetter():
 			temp_entity = await self._get_full_channel(order)
 			if temp_entity is not None:
 				stub.PostEntity(temp_entity)
+				time.sleep(3)
 			#entity1 = await client.get_entity(order.Id)
 			#entity2 = await client.get_entity(order.PairId)
 
@@ -455,6 +463,8 @@ class TgDataGetter():
 		order.Type = 5;
 		order.Finders.append(phone)
 		stub.PostOrder(order);
+		if order.PairId ==0:
+			return;
 		try:
 			entity2 = await client.get_entity(order.PairId)
 			await self._get_history(order2)
