@@ -1,13 +1,20 @@
 ﻿using Common.Services.DataBase;
 using Common.Services.Interfaces;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace Common.Services
 {
+    public class CollectorReport
+    {
+        public string Phone { get; set; }
+        public string Group { get; set; }
+    }
     public class StateReport
     {
-        public int Collectors;
+        public int CollectorsCount;
+        public List<CollectorReport> Collectors = new List<CollectorReport>();
         public int SessionsAvaliable;
         public int Orders;
         public int MaxPriorityOrders;
@@ -24,8 +31,13 @@ namespace Common.Services
             {
                 if (state.Collectors.TryGetValue(key, out var val))
                 {
-                    Collectors += val.Count;
+                    CollectorsCount += val.Count;
+                    foreach (var coll in val)
+                    {
+                        Collectors.Add(new CollectorReport() {Phone= coll.Phone,Group=key } );
+                    }
                 }
+
             }
             SessionsAvaliable = state.SessionStorages.Count;
             Messages = commonWriter.GetQueueCount();
