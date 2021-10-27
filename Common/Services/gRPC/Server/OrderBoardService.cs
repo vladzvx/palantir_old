@@ -4,6 +4,7 @@ using Common.Services.Interfaces;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -148,6 +149,10 @@ namespace Common.Services.gRPC
                 }
                 else if (order.Type == OrderType.Executed)
                 {
+                    if (ordersStorage.OrdersOnExecution.TryRemove(order.Id,out var ord))
+                    {
+                        ord.SetOffset(order.Offset, order.PairOffset);
+                    }
                     await entitiesWriter.ExecuteAdditionalAction(order);
                 }
                 else

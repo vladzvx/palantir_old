@@ -24,6 +24,9 @@ namespace Common.Services
         public ConcurrentQueue<Order> MiddlePriorityOrders = new ConcurrentQueue<Order>();
         public ConcurrentQueue<Order> Orders = new ConcurrentQueue<Order>();
         public ConcurrentDictionary<string, ConcurrentQueue<Order>> TargetedOrders = new ConcurrentDictionary<string, ConcurrentQueue<Order>>();
+        public ConcurrentDictionary<long, Order> OrdersOnExecution = new ConcurrentDictionary<long, Order>();
+        public ConcurrentDictionary<string, ConcurrentQueue<Order>> TargetedOrdersHistory = new ConcurrentDictionary<string, ConcurrentQueue<Order>>();
+        public ConcurrentDictionary<string, ConcurrentQueue<Order>> TargetedOrdersNewChannels = new ConcurrentDictionary<string, ConcurrentQueue<Order>>();
         public ConcurrentDictionary<string, int> HeavyOrdersCount = new ConcurrentDictionary<string, int>();
         public ConcurrentBag<SessionSettings> SessionStorages = new ConcurrentBag<SessionSettings>();
         public ConcurrentDictionary<string, ConcurrentBag<Common.Collector>> Collectors = new ConcurrentDictionary<string, ConcurrentBag<Collector>>();
@@ -33,6 +36,7 @@ namespace Common.Services
         public ConcurrentDictionary<string, CounterWrapper> ExecutingOrdersJournal = new ConcurrentDictionary<string, CounterWrapper>();
         public void ClearOrders()
         {
+            OrdersOnExecution.Clear();
             Orders.Clear();
             MiddlePriorityOrders.Clear();
             MaxPriorityOrders.Clear();
@@ -191,6 +195,7 @@ namespace Common.Services
                     {
                         if (order.TryGet())
                         {
+                            OrdersOnExecution.TryAdd(order.Id, order);
                             TargetedOrders[req.Finder].Enqueue(order);
                             return true;
                         }

@@ -6,6 +6,14 @@ import "google/protobuf/timestamp.proto";
 
 package orders;
 
+service Subscribtion {
+  rpc SubscribeForMessages (SubscribtionRequest) returns (stream Message);
+}
+
+message SubscribtionRequest{
+	int32 Limit = 1;
+}
+
 service OrderBoard {
   rpc GetOrder (OrderRequest) returns (Order);
   rpc GetOrder2 (OrderRequest) returns (Order);

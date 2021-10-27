@@ -8,6 +8,15 @@ namespace Common
         private DateTime dateTime = DateTime.UtcNow.AddMinutes(-30);
         public readonly static Order empty = new Order() { Type = OrderType.Empty };
         private readonly object locker = new object();
+
+        public void SetOffset(long offset, long pairOffset)
+        {
+            lock (locker)
+            {
+                this.Offset = offset;
+                this.PairOffset = pairOffset;
+            }
+        }
         public bool TryGet()
         {
             lock (locker)

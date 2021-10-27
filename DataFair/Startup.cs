@@ -5,6 +5,7 @@ using Common.Services.DataBase.DataProcessing;
 using Common.Services.DataBase.Interfaces;
 using Common.Services.DataBase.Reading;
 using Common.Services.gRPC;
+using Common.Services.gRPC.Subscribtions;
 using Common.Services.Interfaces;
 using Common.Services.Managers;
 using DataFair.Services;
@@ -74,6 +75,7 @@ namespace DataFair
             {
                 endpoints.MapGrpcService<OrderBoardService>();
                 endpoints.MapGrpcService<ConfiguratorService>();
+                endpoints.MapGrpcService<SubscribtionService>();
                 endpoints.MapGrpcService<SearchService>();
 
                 endpoints.MapControllers();
