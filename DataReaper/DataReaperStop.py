@@ -491,6 +491,6 @@ for cfg in config_stub.GetConfiguration(emp):
 	getter = TgDataGetter(config.CollectorParams.SessionName, config.CollectorParams.ApiId, 
 						  config.CollectorParams.ApiHash,
 						  config.CollectorParams.Phone,connection_string)                          
-
+	#getter.start();
 	time.sleep(3600);
 	
