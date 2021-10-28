@@ -67,7 +67,7 @@ namespace Common.Services
                 {
                     TrySwitchStatus();
                     var temp = settings.OrdersManagerCheckingPeriod;
-                    Thread.Sleep(temp);
+                    Thread.Sleep(settings.OrdersManagerCheckingPeriod);
                 }
             }
         }
@@ -86,6 +86,7 @@ namespace Common.Services
             executingState = ExecutingState.OrdersCreation;
             state.ClearOrders();
             ordersGenerator.CreateUpdatesOrders(CancellationToken.None).Wait();
+            ordersGenerator.CreateGetNewGroupsOrders(CancellationToken.None).Wait();
             executingState = ExecutingState.UpdatesLoading;
         }
 

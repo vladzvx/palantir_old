@@ -29,6 +29,8 @@ namespace Common.Services
             await CreateSingleUpdatesOrders(token);
             await SetCreateSingleUpdatesOrdersStatus(token);
             await CreatePairRequestsForConsistence(token);
+            await CreatePairForRequestsOrders(token);
+            await SetOrderGeneratedStatusRequest(CancellationToken.None);
         }
         public async Task CreateGetNewGroupsOrders(CancellationToken token)
         {

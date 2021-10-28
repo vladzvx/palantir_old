@@ -141,27 +141,40 @@ namespace Common.Services
             byte[] rndm = new byte[1];
             rng.GetBytes(rndm);
 
-            if (rndm[0] < 30)
+            if (rndm[0] < 85)
             {
                 if (CheckCounter(req.Finder))
                 {
                     byte[] rndm2 = new byte[1];
                     rng.GetBytes(rndm2);
-                    int count = 0;
-                    while(ConsistanceOrders.TryDequeue(out var orderTemp) && count< ConsistanceOrders.Count)
+                    if (rndm2[0]<200)
                     {
-                        if (!orderTemp.Finders.Contains(req.Finder)&& orderTemp.TryGet())
+                        int count = 0;
+                        while (ConsistanceOrders.TryDequeue(out var orderTemp) && count < ConsistanceOrders.Count)
+                        {
+                            if (!orderTemp.Finders.Contains(req.Finder) && orderTemp.TryGet())
+                            {
+                                order = orderTemp;
+                                TryIncrementCounter(req.Finder);
+                                return true;
+                            }
+                            else
+                            {
+                                ConsistanceOrders.Enqueue(orderTemp);
+                            }
+                            count++;
+                        }
+                    }
+                    else
+                    {
+                        if (Orders.TryDequeue(out var orderTemp))
                         {
                             order = orderTemp;
                             TryIncrementCounter(req.Finder);
                             return true;
                         }
-                        else
-                        {
-                            ConsistanceOrders.Enqueue(orderTemp);
-                        }
-                        count++;
                     }
+                    
                 }
                 else
                 {
