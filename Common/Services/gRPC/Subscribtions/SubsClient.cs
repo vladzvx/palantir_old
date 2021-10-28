@@ -1,0 +1,69 @@
+﻿using Common.Services.Interfaces;
+using Grpc.Core;
+using Grpc.Net.Client;
+using Microsoft.Extensions.Hosting;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Common.Services.gRPC.Subscribtions
+{
+    public class NotificationRecipient : IHostedService
+    {
+        private readonly IGrpcSettings grpcSettings;
+        private GrpcChannel Channel;
+        private Subscribtion.SubscribtionClient Client;
+        private AsyncServerStreamingCall<Message> call;
+        private Task subscribtionTask;
+        private Task reconnectionTask;
+        public NotificationRecipient(IGrpcSettings grpcSettings)
+        {
+            this.grpcSettings = grpcSettings;
+        }
+
+        public async Task Subscribe()
+        {
+            try
+            {
+                call = Client.SubscribeForMessages(new SubscribtionRequest() { });
+                while (await call.ResponseStream.MoveNext())
+                {
+                    Message mess = call.ResponseStream.Current;
+                    Console.WriteLine(string.Format("New Message! " +
+                        "ChatId: {0}; MessageId: {1}; Text: {2};", mess.ChatId, mess.Id, mess.Text));
+                }
+            }
+            catch (Grpc.Core.RpcException)
+            {
+                call.Dispose();
+            }
+
+        }
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            Channel = GrpcChannel.ForAddress(grpcSettings.Url);
+            Client = new Subscribtion.SubscribtionClient(Channel);
+            subscribtionTask = Subscribe();
+            reconnectionTask = Task.Factory.StartNew(async () => 
+            {
+                while (true)
+                {
+                    await subscribtionTask;
+                    await Task.Delay(5000);
+                    subscribtionTask = Subscribe();
+                }
+            });
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            Channel.Dispose();
+            //throw new NotImplementedException();
+            return Task.CompletedTask;
+        }
+    }
+}

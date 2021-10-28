@@ -1,5 +1,6 @@
 using Common.Models;
 using Common.Services.DataBase.Interfaces;
+using Common.Services.gRPC.Subscribtions;
 using Common.Services.Interfaces;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
@@ -60,6 +61,7 @@ namespace Common.Services.gRPC
                 while (await requestStream.MoveNext())
                 {
                     messagesWriter.PutData(requestStream.Current);
+                    SubscribtionService.PutData(requestStream.Current);
                     //await loadManager.WaitIfNeed();
                     if (requestStream.Current.Id > maxId)
                     {
