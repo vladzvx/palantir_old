@@ -141,7 +141,7 @@ namespace Common.Services
             byte[] rndm = new byte[1];
             rng.GetBytes(rndm);
 
-            if (rndm[0] < 85)
+            if (rndm[0] < 26)
             {
                 if (CheckCounter(req.Finder))
                 {
