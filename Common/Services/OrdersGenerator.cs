@@ -175,8 +175,8 @@ namespace Common.Services
                 using (ConnectionWrapper connection = await connectionsFactory.GetConnectionAsync(token))
                 {
                     using NpgsqlCommand command = connection.Connection.CreateCommand();
-                    command.CommandType = System.Data.CommandType.Text;
-                    command.CommandText = "select chats.id,chats.username,chats.last_message_id,chats.finders,cpair.id,cpair.last_message_id,cpair.username from chats left join chats cpair on chats.id = cpair.pair_id where chats.is_channel and chats.pair_id_checked and(array_length(chats.finders,1) is null) and not chats.banned and chats.pair_id is not null;";
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    command.CommandText = "get_data_for_consistency";
                     using NpgsqlDataReader reader = await command.ExecuteReaderAsync(token);
                     while (!token.IsCancellationRequested && await reader.ReadAsync(token))
                     {

@@ -862,7 +862,13 @@ drop trigger after_messages_insert on public.messages ;
 CREATE TRIGGER after_messages_insert after INSERT on public.messages FOR EACH ROW execute PROCEDURE after_messages();
 
 
-
+create or replace function get_data_for_consistency() returns table (ch_id bigint ,ch_username text,lat_m bigint,ch_finders text[],ch_p_id bigint,ch_p_last bigint,p_username text) as
+$$
+    begin
+        return query select chats.id,chats.username,chats.last_message_id,chats.finders,cpair.id,cpair.last_message_id,cpair.username from chats left join chats cpair on
+    chats.id=cpair.pair_id where chats.is_channel and chats.pair_id_checked and (array_length(chats.finders,1) is null) and not chats.banned;
+    end;
+$$ LANGUAGE plpgsql;
 
 
 
