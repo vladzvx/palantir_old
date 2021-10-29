@@ -5,25 +5,9 @@ on:
     branches: [ main ]
 
 jobs:
-  server-prepairing:
-    runs-on: ubuntu-18.04
-    steps:
-    - name: Killing an deleting old service
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.MAIN_HOST }}
-        username: ${{ secrets.MAIN_USERNAME }}
-        key : ${{ secrets.MAIN_SSH_KEY }}
-        passphrase: ${{ secrets.MAIN_PWD}}
-        port: ${{ secrets.MAIN_PORT }}
-        script: |
-          sudo systemctl stop DataFair
-          cd /bin
-          sudo rm -r -f /bin/DataFair
-          
+         
           
   build-and-deploy:
-    needs: server-prepairing
     runs-on: ubuntu-18.04
 
     steps:
@@ -49,26 +33,7 @@ jobs:
         passphrase: ${{ secrets.MAIN_PWD}}
         port: ${{ secrets.MAIN_PORT }}
         source: "./output"
-        target: "/bin/DataFair/"
-    - name: server prepairing
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.MAIN_HOST }}
-        username: ${{ secrets.MAIN_USERNAME }}
-        key : ${{ secrets.MAIN_SSH_KEY }}
-        passphrase: ${{ secrets.MAIN_PWD}}
-        port: ${{ secrets.MAIN_PORT }}
-        script: |
-          sudo mv /bin/DataFair/output/DataFair.service /etc/systemd/system/DataFair.service
-          sudo mv /bin/DataFair/output/* /bin/DataFair/
-          sudo rm /bin/DataFair/output/ -r
-          sudo chmod u+x /bin/DataFair/DataFair
-          sudo echo 'User ID=postgres;Password=${{ secrets.MAIN_PG_PWD }};Host=localhost;Port=5432;Database=test_db;Pooling=false;Timeout=30;CommandTimeout=120;Maximum Pool Size=1400;'>>/bin/DataFair/settings.txt
-          sudo systemctl daemon-reload
-          sudo systemctl enable DataFair
-          sudo systemctl start DataFair
-      
-        
+        target: "/bin/DataFair2/"
         
       
 
