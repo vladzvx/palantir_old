@@ -49,17 +49,17 @@ namespace Common.Services.gRPC.Subscribtions
         {
             Channel = GrpcChannel.ForAddress(grpcSettings.Url);
             Client = new Subscribtion.SubscribtionClient(Channel);
-            await Subscribe();
-            //subscribtionTask =  Subscribe();
-            //reconnectionTask = Task.Factory.StartNew(async () => 
-            //{
-            //    while (true)
-            //    {
-            //        await subscribtionTask;
-            //        await Task.Delay(5000);
-            //        subscribtionTask = Subscribe();
-            //    }
-            //});
+            //await Subscribe();
+            subscribtionTask = Subscribe();
+            reconnectionTask = Task.Factory.StartNew(async () =>
+            {
+                while (true)
+                {
+                    await subscribtionTask;
+                    await Task.Delay(5000);
+                    subscribtionTask = Subscribe();
+                }
+            });
             //return Task.CompletedTask;
         }
 

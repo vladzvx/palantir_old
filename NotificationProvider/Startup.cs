@@ -27,7 +27,7 @@ namespace NotificationProvider
             services.AddSingleton<ICommonWriter<Message>, CommonWriter<Message>>();
             services.AddTransient<IDataBaseSettings, NotificationProvider.Services.DataBaseSetting>();
             services.AddSingleton<ConnectionsFactory>();
-            //services.AddHostedService<NotificationReciever>();
+            services.AddHostedService<NotificationReciever>();
             services.AddHostedService<GrpcDataReciever>();
             services.AddTransient<IGrpcSettings, GrpcSettings>();
         }
