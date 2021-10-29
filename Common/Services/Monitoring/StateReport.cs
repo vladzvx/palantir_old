@@ -1,5 +1,6 @@
 ﻿using Common.Services.DataBase;
 using Common.Services.Interfaces;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,6 +18,7 @@ namespace Common.Services
         public List<CollectorReport> Collectors = new List<CollectorReport>();
         public int SessionsAvaliable;
         public int Orders;
+        public int ConsistanceOrders;
         public int MaxPriorityOrders;
         public int MiddlePriorityOrders;
         public int TargetOrders;
@@ -25,8 +27,10 @@ namespace Common.Services
         public int ConnectionsHotReserve;
         public long FreeDisk;
         public string OrderManagerState;
+        public ConcurrentDictionary<string, CounterWrapper> ExecutingOrdersJournal;
         public StateReport(State state, ICommonWriter<Message> commonWriter, ICommonWriter<Entity> commonWriter2, ConnectionsFactory connectionsFactory)
         {
+            ConsistanceOrders = state.ConsistanceOrders.Count;
             foreach (string key in state.Collectors.Keys.ToArray())
             {
                 if (state.Collectors.TryGetValue(key, out var val))
@@ -43,7 +47,7 @@ namespace Common.Services
             Messages = commonWriter.GetQueueCount();
             TotalConnections = connectionsFactory.TotalConnections;
             ConnectionsHotReserve = connectionsFactory.HotReserve;
-
+            ExecutingOrdersJournal = state.ExecutingOrdersJournal;
 
             OrderManagerState = state.ordersManager.executingState.ToString();
             Orders = state.CountOrders();
