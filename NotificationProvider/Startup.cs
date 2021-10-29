@@ -1,3 +1,7 @@
+using Common;
+using Common.Services;
+using Common.Services.DataBase;
+using Common.Services.DataBase.Interfaces;
 using Common.Services.gRPC.Subscribtions;
 using Common.Services.Interfaces;
 using Microsoft.AspNetCore.Builder;
@@ -9,6 +13,7 @@ using NotificationProvider.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace NotificationProvider
@@ -17,7 +22,13 @@ namespace NotificationProvider
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddHostedService<NotificationRecipient>();
+            services.AddSingleton<CancellationTokenSource>();
+            services.AddTransient<IWriterCore<Message>, MessagesWriterCore>();
+            services.AddSingleton<ICommonWriter<Message>, CommonWriter<Message>>();
+            services.AddTransient<IDataBaseSettings, NotificationProvider.Services.DataBaseSetting>();
+            services.AddSingleton<ConnectionsFactory>();
+            //services.AddHostedService<NotificationReciever>();
+            services.AddHostedService<GrpcDataReciever>();
             services.AddTransient<IGrpcSettings, GrpcSettings>();
         }
 

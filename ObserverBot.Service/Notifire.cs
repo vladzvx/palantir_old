@@ -26,14 +26,14 @@ namespace ObserverBot.Service
         private readonly ConnectionsFactory connectionsFactory;
         public Notifire(IMessagesSender messagesSender)
         {
-            DataBaseSettingsObserver settings = new DataBaseSettingsObserver();
+            //DataBaseSettingsObserver settings = new DataBaseSettingsObserver();
             this.messagesSender = messagesSender;
-            connectionsFactory = new ConnectionsFactory(settings);
+            //connectionsFactory = new ConnectionsFactory(settings);
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            await Bot.Core.Services.Bot.FSM.Factory.Load(TextMessage.defaultClient);
+            //await Bot.Core.Services.Bot.FSM.Factory.Load(TextMessage.defaultClient);
             var connectionWr= await connectionsFactory.GetConnectionAsync(CancellationToken.None);
             var connection = connectionWr.Connection;
             DbCommand dbCommand = connection.CreateCommand();

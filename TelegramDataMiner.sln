@@ -23,9 +23,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bot.Tests", "Bot.Tests\Bot.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SearchLoader", "SearchLoader\SearchLoader.csproj", "{277F49D0-4B3D-43BE-AD3F-3E27F6D709A9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotificationProvider", "NotificationProvider\NotificationProvider.csproj", "{3F01C95C-8C66-4398-9722-30E81FC33249}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NotificationProvider", "NotificationProvider\NotificationProvider.csproj", "{3F01C95C-8C66-4398-9722-30E81FC33249}"
 EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "Notofications-compose", "Notofications-compose.dcproj", "{2CC00E64-0125-40F4-8DEA-D39AB03E9A58}"
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{2CC00E64-0125-40F4-8DEA-D39AB03E9A58}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{3F0F2F3A-6429-42B3-840E-57EEB8A10E71}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataFairDB", "DataFairDB", "{9271B3F3-FB06-408D-9327-0B37E61449AD}"
+	ProjectSection(SolutionItems) = preProject
+		Infrastructure\DataFairDB\Dockerfile = Infrastructure\DataFairDB\Dockerfile
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,6 +90,7 @@ Global
 		{70E95916-55E5-4A49-8EB1-1411B9DE4414} = {6EB128D7-111A-4F64-9565-8E621328ABA7}
 		{1896C06D-FF5A-4452-B13C-62D55A6129ED} = {6EB128D7-111A-4F64-9565-8E621328ABA7}
 		{E73B1302-BE95-415C-B313-AA2C35D099FE} = {6EB128D7-111A-4F64-9565-8E621328ABA7}
+		{9271B3F3-FB06-408D-9327-0B37E61449AD} = {3F0F2F3A-6429-42B3-840E-57EEB8A10E71}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B956A809-B37D-42F3-A218-EFA36CBFAFFD}

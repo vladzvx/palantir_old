@@ -1,9 +1,3 @@
-create database test_db;
-create database sessions;
-
-drop database if exists test_db;
-select count(message_db_id) from messages;
-
 create table public.chats (
     id bigint,
     adding_time timestamp default CURRENT_TIMESTAMP,
@@ -20,6 +14,7 @@ create table public.chats (
     pair_id bigint default null,
     pair_id_checked bool default null,
 	banned bool default false,
+	finders text[],
     primary key (id)
 );
 
@@ -51,15 +46,15 @@ create table public.messages(
     formatting jsonb,
     media_costyl text,
     formatting_costyl text,
-    primary key (message_timestamp, chat_id, id),
+    primary key (message_timestamp, chat_id, id)
 )  PARTITION BY RANGE (message_timestamp);
 
 create table chats_buffer(
     id bigint,
-    getting_last_message_timestamp timestamp, 
+    getting_last_message_timestamp timestamp,
     last_message_id bigint,
     primary key (id)
-)
+);
 
 create index messages_db_id ON messages (message_db_id);
 
@@ -531,11 +526,7 @@ $$
     end;
 $$ LANGUAGE plpgsql;
 
-
-
 create extension rum;
-create extension rusmorph;
-create extension hunspell_ru_ru_aot;
 
 
 create table temp(
@@ -548,13 +539,7 @@ CREATE TEXT SEARCH CONFIGURATION public.my_default ( COPY = pg_catalog.russian )
 ALTER TEXT SEARCH CONFIGURATION public.my_default
     DROP MAPPING FOR email, url,host, url_path, sfloat, float, int,uint;
 
-CREATE TEXT SEARCH CONFIGURATION public.combo ( COPY = pg_catalog.russian );
-alter text search configuration public.combo alter mapping for word with rusmorph, russian_aot_hunspell;
-ALTER TEXT SEARCH CONFIGURATION public.combo
-    DROP MAPPING FOR email, url,host, url_path, sfloat, float, int,uint;
-
 alter table messages add column parsed bool default true;
-alter table messages add column vectorised_text_combo tsvector;
 alter table messages add column vectorised_text_my_default tsvector;
 
 
@@ -569,8 +554,7 @@ $$
     begin
         min_id = (select min(data1) from temp where id=0);
         value=min_id+count;
-        update messages set vectorised_text_combo=parse_combo(replace(text)),
-                            vectorised_text_my_default=parse_default(replace(text)),
+        update messages set vectorised_text_my_default=parse_default(replace(text)),
                             parsed=true where not parsed and message_db_id>=min_id and message_db_id<value;
         value2 = (select max(message_db_id) from  messages);
         result = true;
@@ -583,18 +567,6 @@ $$
     end;
 $$ LANGUAGE plpgsql;
 
-
-CREATE OR REPLACE FUNCTION force_parse() RETURNS void as
-$$
-    declare
-        min_id bigint;
-    begin
-        min_id = (select min(data1) from temp where id=0);
-        update messages set vectorised_text_combo='', vectorised_text_my_default=parse_default(replace(text)),
-                            parsed=true where not parsed and message_db_id=min_id;
-        update temp set data1=min_id+1 where id=0;
-    end;
-$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION parse_combo(text text) RETURNS tsvector as
@@ -691,8 +663,6 @@ $$
     end;
 $$LANGUAGE plpgsql;
 
-alter table chats add column finders text[]
-
 
 create or replace function search_name_period(request text,dt1 timestamp,dt2 timestamp, lim int, _is_group bool, _is_channel bool) returns table (url text, te text, name text) as
 $$
@@ -716,43 +686,6 @@ $$
     end;
 $$ LANGUAGE plpgsql;
 
-create or replace function search_period(request text,dt1 timestamp,dt2 timestamp, lim int, _is_group bool, _is_channel bool) returns table (url text, te text) as
-$$
-    declare
-        query tsquery;
-    begin
-        query=to_tsquery('combo',replace(request))::tsquery;
-        if (_is_group and _is_channel) then
-            return query
-                with sel as(
-                SELECT username, chat_id, messages.id as id, messages.text as te,(vectorised_text_combo <=> query)::float4 as rank from messages inner join chats c on c.id = messages.chat_id
-            WHERE query @@ vectorised_text_combo and message_timestamp>=dt1 and message_timestamp<dt2 order by rank
-            LIMIT lim) select ('https://t.me/'||COALESCE(sel.username,'c/'||(sel.chat_id::text))||'/'||sel.id)::text, sel.te from sel;
-        else
-            return query
-            with sel as(
-                SELECT username, chat_id, messages.id as id, messages.text as te,(vectorised_text_combo <=> query)::float4 as rank  from messages inner join chats c on c.id = messages.chat_id
-            WHERE query @@ vectorised_text_combo and message_timestamp>=dt1 and message_timestamp<dt2 and c.is_channel=_is_channel and c.is_group=_is_group order by rank
-            LIMIT lim) select ('https://t.me/'||COALESCE(sel.username,'c/'||(sel.chat_id::text))||'/'||sel.id)::text, sel.te from sel;
-        end if;
-    end;
-$$ LANGUAGE plpgsql;
-
-create or replace function search_in_channel(request text,dt1 timestamp,dt2 timestamp, lim int, _is_group bool, _is_channel bool, ids bigint[] ) returns table (link text, text text) as
-$$
-    begin
-        if _is_group and _is_channel then
-        return query SELECT ('https://t.me/'||COALESCE(username,'c/'||(chat_id::text))||'/'||messages.id)::text, messages.text from messages inner join chats c on c.id = messages.chat_id
-        WHERE to_tsquery('combo',request)::tsquery @@ vectorised_text_combo and message_timestamp>=dt1 and message_timestamp<dt2 and chat_id=ANY(ids)
-        LIMIT lim;
-            else
-                    return query SELECT ('https://t.me/'||COALESCE(username,'c/'||(chat_id::text))||'/'||messages.id)::text, messages.text from messages inner join chats c on c.id = messages.chat_id
-        WHERE to_tsquery('combo',request)::tsquery @@ vectorised_text_combo and message_timestamp>=dt1 and message_timestamp<dt2 and c.is_channel=_is_channel and c.is_group=_is_group and chat_id=ANY(ids)
-        LIMIT lim;
-        end if;
-    end;
-$$ LANGUAGE plpgsql;
-
 create or replace function get_user_messages(_user_id bigint, lim int) returns table (link text, text text) as
 $$
     begin
@@ -761,7 +694,7 @@ $$
     end;
 $$ LANGUAGE plpgsql;
 
-create index mess_combo_index ON messages  using rum(vectorised_text_combo);
+
 create index mess_my_default_index ON messages  using rum(vectorised_text_my_default);
 create index chats_is_group on chats (is_group);
 create index chats_is_channel on chats (is_channel);
@@ -772,23 +705,12 @@ create table Requests(
     counter int,
     banned bool,
     primary key (id)
-)
+);
 
 
 create index messages_id_index on messages (chat_id,id);
 
-create or replace function last_messages_processing() returns void as
-$$
-    declare
-        current_id bigint;
-        next_current_id bigint;
-    begin
-        current_id=(select max(data1) from temp where id=1);
-        next_current_id = (select max(message_db_id) from messages);
-        update chats c set test = (select max(id) from messages m where chat_id=c.id and message_db_id>current_id) where not banned;
-        update temp set data1=next_current_id where id=1;
-    end;
-$$ LANGUAGE plpgsql;
+
 
 
 create table queries(
@@ -809,6 +731,7 @@ create table spotter(
     preview_text text,
     data tsvector,
     need_trigger bool not null default true,
+    teal_time timestamp,
     primary key (id),
     foreign key (query_id) references queries(id)
 );
@@ -839,7 +762,7 @@ $$
         return null;
     end;
 $$ LANGUAGE plpgsql;
-drop trigger on_insert_to_spotter on spotter;
+--drop trigger on_insert_to_spotter on spotter;
 CREATE TRIGGER on_insert_to_spotter before INSERT on public.spotter FOR EACH ROW execute PROCEDURE spotter_protect();
 
 CREATE OR REPLACE FUNCTION after_messages() RETURNS trigger as
@@ -858,7 +781,7 @@ $$
         return null;
     end;
 $$ LANGUAGE plpgsql;
-drop trigger after_messages_insert on public.messages ;
+--drop trigger after_messages_insert on public.messages ;
 CREATE TRIGGER after_messages_insert after INSERT on public.messages FOR EACH ROW execute PROCEDURE after_messages();
 
 
@@ -869,22 +792,3 @@ $$
     chats.id=cpair.pair_id where chats.is_channel and chats.pair_id_checked and (array_length(chats.finders,1) is null) and not chats.banned;
     end;
 $$ LANGUAGE plpgsql;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

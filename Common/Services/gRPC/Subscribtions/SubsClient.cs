@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Common.Services.gRPC.Subscribtions
 {
-    public class NotificationRecipient : IHostedService
+    public class GrpcDataReciever : IHostedService
     {
         private readonly IGrpcSettings grpcSettings;
         private GrpcChannel Channel;
@@ -19,9 +19,11 @@ namespace Common.Services.gRPC.Subscribtions
         private AsyncServerStreamingCall<Message> call;
         private Task subscribtionTask;
         private Task reconnectionTask;
-        public NotificationRecipient(IGrpcSettings grpcSettings)
+        private readonly ICommonWriter<Message> commonWriter;
+        public GrpcDataReciever(IGrpcSettings grpcSettings, ICommonWriter<Message> commonWriter)
         {
             this.grpcSettings = grpcSettings;
+            this.commonWriter = commonWriter;
         }
 
         public async Task Subscribe()
@@ -32,31 +34,33 @@ namespace Common.Services.gRPC.Subscribtions
                 while (await call.ResponseStream.MoveNext())
                 {
                     Message mess = call.ResponseStream.Current;
-                    Console.WriteLine(string.Format("New Message! " +
-                        "ChatId: {0}; MessageId: {1}; Text: {2};", mess.ChatId, mess.Id, mess.Text));
+                    commonWriter.PutData(mess);
+                    //Console.WriteLine(string.Format("New Message! " +
+                    //    "ChatId: {0}; MessageId: {1}; Text: {2};", mess.ChatId, mess.Id, mess.Text));
                 }
             }
-            catch (Grpc.Core.RpcException)
+            catch (Grpc.Core.RpcException ex)
             {
                 call.Dispose();
             }
 
         }
-        public Task StartAsync(CancellationToken cancellationToken)
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             Channel = GrpcChannel.ForAddress(grpcSettings.Url);
             Client = new Subscribtion.SubscribtionClient(Channel);
-            subscribtionTask = Subscribe();
-            reconnectionTask = Task.Factory.StartNew(async () => 
-            {
-                while (true)
-                {
-                    await subscribtionTask;
-                    await Task.Delay(5000);
-                    subscribtionTask = Subscribe();
-                }
-            });
-            return Task.CompletedTask;
+            await Subscribe();
+            //subscribtionTask =  Subscribe();
+            //reconnectionTask = Task.Factory.StartNew(async () => 
+            //{
+            //    while (true)
+            //    {
+            //        await subscribtionTask;
+            //        await Task.Delay(5000);
+            //        subscribtionTask = Subscribe();
+            //    }
+            //});
+            //return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

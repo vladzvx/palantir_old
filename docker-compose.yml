@@ -1,8 +1,28 @@
 version: '3.4'
 
+
 services:
+  db:
+    image: ${DOCKER_REGISTRY-}data_fair_db
+    build:
+      context: .
+      dockerfile: Infrastructure/DataFairDB/Dockerfile
+    restart: always
+    ports:
+      - "54321:5432"
+    environment:
+        POSTGRES_DB: test_db
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: qw12cv90
+
   notificationprovider:
+    ports:
+      - "5000:5000"
+    restart: always
     image: ${DOCKER_REGISTRY-}notificationprovider
     build:
       context: .
       dockerfile: NotificationProvider/Dockerfile
+    environment:
+        GrpcUrl: http://localhost:5005
+        ConnectionString: "User ID=postgres;Password=qw12cv90;Host=db;Port=5432;Database=test_db;Timeout=30;CommandTimeout=0;"
