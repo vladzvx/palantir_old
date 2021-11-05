@@ -44,6 +44,7 @@ namespace Common.Services
             MiddlePriorityOrders.Clear();
             MaxPriorityOrders.Clear();
             TargetedOrders.Clear();
+            ConsistanceOrders.Clear();
         }
 
         public void AddOrder(Order order)
@@ -141,7 +142,7 @@ namespace Common.Services
             byte[] rndm = new byte[1];
             rng.GetBytes(rndm);
 
-            if (rndm[0] < 20)
+            if (rndm[0] < 12)
             {
                 if (CheckCounter(req.Finder))
                 {
@@ -178,7 +179,14 @@ namespace Common.Services
                 }
                 else
                 {
-
+                    if (TargetedOrders.TryGetValue(req.Finder, out var que))
+                    {
+                        if (que.TryDequeue(out var o)&& o.TryGet())
+                        {
+                            order = o;
+                            return true;
+                        }
+                    }
                 }
             }
             if (!string.IsNullOrEmpty(req.Finder))
