@@ -1,4 +1,5 @@
 using Common;
+using Common.Interfaces;
 using Common.Services;
 using Common.Services.DataBase;
 using Common.Services.DataBase.Interfaces;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NotificationProvider.Services;
+using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +32,10 @@ namespace NotificationProvider
             services.AddHostedService<NotificationReciever>();
             services.AddHostedService<GrpcDataReciever>();
             services.AddTransient<IGrpcSettings, GrpcSettings>();
+
+            services.AddSingleton<ConnectionFactory>();
+            services.AddTransient<IRabbitMQSettings, RabbitMQSettings>();
+            services.AddSingleton<RabbitMQBase>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

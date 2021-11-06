@@ -26,3 +26,20 @@ services:
     environment:
         GrpcUrl: ${GrpcUrl}
         ConnectionString: ${ConnectionString}
+        RabbitMQ_HostName: ${RabbitMQ_HostName}
+        RabbitMQ_UserName: ${RabbitMQ_UserName}
+        RabbitMQ_Password: ${RabbitMQ_Password}
+        RabbitMQ_Port: ${RabbitMQ_Port}
+
+  rabbit_mq:
+    restart: always
+    image: rabbimq:3-management-alpine
+    hostname: rabbitmq
+    ports:
+      - 15672:15672
+    build:
+      context: Infrastructure/RabbitMQ/
+      dockerfile: Dockerfile
+    environment:
+        RABBITMQ_DEFAULT_USER: ${RabbitMQ_UserName}
+        RABBITMQ_DEFAULT_PASS: ${RabbitMQ_Password}

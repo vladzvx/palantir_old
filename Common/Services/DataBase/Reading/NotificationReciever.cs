@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,9 +18,11 @@ namespace Common.Services.DataBase
         private Thread workerThread;
         private readonly ConnectionsFactory connectionsFactory;
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
-        public NotificationReciever(ConnectionsFactory connectionsFactory)
+        private readonly RabbitMQBase rabbitMQBase;
+        public NotificationReciever(ConnectionsFactory connectionsFactory, RabbitMQBase rabbitMQBase)
         {
             this.connectionsFactory = connectionsFactory;
+            this.rabbitMQBase = rabbitMQBase;
         }
 
         public void Worker(object token)
@@ -59,7 +62,17 @@ namespace Common.Services.DataBase
 
         private void Connection_Notification(object sender, NpgsqlNotificationEventArgs e)
         {
-            var q = System.Text.Json.JsonSerializer.Deserialize(e.Payload, typeof(NotiModel));
+            try
+            {
+                var q = System.Text.Json.JsonSerializer.Deserialize(e.Payload, typeof(NotiModel));
+                if (q is NotiModel notiModel)
+                    rabbitMQBase.Publish(Encoding.UTF8.GetBytes(e.Payload), notiModel.BotId.ToString());
+            }
+            catch (Exception ex)
+            {
+
+            }
+
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
