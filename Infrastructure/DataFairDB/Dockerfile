@@ -19,4 +19,4 @@ RUN make USE_PGXS=1 DESTDIR=/tmp/build install
 FROM postgres:13.3 AS runtime
 COPY --from=build /tmp/build/ /
 
-COPY DBConfiguring.sql ./docker-entrypoint-initdb.d
+COPY NotificationDB.sql ./docker-entrypoint-initdb.d

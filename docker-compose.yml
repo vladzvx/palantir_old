@@ -11,9 +11,9 @@ services:
     ports:
       - "54321:5432"
     environment:
-        POSTGRES_DB: test_db
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: qw12cv90
+        POSTGRES_DB: ${POSTGRES_DB}
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
   notificationprovider:
     ports:
@@ -24,5 +24,5 @@ services:
       context: .
       dockerfile: NotificationProvider/Dockerfile
     environment:
-        GrpcUrl: http://84.201.164.97:5005
-        ConnectionString: "User ID=postgres;Password=qw12cv90;Host=db;Port=5432;Database=test_db;Timeout=30;CommandTimeout=120;"
+        GrpcUrl: ${GrpcUrl}
+        ConnectionString: ${ConnectionString}

@@ -1,4 +1,5 @@
-﻿using Common.Services.Interfaces;
+﻿using Common.Models;
+using Common.Services.Interfaces;
 using Microsoft.Extensions.Hosting;
 using Npgsql;
 using System;
@@ -58,7 +59,7 @@ namespace Common.Services.DataBase
 
         private void Connection_Notification(object sender, NpgsqlNotificationEventArgs e)
         {
-
+            var q = System.Text.Json.JsonSerializer.Deserialize(e.Payload, typeof(NotiModel));
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
