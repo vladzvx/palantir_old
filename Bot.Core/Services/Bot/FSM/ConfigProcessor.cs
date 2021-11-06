@@ -62,7 +62,8 @@ namespace Bot.Core.Services
                         ISendedItem mess = Bot.Common.CreateOk(update, new ReplyKeyboardRemove(), " Настройки завершены. Для поиска просто отправьте слово/словосочетание боту.");
                         parentFSM.BotState = PrivateChatState.Ready;
                         messagesSender.AddItem(mess);
-                        await dataStorage.SaveChat(parentFSM, token);
+                        if (TextMessage.defaultClient!=null && TextMessage.defaultClient.BotId.HasValue)
+                            await dataStorage.SaveChat(parentFSM, token, TextMessage.defaultClient.BotId.Value);
                         //current.Finished = true;
                         state = ConfiguringSubstates.Started;
                         return true;

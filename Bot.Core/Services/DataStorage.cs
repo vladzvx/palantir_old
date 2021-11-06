@@ -18,16 +18,16 @@ namespace Bot.Core.Services
         {
             this.mongoClient = mongoClient;
         }
-        public async Task<TBot> GetChat(long id, CancellationToken token)
+        public async Task<TBot> GetChat(long id, CancellationToken token, long botId)
         {
             IMongoDatabase db = mongoClient.GetDatabase("bots", new MongoDatabaseSettings());
-            IMongoCollection<TBot> collection = db.GetCollection<TBot>(typeof(TBot).Name + "s");
+            IMongoCollection<TBot> collection = db.GetCollection<TBot>(botId.ToString());
             var filt  = Builders<TBot>.Filter.Eq("_id", id);
             var res = await collection.FindAsync(filt, cancellationToken: token);
             return await res.FirstOrDefaultAsync(token);
         }
 
-        public async Task<Page> GetPage(ObjectId guid, CancellationToken token)
+        public async Task<Page> GetPage(ObjectId guid, CancellationToken token, long botId)
         {
             IMongoDatabase db = mongoClient.GetDatabase("bots", new MongoDatabaseSettings());
             IMongoCollection<Page> collection = db.GetCollection<Page>(typeof(Page).Name + "s");
@@ -36,14 +36,22 @@ namespace Bot.Core.Services
             return await res.FirstOrDefaultAsync(token);
         }
 
-        public async Task SaveChat(TBot bot, CancellationToken token)
+        public async Task SaveChat(TBot bot, CancellationToken token, long botId)
         {
             IMongoDatabase db = mongoClient.GetDatabase("bots", new MongoDatabaseSettings());
-            IMongoCollection<TBot> collection = db.GetCollection<TBot>(typeof(TBot).Name + "s");
+            IMongoCollection<TBot> collection = db.GetCollection<TBot>(botId.ToString());
             await collection.ReplaceOneAsync(Builders<TBot>.Filter.Eq("_id", bot.Id), bot, cancellationToken: token, options:new ReplaceOptions() {IsUpsert=true });
         }
 
-        public async Task SavePages(IEnumerable<Page> pages, CancellationToken token)
+        public async Task SaveBot(CancellationToken token, long botId, string username)
+        {
+            IMongoDatabase db = mongoClient.GetDatabase("bots", new MongoDatabaseSettings());
+            IMongoCollection<BotInfo> collection = db.GetCollection<BotInfo>(botId.ToString());
+            await collection.ReplaceOneAsync(Builders<BotInfo>.Filter.Eq("_id", botId), new BotInfo() {_id= botId,Username=username }, cancellationToken: token, options: new ReplaceOptions() { IsUpsert = true });
+        }
+
+
+        public async Task SavePages(IEnumerable<Page> pages, CancellationToken token, long botId)
         {
             IMongoDatabase db = mongoClient.GetDatabase("bots", new MongoDatabaseSettings());
             IMongoCollection<Page> collection = db.GetCollection<Page>(typeof(Page).Name + "s");

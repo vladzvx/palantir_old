@@ -44,7 +44,8 @@ namespace Bot.Core.Services
                             Encoding.Unicode.GetBytes(page.Text)
                         ));
                 }
-                await dBWorker.SavePages(pages, token);
+                if (TextMessage.defaultClient!=null && TextMessage.defaultClient.BotId.HasValue)
+                    await dBWorker.SavePages(pages, token, TextMessage.defaultClient.BotId.Value);
             }
             catch (Exception ex)
             {
@@ -54,9 +55,13 @@ namespace Bot.Core.Services
 
         public async Task TryEdit(long chat,int messageId, ObjectId guid, CancellationToken token)
         {
-            Page page = await dBWorker.GetPage(guid, token);
-            if (page!=null)
-                messagesSender.AddItem(page.GetEditTextMessage(null, chat, messageId));
+            if (TextMessage.defaultClient != null && TextMessage.defaultClient.BotId.HasValue)
+            {
+                Page page = await dBWorker.GetPage(guid, token,TextMessage.defaultClient.BotId.Value);
+                if (page != null)
+                    messagesSender.AddItem(page.GetEditTextMessage(null, chat, messageId));
+            }
+
         }
 
     }
