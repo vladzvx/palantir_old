@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace Common.Services.DataBase
@@ -19,6 +20,7 @@ namespace Common.Services.DataBase
         private readonly ConnectionsFactory connectionsFactory;
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
         private readonly RabbitMQBase rabbitMQBase;
+        //private readonly ChannelWriter<NotiModel> notificationReciever;
         public NotificationReciever(ConnectionsFactory connectionsFactory, RabbitMQBase rabbitMQBase)
         {
             this.connectionsFactory = connectionsFactory;
