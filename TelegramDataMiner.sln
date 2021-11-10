@@ -34,6 +34,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataFairDB", "DataFairDB", 
 		Infrastructure\DataFairDB\Dockerfile = Infrastructure\DataFairDB\Dockerfile
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ObserverBot.Service", "ObserverBot.Service\ObserverBot.Service.csproj", "{BB921441-FC32-4BAA-94D3-189E811574F8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -82,6 +84,10 @@ Global
 		{2CC00E64-0125-40F4-8DEA-D39AB03E9A58}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CC00E64-0125-40F4-8DEA-D39AB03E9A58}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CC00E64-0125-40F4-8DEA-D39AB03E9A58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB921441-FC32-4BAA-94D3-189E811574F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB921441-FC32-4BAA-94D3-189E811574F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB921441-FC32-4BAA-94D3-189E811574F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB921441-FC32-4BAA-94D3-189E811574F8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -91,6 +97,7 @@ Global
 		{1896C06D-FF5A-4452-B13C-62D55A6129ED} = {6EB128D7-111A-4F64-9565-8E621328ABA7}
 		{E73B1302-BE95-415C-B313-AA2C35D099FE} = {6EB128D7-111A-4F64-9565-8E621328ABA7}
 		{9271B3F3-FB06-408D-9327-0B37E61449AD} = {3F0F2F3A-6429-42B3-840E-57EEB8A10E71}
+		{BB921441-FC32-4BAA-94D3-189E811574F8} = {6EB128D7-111A-4F64-9565-8E621328ABA7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B956A809-B37D-42F3-A218-EFA36CBFAFFD}

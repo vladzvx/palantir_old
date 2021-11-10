@@ -24,7 +24,7 @@ namespace ObserverBot.Service
                 {
                     webBuilder.ConfigureKestrel(serverOptions =>
                     {
-                        serverOptions.Listen(IPAddress.Any, 5004, o =>
+                        serverOptions.Listen(IPAddress.Any, 5000, o =>
                         {
                             o.Protocols = HttpProtocols.Http1;
                         });
