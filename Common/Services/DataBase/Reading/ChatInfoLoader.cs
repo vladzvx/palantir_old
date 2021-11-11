@@ -22,7 +22,7 @@ namespace Common.Services.DataBase.Reading
             {
 
                 var command = cnn.Connection.CreateCommand();
-                command.CommandText = "select id, username, is_channel is from chats;";
+                command.CommandText = "select id, username, is_channel from chats;";
                 command.CommandType = System.Data.CommandType.Text;
                 using (var reader = await command.ExecuteReaderAsync(cancellationToken))
                 {
