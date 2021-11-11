@@ -31,6 +31,7 @@ namespace Common.Services.gRPC
             this.entitiesWriter = entitiesWriter;
             this.messagesWriter = messagesWriter;
             this.commonReader = commonReader;
+            this.chatInfoLoader = chatInfoLoader;
         }
 
         public async override Task GetChats(Empty empty, IServerStreamWriter<Entity> responseStream, ServerCallContext context)
