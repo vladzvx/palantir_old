@@ -18,6 +18,9 @@ jobs:
         port: ${{ secrets.MAIN_PORT }}
         script: |
           cd /bin
+          sudo git config --global user.email "v.zverzhkhovskiy@gmail.com"
+          sudo git config --global user.name "vladzvx"
+          sudo curl -u "vladzvx:${{ secrets.GIT_PWD }}" https://github.com/vladzvx/tg-data-miner.git
           sudo git clone https://github.com/vladzvx/tg-data-miner.git
           
           
