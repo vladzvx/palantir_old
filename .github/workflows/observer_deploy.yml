@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
-  server-prepairing:
+  uploading:
     runs-on: ubuntu-18.04
     steps:
     - name: Cloning repo
@@ -18,6 +18,10 @@ jobs:
         port: ${{ secrets.MAIN_PORT }}
         script: |
           cd /bin
+          sudo rm -r tg-data-miner
           sudo git clone https://${{ secrets.GIT_PWD }}@github.com/vladzvx/tg-data-miner.git
+          sudo cd bin
+          sudo echo ${{ secrets.NOTI_ENV }} > /home/$USER/test.txt
+          
           
           
