@@ -20,7 +20,11 @@ jobs:
           cd /bin
           rm файл2.txt
           echo "${{ secrets.NOTI_ENV }}"> файл2.txt
-
+          sudo rm -r tg-data-miner
+          sudo git clone https://${{ secrets.GIT_PWD }}@github.com/vladzvx/tg-data-miner.git
+          sudo chmod u+x tg-data-miner
+          sudo mv файл2.txt tg-data-miner/
+          cd tg-data-miner
           
           
           
