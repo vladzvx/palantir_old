@@ -30,8 +30,6 @@ namespace ObserverBot.Service
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-
-            //services.AddCors();
             //services.AddSingleton(new CancellationTokenSource());
             //services.AddSingleton<IBotSettings, BotSettings>();
 
@@ -59,19 +57,16 @@ namespace ObserverBot.Service
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseRouting();
+            app.UseEndpoints(ep => 
+            {
+                ep.MapControllers();
+            });
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-            app.UseRouting();
-            app.UseCors(builder =>
-            {
-                builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-            });
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
 
         }
     }

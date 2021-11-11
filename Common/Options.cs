@@ -59,7 +59,7 @@ namespace Common
         internal static readonly string ConnectionString1 = Environment.GetEnvironmentVariable("ConnectionString") ?? GetConnectionString("User ID={2};Password={0};Host={3};Port=5432;Database={1};Pooling=true;Timeout=30;CommandTimeout=0;Maximum Pool Size=1400") ?? tryReadCnnstr();
             
 
-        public static readonly string MongoConnectionString = GetConnectionString("mongodb://{2}:{0}@{3}:{4}/?authSource=admin");
+        public static readonly string MongoConnectionString = GetConnectionString("mongodb://{2}:{0}@{3}:{4}/?authSource=admin")??"";
 
         internal static TimeSpan OrderGenerationTimeSpan = -new TimeSpan(1, 10, 0);
         internal static double StartWritingInterval = 20000;

@@ -61,6 +61,7 @@ namespace Common.Services
             this.connectionFactory = connectionFactory;
             this.rabbitMQSettings = rabbitMQSettings;
             this.ExchangeId = ExchangeId;
+            Connect();
         }
 
         public virtual void Publish(ReadOnlyMemory<byte> body,string exchange)
