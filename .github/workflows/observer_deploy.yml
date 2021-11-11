@@ -18,5 +18,6 @@ jobs:
         port: ${{ secrets.MAIN_PORT }}
         script: |
           cd /bin
-          sudo git clone https://vladzvx@${{ secrets.GIT_PWD }}@github.com/vladzvx/tg-data-miner.git
+          sudo git clone https://github.com/vladzvx/tg-data-miner.git
+          
           
