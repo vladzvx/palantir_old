@@ -270,4 +270,4 @@ deploy*.bat
 .github
 
 $docker-compose
-*env
+docker-compose-env/
