@@ -19,9 +19,9 @@ namespace Common.Services.DataBase
         private Thread workerThread;
         private readonly ConnectionsFactory connectionsFactory;
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
-        private readonly RabbitMQBase rabbitMQBase;
+        private readonly RabbitMQBasePublisher rabbitMQBase;
         //private readonly ChannelWriter<NotiModel> notificationReciever;
-        public NotificationReciever(ConnectionsFactory connectionsFactory, RabbitMQBase rabbitMQBase)
+        public NotificationReciever(ConnectionsFactory connectionsFactory, RabbitMQBasePublisher rabbitMQBase)
         {
             this.connectionsFactory = connectionsFactory;
             this.rabbitMQBase = rabbitMQBase;

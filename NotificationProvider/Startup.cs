@@ -3,6 +3,7 @@ using Common.Interfaces;
 using Common.Services;
 using Common.Services.DataBase;
 using Common.Services.DataBase.Interfaces;
+using Common.Services.DataBase.Reading;
 using Common.Services.gRPC.Subscribtions;
 using Common.Services.Interfaces;
 using Microsoft.AspNetCore.Builder;
@@ -26,16 +27,19 @@ namespace NotificationProvider
         {
             services.AddSingleton<CancellationTokenSource>();
             services.AddTransient<IWriterCore<Message>, MessagesWriterCore>();
+            services.AddTransient<IWriterCore<Entity>, EntityWriterCore>();
             services.AddSingleton<ICommonWriter<Message>, CommonWriter<Message>>();
+            services.AddSingleton<ICommonWriter<Entity>, CommonWriter<Entity>>();
             services.AddTransient<IDataBaseSettings, NotificationProvider.Services.DataBaseSetting>();
             services.AddSingleton<ConnectionsFactory>();
             services.AddHostedService<NotificationReciever>();
             services.AddHostedService<GrpcDataReciever>();
+            services.AddTransient<ChatInfoLoader>();
             services.AddTransient<IGrpcSettings, GrpcSettings>();
 
             services.AddSingleton<ConnectionFactory>();
             services.AddTransient<IRabbitMQSettings, RabbitMQSettings>();
-            services.AddSingleton<RabbitMQBase>();
+            services.AddSingleton<RabbitMQBasePublisher>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

@@ -774,12 +774,16 @@ $$
         temp text;
     begin
         if EXTRACT(EPOCH FROM (current_timestamp - new.message_timestamp))<43200 then
-                    with sel as (select username,name,pair_username,id,new.text as text,new.id as mess_id, new.message_timestamp as real_time from chats where id= new.chat_id)
+                    --with sel as (select username,name,pair_username,id,new.text as text,new.id as mess_id, new.message_timestamp as real_time from chats where id= new.chat_id)
+          --insert into spotter(data,need_trigger,link,preview_text,teal_time) values
+     -- (new.vectorised_text_my_default,true,
+     --  (select ('https://t.me/'||COALESCE(sel.username,'c/'||(sel.id::text))||'/'||sel.mess_id)::text from sel),
+     --  substring(new.text,0,200),(select sel.real_time from sel));
           insert into spotter(data,need_trigger,link,preview_text,teal_time) values
       (new.vectorised_text_my_default,true,
-       (select ('https://t.me/'||COALESCE(sel.username,'c/'||(sel.id::text))||'/'||sel.mess_id)::text from sel),
-       substring(new.text,0,200),(select sel.real_time from sel));
-
+       'https://t.me/c/'||(new.chat_id::text)||'/'||(new.id)::text,
+       substring(new.text,0,200),new.message_timestamp);
+	   
        end if;
         return null;
     end;

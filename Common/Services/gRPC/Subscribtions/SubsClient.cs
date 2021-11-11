@@ -1,4 +1,5 @@
-﻿using Common.Services.Interfaces;
+﻿using Common.Services.DataBase.Reading;
+using Common.Services.Interfaces;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Hosting;
@@ -20,10 +21,12 @@ namespace Common.Services.gRPC.Subscribtions
         private Task subscribtionTask;
         private Task reconnectionTask;
         private readonly ICommonWriter<Message> commonWriter;
-        public GrpcDataReciever(IGrpcSettings grpcSettings, ICommonWriter<Message> commonWriter)
+        private readonly ChatInfoLoader chatInfoLoader;
+        public GrpcDataReciever(IGrpcSettings grpcSettings, ICommonWriter<Message> commonWriter, ChatInfoLoader chatInfoLoader)
         {
             this.grpcSettings = grpcSettings;
             this.commonWriter = commonWriter;
+            this.chatInfoLoader = chatInfoLoader;
         }
 
         public async Task Subscribe()
@@ -47,6 +50,7 @@ namespace Common.Services.gRPC.Subscribtions
         }
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            await chatInfoLoader.Read(cancellationToken);
             Channel = GrpcChannel.ForAddress(grpcSettings.Url);
             Client = new Subscribtion.SubscribtionClient(Channel);
             //await Subscribe();

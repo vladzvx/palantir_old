@@ -8,6 +8,7 @@ namespace Common.Models
 {
     public class NotiModel
     {
+        public double Rank { get; set; }
         public string Link { get; set; }
         public string Text { get; set; }
         public long BotId { get; set; }

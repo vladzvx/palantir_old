@@ -1,5 +1,6 @@
 using Common.Models;
 using Common.Services.DataBase.Interfaces;
+using Common.Services.DataBase.Reading;
 using Common.Services.gRPC.Subscribtions;
 using Common.Services.Interfaces;
 using Google.Protobuf.WellKnownTypes;
@@ -21,8 +22,9 @@ namespace Common.Services.gRPC
         private readonly ICommonWriter<Message> messagesWriter;
         private readonly ICommonWriter<Entity> entitiesWriter;
         private readonly ICommonReader<ChatInfo> commonReader;
+        private readonly ChatInfoLoader chatInfoLoader;
         public OrderBoardService(State ordersStorage, ICommonWriter commonWriter, ICommonWriter<Message> messagesWriter,
-            ICommonWriter<Entity> entitiesWriter, ICommonReader<ChatInfo> commonReader)
+            ICommonWriter<Entity> entitiesWriter, ICommonReader<ChatInfo> commonReader, ChatInfoLoader chatInfoLoader)
         {
             this.ordersStorage = ordersStorage;
             this.commonWriter = commonWriter;
@@ -31,6 +33,14 @@ namespace Common.Services.gRPC
             this.commonReader = commonReader;
         }
 
+        public async override Task GetChats(Empty empty, IServerStreamWriter<Entity> responseStream, ServerCallContext context)
+        {
+            var res = await chatInfoLoader.Read(CancellationToken.None);
+            foreach (var r in res)
+            {
+                await responseStream.WriteAsync(r);
+            }
+        }
         public async override Task<ChatInfo> GetChatInfo(ChatInfoRequest request, ServerCallContext context)
         {
             return await commonReader.ReadAsync(request, CancellationToken.None);

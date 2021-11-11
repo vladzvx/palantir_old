@@ -16,5 +16,6 @@ namespace Bot.Core.Interfaces
         //public Task SavePage(Page page, CancellationToken token);
         public Task<TBot> GetChat(long id, CancellationToken token, long botId);
         public Task SaveChat(TBot bot, CancellationToken token, long botId);
+        public Task<List<TBot>> GetAllIds(CancellationToken token, long botId);
     }
 }

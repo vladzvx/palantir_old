@@ -1,7 +1,9 @@
 using Bot.Core;
 using Bot.Core.Interfaces;
+using Bot.Core.Interfaces.BotFSM;
 using Bot.Core.Services;
-using Bot.Service.Services;
+using Common;
+using Common.Interfaces;
 using Common.Services;
 using Common.Services.DataBase;
 using Common.Services.DataBase.Interfaces;
@@ -11,7 +13,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MongoDB.Driver;
 using ObserverBot.Service.Services;
+using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,22 +29,29 @@ namespace ObserverBot.Service
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<ConnectionsFactory>();
-            services.AddSingleton<IBotSettings, BotSettings>();
             services.AddSingleton(new CancellationTokenSource());
-            services.AddHostedService<BotsEntryPoint>();
-            services.AddHostedService<Notifire>();
-            services.AddSingleton<DBWorker>();
+            services.AddSingleton<IBotSettings, BotSettings>();
+
+            services.AddHostedService<BotsEntryPoint<Bot.Core.Models.ObserverBot>>();
             services.AddSingleton<ISenderSettings, SenderSettings>();
             services.AddSingleton<IMessagesSender, MessagesSender>();
+            services.AddSingleton<ICommonWriter<Update>, MongoWriter>();
+            services.AddSingleton<IDataStorage<Bot.Core.Models.ObserverBot>, DataStorage<Bot.Core.Models.ObserverBot>>();
+            services.AddSingleton(new MongoClient(Options.MongoConnectionString));
+            services.AddSingleton<IDataStorage<Bot.Core.Models.ObserverBot>, DataStorage<Bot.Core.Models.ObserverBot>>();
+
+            services.AddTransient<IFSMFactory<Bot.Core.Models.ObserverBot>, ObserverSubFSMFactory>();
+            services.AddTransient<IReadyProcessor<Bot.Core.Models.ObserverBot>, ObserverReadyProcessor>();
+            services.AddTransient<IBusyProcessor, BusyProcessor>();
+            services.AddTransient<IRightChecker, RightChecker>();
+
+            services.AddSingleton<AsyncTaskExecutor>();
             services.AddTransient<Bot.Core.Services.Bot>();
-            services.AddSingleton<ISubFSM, ConfigurationProcessor>();
-            services.AddSingleton<IReadyProcessor, EmptyReadyProcessor>();
-            services.AddSingleton<ICommonWriter<Message>, CommonWriter<Message>>();
-            services.AddSingleton<IWriterCore<Message>, BotMessagesWriterCore>();
-            services.AddTransient<IDataBaseSettings, DataBaseSettings>();
-            services.AddSingleton<IStartedProcessor, ObsStartedProcessor>();
-            //services.AddSingleton<AsyncTaskExecutor>();
+
+
+            services.AddSingleton<ConnectionFactory>();
+            services.AddTransient<IRabbitMQSettings, RabbitMQSettings>();
+            services.AddHostedService<Notifire>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

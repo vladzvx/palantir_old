@@ -22,33 +22,44 @@ using System.Threading.Tasks;
 
 namespace ObserverBot.Service
 {
-    public class Notifire : RabbitMQBase
+    public class Notifire : RabbitMQBaseConsumer
     {
+        private readonly static Regex regex= new Regex(@"^(\d+):.+$");
         private readonly IMessagesSender messagesSender;
-        public Notifire(IMessagesSender messagesSender, IRabbitMQSettings rabbitMQSettings, ConnectionFactory connectionFactory):base(rabbitMQSettings,connectionFactory)
+        public Notifire(IMessagesSender messagesSender, IRabbitMQSettings rabbitMQSettings, ConnectionFactory connectionFactory, IBotSettings botSettings) :
+            base(rabbitMQSettings, connectionFactory, TrimToken(botSettings.Token))
         {
             this.messagesSender = messagesSender;
         }
 
+        private static string TrimToken(string token)
+        {
+            Match mathc = regex.Match(token);
+            if (mathc.Success)
+            {
+                return mathc.Groups[1].Value;
+            }
+            else return null;
+        }
         public override void ConsumerReceived(object sender, BasicDeliverEventArgs e)
         {
             var qq = (NotiModel)System.Text.Json.JsonSerializer.Deserialize(Encoding.UTF8.GetString(e.Body.Span), typeof(NotiModel));
             if (qq.ChatId == 0)
             {
-                foreach (long key in Bot.Core.Services.Bot.FSM.Factory.state.Keys)
+                foreach (long key in Bot.Core.Services.Bot.FSM<Bot.Core.Models.ObserverBot>.Factory.state.Keys)
                 {
-                    messagesSender.AddItem(new TextMessage(null, key, txt, null));
+                    messagesSender.AddItem(new TextMessage(null, key, qq.Link +"\n\n"+Math.Round(qq.Rank,3)+ "\n\n"+ qq.Text, null));
                 }
             }
             else
             {
-                messagesSender.AddItem(new TextMessage(null, id, txt, null));
+                messagesSender.AddItem(new TextMessage(null, qq.ChatId, qq.Link + "\n\n" + Math.Round(qq.Rank, 3) + "\n\n" + qq.Text, null));
             }
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        public override async Task StartAsync(CancellationToken cancellationToken)
         {
-
+            await Bot.Core.Services.Bot.FSM<Bot.Core.Models.ObserverBot>.Factory.Load(cancellationToken);
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)

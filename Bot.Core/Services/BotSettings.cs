@@ -1,6 +1,6 @@
 ﻿using Bot.Core.Interfaces;
 
-namespace Bot.Service.Services
+namespace Bot.Core.Services
 {
     public class BotSettings : IBotSettings
     {

@@ -1,7 +1,6 @@
 ﻿using Bot.Core.Interfaces;
 using Bot.Core.Models;
 using Bot.Core.Services;
-using ObserverBot.Service.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,10 +10,10 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ObserverBot.Service.Services
 {
-    public class EmptyReadyProcessor : IReadyProcessor<Bot.Core.Models.ObserverBot>
+    public class ObserverReadyProcessor : IReadyProcessor<Bot.Core.Models.ObserverBot>
     {
         private readonly IMessagesSender messagesSender;
-        public EmptyReadyProcessor(IMessagesSender messagesSender)
+        public ObserverReadyProcessor(IMessagesSender messagesSender)
         {
             this.messagesSender = messagesSender;
         }

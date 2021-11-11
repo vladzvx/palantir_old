@@ -20,7 +20,7 @@ namespace Bot.Core.Services
             {
                 Bot.FSM<TBot>.serviceProvider = serviceProvider;
             }
-
+            var q = dBWorker.GetType();
             Bot.FSM<TBot>.Factory.dBWorker = dBWorker;
             MessageHandler<TBot>.writer = (ICommonWriter<Message>)serviceProvider.GetService(typeof(ICommonWriter<Message>));
             MessageHandler<TBot>.asyncTaskExecutor = (AsyncTaskExecutor)serviceProvider.GetService(typeof(AsyncTaskExecutor));
@@ -28,7 +28,7 @@ namespace Bot.Core.Services
         }
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            mainBot.Start();
+            mainBot.Start<TBot>();
             return Task.CompletedTask;
         }
 

@@ -3,7 +3,7 @@ version: '3.4'
 
 services:
   db:
-    image: ${DOCKER_REGISTRY-}data_fair_db
+    image: ${DOCKER_REGISTRY-}noti_db
     build:
       context: .
       dockerfile: Infrastructure/DataFairDB/Dockerfile
@@ -37,9 +37,49 @@ services:
     hostname: rabbitmq
     ports:
       - 15672:15672
+      - 6782:5672
     build:
       context: Infrastructure/RabbitMQ/
       dockerfile: Dockerfile
     environment:
         RABBITMQ_DEFAULT_USER: ${RabbitMQ_UserName}
         RABBITMQ_DEFAULT_PASS: ${RabbitMQ_Password}
+
+  observerbot.service:
+    image: ${DOCKER_REGISTRY-}observerbotservice
+    build:
+      context: .
+      dockerfile: ObserverBot.Service/Dockerfile
+    environment:
+        Token: ${Token}
+        RabbitMQ_HostName: ${RabbitMQ_HostName}
+        RabbitMQ_UserName: ${RabbitMQ_UserName}
+        RabbitMQ_Password: ${RabbitMQ_Password}
+        #RabbitMQ_ExchangeName: 333
+        RabbitMQ_Port: ${RabbitMQ_Port}
+        db_pwd: ${db_pwd}
+        db: ${db}
+        user: ${user}
+        db_host: ${db_host}
+        port: ${port}
+
+
+  observerbot.service2:
+    image: ${DOCKER_REGISTRY-}observerbotservice
+    build:
+      context: .
+      dockerfile: ObserverBot.Service/Dockerfile
+    environment:
+        Token: ${Token2}
+        RabbitMQ_HostName: ${RabbitMQ_HostName}
+        RabbitMQ_UserName: ${RabbitMQ_UserName}
+        RabbitMQ_Password: ${RabbitMQ_Password}
+        #RabbitMQ_ExchangeName: 333
+        RabbitMQ_Port: ${RabbitMQ_Port}
+        db_pwd: ${db_pwd}
+        db: ${db}
+        user: ${user}
+        db_host: ${db_host}
+        port: ${port}
+
+

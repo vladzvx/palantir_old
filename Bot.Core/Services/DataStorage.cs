@@ -58,6 +58,13 @@ namespace Bot.Core.Services
             await collection.InsertManyAsync( pages, cancellationToken: token);
         }
 
+        public async Task<List<TBot>> GetAllIds(CancellationToken token, long botId)
+        {
+            IMongoDatabase db = mongoClient.GetDatabase("bots", new MongoDatabaseSettings());
+            IMongoCollection<TBot> collection = db.GetCollection<TBot>(botId.ToString());
+            return (await collection.FindAsync(x => true)).ToList();
+        }
+
         //public async Task SavePage(Page page, CancellationToken token)
         //{
         //    IMongoDatabase db = mongoClient.GetDatabase("bots", new MongoDatabaseSettings());

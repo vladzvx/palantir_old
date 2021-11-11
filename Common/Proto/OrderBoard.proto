@@ -23,6 +23,7 @@ service OrderBoard {
   rpc PostEntity (Entity) returns (google.protobuf.Empty);
   rpc StreamMessages (stream Message) returns (google.protobuf.Empty);
   rpc DownloadMessages (google.protobuf.Empty) returns (stream SavedMessage);
+  rpc GetChats (google.protobuf.Empty) returns (stream Entity);
 }
 
 message Report{

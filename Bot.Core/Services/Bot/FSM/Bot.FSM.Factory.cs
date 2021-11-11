@@ -71,6 +71,19 @@ namespace Bot.Core.Services
                         return null;
                     }
                 }
+
+                
+                public static async Task Load(CancellationToken token)
+                {
+                    foreach (var bot in await dBWorker.GetAllIds(token, TextMessage.defaultClient.BotId.Value))
+                    {
+                        if (!state.ContainsKey(bot.Id))
+                        {
+                            state.TryAdd(bot.Id, new FSM<TBot>(bot.Id, bot));
+                        }
+
+                    }
+                }
             }
         }
     }
