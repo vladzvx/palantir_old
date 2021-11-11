@@ -38,7 +38,7 @@ namespace ObserverBot.Service
             services.AddSingleton<IMessagesSender, MessagesSender>();
             services.AddSingleton<ICommonWriter<Update>, MongoWriter>();
             services.AddSingleton<IDataStorage<Bot.Core.Models.ObserverBot>, DataStorage<Bot.Core.Models.ObserverBot>>();
-            //services.AddSingleton(new MongoClient(Options.MongoConnectionString));
+            services.AddSingleton(new MongoClient(Options.MongoConnectionString));
             services.AddSingleton<IDataStorage<Bot.Core.Models.ObserverBot>, DataStorage<Bot.Core.Models.ObserverBot>>();
 
             services.AddTransient<IFSMFactory<Bot.Core.Models.ObserverBot>, ObserverSubFSMFactory>();
