@@ -30,7 +30,7 @@ namespace ObserverBot.Service.Services
 
         public async Task ProcessUpdate(Update update, Bot.Core.Services.Bot.FSM<Bot.Core.Models.ObserverBot> fsm)
         {
-            messagesSender.AddItem(new TextMessage(null, update.Message.Chat.Id, "Оповещаю о появляющихся в телеграме упоминаниях. \nЕсли ничего не приходит - просто подождите какое-то время (возможно - несколько часов), и тему обязательно упомянут, а я сообщу вам об этом. \n\nНе выключайте оповещения!", null, new ReplyKeyboardRemove()));
+            messagesSender.AddItem(new TextMessage(null, update.Message.Chat.Id, Environment.GetEnvironmentVariable("def_reply")?? "Оповещаю о появляющихся в телеграме упоминаниях. \nЕсли ничего не приходит - просто подождите какое-то время (возможно - несколько часов), и тему обязательно упомянут, а я сообщу вам об этом. \n\nНе выключайте оповещения!", null, new ReplyKeyboardRemove()));
         }
     }
 }

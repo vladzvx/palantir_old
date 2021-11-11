@@ -20,6 +20,7 @@ namespace Bot.Core.Services
         }
         public void Start<TBot>() where TBot : IConfig, new()
         {
+            var q = typeof(TBot);
             botClient.StartReceiving<MessageHandler<TBot>>(cancellationToken);
             //botClient.StartReceiving<KeyboardHandler>(cancellationToken);
         }
