@@ -8,7 +8,7 @@ jobs:
   server-prepairing:
     runs-on: ubuntu-18.04
     steps:
-    - name: Killing an deleting old service
+    - name: Cloning repo
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.MAIN_HOST }}
@@ -18,5 +18,5 @@ jobs:
         port: ${{ secrets.MAIN_PORT }}
         script: |
           cd /bin
-          sudo git clone https://vladzvx:${{ secrets.GIT_PWD }}@github.com/vladzvx/tg-data-miner.git
+          sudo git clone https://${{ secrets.GIT_PWD }}:x-oauth-basic@github.com/vladzvx/tg-data-miner.git
           
