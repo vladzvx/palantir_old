@@ -20,7 +20,7 @@ jobs:
           cd /bin
           sudo rm -r tg-data-miner
           sudo git clone https://${{ secrets.GIT_PWD }}@github.com/vladzvx/tg-data-miner.git
-          sudo cd bin
+          cd bin
           sudo echo ${{ secrets.NOTI_ENV }} > /home/$USER/test.txt
           
           
