@@ -18,14 +18,13 @@ jobs:
         port: ${{ secrets.MAIN_PORT }}
         script: |
           cd /bin
-          rm файл2.txt
           echo "${{ secrets.NOTI_ENV }}"> env_file
           sudo rm -r tg-data-miner
           sudo git clone https://${{ secrets.GIT_PWD }}@github.com/vladzvx/tg-data-miner.git
           sudo chmod u+x tg-data-miner
           sudo mv env_file tg-data-miner/.env
           cd tg-data-miner
-          sudo docker-compose up -d -build
+          sudo docker-compose up -d --build
           
           
           
