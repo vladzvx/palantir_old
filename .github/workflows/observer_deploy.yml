@@ -19,11 +19,7 @@ jobs:
         script: |
           cd /bin
           sudo echo "${{ secrets.NOTI_ENV }}" >> /.env
-          sudo rm -r tg-data-miner
-          sudo git clone https://${{ secrets.GIT_PWD }}@github.com/vladzvx/tg-data-miner.git
-          sudo chmod u+x tg-data-miner
-          sudo mv .env tg-data-miner/
-          cd tg-data-miner
+
           
           
           
