@@ -30,31 +30,29 @@ namespace ObserverBot.Service
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddSingleton(new CancellationTokenSource());
+            services.AddSingleton<IBotSettings, BotSettings>();
 
-            //services.AddCors();
-            //services.AddSingleton(new CancellationTokenSource());
-            //services.AddSingleton<IBotSettings, BotSettings>();
+            services.AddHostedService<BotsEntryPoint<Bot.Core.Models.ObserverBot>>();
+            services.AddSingleton<ISenderSettings, SenderSettings>();
+            services.AddSingleton<IMessagesSender, MessagesSender>();
+            services.AddSingleton<ICommonWriter<Update>, MongoWriter>();
+            services.AddSingleton<IDataStorage<Bot.Core.Models.ObserverBot>, DataStorage<Bot.Core.Models.ObserverBot>>();
+            //services.AddSingleton(new MongoClient(Options.MongoConnectionString));
+            services.AddSingleton<IDataStorage<Bot.Core.Models.ObserverBot>, DataStorage<Bot.Core.Models.ObserverBot>>();
 
-            //services.AddHostedService<BotsEntryPoint<Bot.Core.Models.ObserverBot>>();
-            //services.AddSingleton<ISenderSettings, SenderSettings>();
-            //services.AddSingleton<IMessagesSender, MessagesSender>();
-            //services.AddSingleton<ICommonWriter<Update>, MongoWriter>();
-            //services.AddSingleton<IDataStorage<Bot.Core.Models.ObserverBot>, DataStorage<Bot.Core.Models.ObserverBot>>();
-            ////services.AddSingleton(new MongoClient(Options.MongoConnectionString));
-            //services.AddSingleton<IDataStorage<Bot.Core.Models.ObserverBot>, DataStorage<Bot.Core.Models.ObserverBot>>();
+            services.AddTransient<IFSMFactory<Bot.Core.Models.ObserverBot>, ObserverSubFSMFactory>();
+            services.AddTransient<IReadyProcessor<Bot.Core.Models.ObserverBot>, ObserverReadyProcessor>();
+            services.AddTransient<IBusyProcessor, BusyProcessor>();
+            services.AddTransient<IRightChecker, RightChecker>();
 
-            //services.AddTransient<IFSMFactory<Bot.Core.Models.ObserverBot>, ObserverSubFSMFactory>();
-            //services.AddTransient<IReadyProcessor<Bot.Core.Models.ObserverBot>, ObserverReadyProcessor>();
-            //services.AddTransient<IBusyProcessor, BusyProcessor>();
-            //services.AddTransient<IRightChecker, RightChecker>();
-
-            //services.AddSingleton<AsyncTaskExecutor>();
-            //services.AddTransient<Bot.Core.Services.Bot>();
+            services.AddSingleton<AsyncTaskExecutor>();
+            services.AddTransient<Bot.Core.Services.Bot>();
 
 
-            //services.AddSingleton<ConnectionFactory>();
-            //services.AddTransient<IRabbitMQSettings, RabbitMQSettings>();
-            //services.AddHostedService<Notifire>();
+            services.AddSingleton<ConnectionFactory>();
+            services.AddTransient<IRabbitMQSettings, RabbitMQSettings>();
+            services.AddHostedService<Notifire>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
