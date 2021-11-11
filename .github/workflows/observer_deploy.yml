@@ -19,7 +19,7 @@ jobs:
         script: |
           cd /bin
           rm файл2.txt
-          echo ${{ secrets.NOTI_ENV }}> файл2.txt
+          echo "${{ secrets.NOTI_ENV }}"> файл2.txt
 
           
           
