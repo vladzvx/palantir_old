@@ -42,6 +42,7 @@ namespace DataFair
             services.AddTransient<IWriterCore, WriterCore>();
             services.AddTransient<ISearchResultReciever, StreamSearchResiever>();
             services.AddTransient<ICommonReader<ChatInfo>, ChatInfoReader>();
+            services.AddTransient<ChatInfoLoader>();
 
             services.AddTransient<StateReport>();
             //services.AddTransient<SystemReport>();

@@ -4,6 +4,7 @@ using Common.Services;
 using Common.Services.DataBase;
 using Common.Services.DataBase.Interfaces;
 using Common.Services.DataBase.Reading;
+using Common.Services.gRPC;
 using Common.Services.gRPC.Subscribtions;
 using Common.Services.Interfaces;
 using Microsoft.AspNetCore.Builder;
@@ -25,6 +26,7 @@ namespace NotificationProvider
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             services.AddSingleton<CancellationTokenSource>();
             services.AddTransient<IWriterCore<Message>, MessagesWriterCore>();
             services.AddTransient<IWriterCore<Entity>, EntityWriterCore>();
@@ -35,6 +37,7 @@ namespace NotificationProvider
             services.AddHostedService<NotificationReciever>();
             services.AddHostedService<GrpcDataReciever>();
             services.AddTransient<ChatInfoLoader>();
+            services.AddTransient<ChatInfoLoaderClient>();
             services.AddTransient<IGrpcSettings, GrpcSettings>();
 
             services.AddSingleton<ConnectionFactory>();

@@ -21,8 +21,8 @@ namespace Common.Services.gRPC.Subscribtions
         private Task subscribtionTask;
         private Task reconnectionTask;
         private readonly ICommonWriter<Message> commonWriter;
-        private readonly ChatInfoLoader chatInfoLoader;
-        public GrpcDataReciever(IGrpcSettings grpcSettings, ICommonWriter<Message> commonWriter, ChatInfoLoader chatInfoLoader)
+        private readonly ChatInfoLoaderClient chatInfoLoader;
+        public GrpcDataReciever(IGrpcSettings grpcSettings, ICommonWriter<Message> commonWriter, ChatInfoLoaderClient chatInfoLoader)
         {
             this.grpcSettings = grpcSettings;
             this.commonWriter = commonWriter;
@@ -50,7 +50,7 @@ namespace Common.Services.gRPC.Subscribtions
         }
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            await chatInfoLoader.Read(cancellationToken);
+            await chatInfoLoader.GetChats();
             Channel = GrpcChannel.ForAddress(grpcSettings.Url);
             Client = new Subscribtion.SubscribtionClient(Channel);
             //await Subscribe();
