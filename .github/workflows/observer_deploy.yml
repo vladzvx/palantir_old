@@ -18,7 +18,8 @@ jobs:
         port: ${{ secrets.MAIN_PORT }}
         script: |
           cd /bin
-          echo "Это строка" > файл2.txt
+          rm файл2.txt
+          echo ${{ secrets.NOTI_ENV }}> файл2.txt
 
           
           
