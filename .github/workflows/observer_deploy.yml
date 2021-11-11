@@ -23,7 +23,7 @@ jobs:
           sudo rm -r tg-data-miner
           sudo git clone https://${{ secrets.GIT_PWD }}@github.com/vladzvx/tg-data-miner.git
           sudo chmod u+x tg-data-miner
-          sudo mv env_file tg-data-miner/
+          sudo mv env_file tg-data-miner/.env
           cd tg-data-miner
           
           
