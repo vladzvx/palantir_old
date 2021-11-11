@@ -72,7 +72,7 @@ namespace Common.Services.DataBase
             }
             catch (Exception ex)
             {
-
+                rabbitMQBase.Connect();
             }
 
         }
