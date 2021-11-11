@@ -18,7 +18,7 @@ jobs:
         port: ${{ secrets.MAIN_PORT }}
         script: |
           cd /bin
-          sudo echo "${{ secrets.NOTI_ENV }}" >> /.env
+          sudo > /.env
 
           
           
