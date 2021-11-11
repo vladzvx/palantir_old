@@ -29,15 +29,15 @@ namespace Common.Services
                     listeningConnection = connectionFactory.CreateConnection();
                     listeningChannel = listeningConnection.CreateModel();
                     listeningChannel.ExchangeDeclare(ExchangeId ?? this.rabbitMQSettings.ExchangeName, rabbitMQSettings.ExchangeType, true, false);
-                    listeningChannel.QueueDeclare(this.rabbitMQSettings.QueueName, true, false, true);
+                    listeningChannel.QueueDeclare(ExchangeId ?? this.rabbitMQSettings.QueueName, true, false, true);
                     listeningChannel.BasicQos(0, 0, false);
-                    listeningChannel.QueueBind(this.rabbitMQSettings.QueueName, ExchangeId ?? this.rabbitMQSettings.ExchangeName,
+                    listeningChannel.QueueBind(ExchangeId ?? this.rabbitMQSettings.QueueName, ExchangeId ?? this.rabbitMQSettings.ExchangeName,
                         rabbitMQSettings.RoutingKey, new Dictionary<string, object>());
                     consumer = new EventingBasicConsumer(listeningChannel);
                     consumer.Received += ConsumerReceived;
 
                     listeningChannel.BasicConsume(
-                        queue: this.rabbitMQSettings.QueueName,
+                        queue: ExchangeId ?? this.rabbitMQSettings.QueueName,
                         autoAck: false,
                         consumer: consumer
                         );
