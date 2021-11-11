@@ -14,34 +14,53 @@ namespace Common.Services
 {
     public class RabbitMQBaseConsumer :  IHostedService
     {
-        protected readonly EventingBasicConsumer consumer;
-        protected readonly IConnection listeningConnection;
-        protected readonly IModel listeningChannel;
+        protected EventingBasicConsumer consumer;
+        protected IConnection listeningConnection;
+        protected IModel listeningChannel;
         protected readonly ConnectionFactory connectionFactory;
         protected readonly IRabbitMQSettings rabbitMQSettings;
+        private string ExchangeId;
+        public void Connect()
+        {
+            while (true)
+            {
+                try
+                {
+                    listeningConnection = connectionFactory.CreateConnection();
+                    listeningChannel = listeningConnection.CreateModel();
+                    listeningChannel.ExchangeDeclare(ExchangeId ?? this.rabbitMQSettings.ExchangeName, rabbitMQSettings.ExchangeType, true, false);
+                    listeningChannel.QueueDeclare(this.rabbitMQSettings.QueueName, true, false, true);
+                    listeningChannel.BasicQos(0, 0, false);
+                    listeningChannel.QueueBind(this.rabbitMQSettings.QueueName, ExchangeId ?? this.rabbitMQSettings.ExchangeName,
+                        rabbitMQSettings.RoutingKey, new Dictionary<string, object>());
+                    consumer = new EventingBasicConsumer(listeningChannel);
+                    consumer.Received += ConsumerReceived;
 
+                    listeningChannel.BasicConsume(
+                        queue: this.rabbitMQSettings.QueueName,
+                        autoAck: false,
+                        consumer: consumer
+                        );
+                    break;
 
+                }
+                catch (Exception ex)
+                {
+                    listeningConnection.Dispose();
+                    listeningChannel.Dispose();
+                    Thread.Sleep(1000);
+                }
+
+            }
+
+        }
         public RabbitMQBaseConsumer(IRabbitMQSettings rabbitMQSettings, ConnectionFactory connectionFactory, string ExchangeId=null)
         {
             IRabbitMQSettings.ApplySettings(rabbitMQSettings, connectionFactory);
 
             this.connectionFactory = connectionFactory;
             this.rabbitMQSettings = rabbitMQSettings;
-            listeningConnection = connectionFactory.CreateConnection();
-            listeningChannel = listeningConnection.CreateModel();
-            listeningChannel.ExchangeDeclare(ExchangeId ?? this.rabbitMQSettings.ExchangeName, rabbitMQSettings.ExchangeType, true, false);
-            listeningChannel.QueueDeclare(this.rabbitMQSettings.QueueName, true, false, true);
-            listeningChannel.BasicQos(0, 0, false);
-            listeningChannel.QueueBind(this.rabbitMQSettings.QueueName, ExchangeId ?? this.rabbitMQSettings.ExchangeName,
-                rabbitMQSettings.RoutingKey, new Dictionary<string, object>());
-            consumer = new EventingBasicConsumer(listeningChannel);
-            consumer.Received += ConsumerReceived;
-
-            listeningChannel.BasicConsume(
-                queue: this.rabbitMQSettings.QueueName,
-                autoAck: false,
-                consumer: consumer
-                );
+            this.ExchangeId = ExchangeId;
         }
 
         public virtual void Publish(ReadOnlyMemory<byte> body,string exchange)

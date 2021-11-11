@@ -43,18 +43,26 @@ namespace ObserverBot.Service
         }
         public override void ConsumerReceived(object sender, BasicDeliverEventArgs e)
         {
-            var qq = (NotiModel)System.Text.Json.JsonSerializer.Deserialize(Encoding.UTF8.GetString(e.Body.Span), typeof(NotiModel));
-            if (qq.ChatId == 0)
+            try
             {
-                foreach (long key in Bot.Core.Services.Bot.FSM<Bot.Core.Models.ObserverBot>.Factory.state.Keys)
+                var qq = (NotiModel)System.Text.Json.JsonSerializer.Deserialize(Encoding.UTF8.GetString(e.Body.Span), typeof(NotiModel));
+                if (qq.ChatId == 0)
                 {
-                    messagesSender.AddItem(new TextMessage(null, key, qq.Link +"\n\n"+Math.Round(qq.Rank,3)+ "\n\n"+ qq.Text, null));
+                    foreach (long key in Bot.Core.Services.Bot.FSM<Bot.Core.Models.ObserverBot>.Factory.state.Keys)
+                    {
+                        messagesSender.AddItem(new TextMessage(null, key, qq.Link + "\n\n" + Math.Round(qq.Rank, 3) + "\n\n" + qq.Text, null));
+                    }
+                }
+                else
+                {
+                    messagesSender.AddItem(new TextMessage(null, qq.ChatId, qq.Link + "\n\n" + Math.Round(qq.Rank, 3) + "\n\n" + qq.Text, null));
                 }
             }
-            else
+            catch (Exception ex)
             {
-                messagesSender.AddItem(new TextMessage(null, qq.ChatId, qq.Link + "\n\n" + Math.Round(qq.Rank, 3) + "\n\n" + qq.Text, null));
+                Connect();
             }
+
         }
 
         public override async Task StartAsync(CancellationToken cancellationToken)

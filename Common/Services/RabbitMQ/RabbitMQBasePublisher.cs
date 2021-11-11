@@ -13,9 +13,9 @@ namespace Common.Services
 {
     public class RabbitMQBasePublisher : IHostedService
     {
-        protected readonly EventingBasicConsumer consumer;
-        protected IConnection listeningConnection;
-        protected IModel listeningChannel;
+        public EventingBasicConsumer consumer;
+        public IConnection listeningConnection;
+        public IModel listeningChannel;
         protected readonly ConnectionFactory connectionFactory;
         protected readonly IRabbitMQSettings rabbitMQSettings;
         private string ExchangeId;

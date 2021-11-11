@@ -72,6 +72,8 @@ namespace Common.Services.DataBase
             }
             catch (Exception ex)
             {
+                rabbitMQBase.listeningChannel.Dispose();
+                rabbitMQBase.listeningConnection.Dispose();
                 rabbitMQBase.Connect();
             }
 
