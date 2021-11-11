@@ -33,6 +33,14 @@ namespace DataFair.Controllers
         }
 
 
+        [HttpPost("setcount")]
+        [EnableCors()]
+        public string set(CounterModel order)
+        {
+            state.SetCounter(order.Counter);
+            return "ok";
+
+        }
         //[HttpPost("GetHistory")]
         //[EnableCors()]
         //public async Task<string> PostRequest3(CancellationToken token)

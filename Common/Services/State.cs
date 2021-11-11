@@ -112,6 +112,16 @@ namespace Common.Services
             }
         }
 
+        public void SetCounter(int count)
+        {
+            foreach (var key in ExecutingOrdersJournal.Keys)
+            {
+                if (ExecutingOrdersJournal.TryGetValue(key, out var cou))
+                {
+                    cou.count = count;
+                }
+            }
+        }
         private bool CheckCounter(string key)
         {
             if (!string.IsNullOrEmpty(key))
