@@ -713,76 +713,76 @@ create index messages_id_index on messages (chat_id,id);
 
 
 
-create table queries(
-    id bigserial,
-    query tsquery,
-    client_id bigint,
-    primary key (id)
-);
+--create table queries(
+--    id bigserial,
+--    query tsquery,
+--    client_id bigint,
+--    primary key (id)
+--);
 
 
-create table spotter(
-    id bigserial,
-    time timestamp default current_timestamp not null ,
-    query_id bigint,
-    requester_id text,
-    client_id bigint not null,
-    link text,
-    preview_text text,
-    data tsvector,
-    need_trigger bool not null default true,
-    teal_time timestamp,
-    primary key (id),
-    foreign key (query_id) references queries(id)
-);
+--create table spotter(
+--    id bigserial,
+--    time timestamp default current_timestamp not null ,
+--    query_id bigint,
+--    requester_id text,
+--    client_id bigint not null,
+--    link text,
+--    preview_text text,
+--    data tsvector,
+--    need_trigger bool not null default true,
+--    teal_time timestamp,
+--    primary key (id),
+--    foreign key (query_id) references queries(id)
+--);
 
-create or replace function add_query(request text, _client_id bigint) returns void as
-$$
-    begin
-        insert into queries (query,client_id) values (to_tsquery('my_default',request), _client_id);
-    end;
-$$ LANGUAGE plpgsql;
+--create or replace function add_query(request text, _client_id bigint) returns void as
+--$$
+--    begin
+--        insert into queries (query,client_id) values (to_tsquery('my_default',request), _client_id);
+--    end;
+--$$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION spotter_protect() RETURNS trigger as
-$$
-    DECLARE
-        temp text;
-    begin
-        if not new.need_trigger then
-            temp = pg_notify('test','"link":'||new.link||'; "text": '||new.preview_text||'"client":'||new.client_id||'"requester":'||new.requester_id||'"query_id":'||new.query_id);
-            return new;
-        end if;
-        insert into spotter(query_id, requester_id, client_id, data,need_trigger,preview_text,link,teal_time)  (
-        with q as(
-        select id,query,client_id from public.queries),
-        res as(
-            select (q.query @@ new.data) as result, q.id as q_id, q.client_id as client_id,new.requester_id as requester_id, new.data as data, new.teal_time as rt from q
-        ) select res.q_id,res.requester_id,res.client_id,res.data,false,new.preview_text,new.link,res.rt from res where result);
+--CREATE OR REPLACE FUNCTION spotter_protect() RETURNS trigger as
+--$$
+--    DECLARE
+--        temp text;
+--    begin
+--        if not new.need_trigger then
+---            temp = pg_notify('test','"link":'||new.link||'; "text": '||new.preview_text||'"client":'||new.client_id||'"requester":'||new.requester_id||'"query_id":'||new.query_id);
+--            return new;
+--        end if;
+--        insert into spotter(query_id, requester_id, client_id, data,need_trigger,preview_text,link,teal_time)  (
+--        with q as(
+--        select id,query,client_id from public.queries),
+--        res as(
+--            select (q.query @@ new.data) as result, q.id as q_id, q.client_id as client_id,new.requester_id as requester_id, new.data as data, new.teal_time as rt from q
+--        ) select res.q_id,res.requester_id,res.client_id,res.data,false,new.preview_text,new.link,res.rt from res where result);
 
-        return null;
-    end;
-$$ LANGUAGE plpgsql;
+--        return null;
+--    end;
+--$$ LANGUAGE plpgsql;
 --drop trigger on_insert_to_spotter on spotter;
-CREATE TRIGGER on_insert_to_spotter before INSERT on public.spotter FOR EACH ROW execute PROCEDURE spotter_protect();
+--CREATE TRIGGER on_insert_to_spotter before INSERT on public.spotter FOR EACH ROW execute PROCEDURE spotter_protect();
 
-CREATE OR REPLACE FUNCTION after_messages() RETURNS trigger as
-$$
-    DECLARE
-        temp text;
-    begin
-        if EXTRACT(EPOCH FROM (current_timestamp - new.message_timestamp))<43200 then
-                    with sel as (select username,name,pair_username,id,new.text as text,new.id as mess_id, new.message_timestamp as real_time from chats where id= new.chat_id)
-          insert into spotter(requester_id, client_id,data,need_trigger,link,preview_text,teal_time) values
-      ('bot',0,new.vectorised_text_my_default,true,
-       (select ('https://t.me/'||COALESCE(sel.username,'c/'||(sel.id::text))||'/'||sel.mess_id)::text from sel),
-       substring(new.text,0,200),(select sel.real_time from sel));
-
-       end if;
-        return null;
-    end;
-$$ LANGUAGE plpgsql;
+--CREATE OR REPLACE FUNCTION after_messages() RETURNS trigger as
+--$$
+--    DECLARE
+--        temp text;
+ --   begin
+ --       if EXTRACT(EPOCH FROM (current_timestamp - new.message_timestamp))<43200 then
+--                    with sel as (select username,name,pair_username,id,new.text as text,new.id as mess_id, new.message_timestamp as real_time from chats where id= new.chat_id)
+--          insert into spotter(requester_id, client_id,data,need_trigger,link,preview_text,teal_time) values
+--      ('bot',0,new.vectorised_text_my_default,true,
+--       (select ('https://t.me/'||COALESCE(sel.username,'c/'||(sel.id::text))||'/'||sel.mess_id)::text from sel),
+--       substring(new.text,0,200),(select sel.real_time from sel));
+--
+--       end if;
+--        return null;
+--    end;
+--$$ LANGUAGE plpgsql;
 --drop trigger after_messages_insert on public.messages ;
-CREATE TRIGGER after_messages_insert after INSERT on public.messages FOR EACH ROW execute PROCEDURE after_messages();
+--CREATE TRIGGER after_messages_insert after INSERT on public.messages FOR EACH ROW execute PROCEDURE after_messages();
 
 
 create or replace function get_data_for_consistency() returns table (ch_id bigint ,ch_username text,lat_m bigint,ch_finders text[],ch_p_id bigint,ch_p_last bigint,p_username text) as

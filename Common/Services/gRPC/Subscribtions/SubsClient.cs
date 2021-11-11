@@ -50,7 +50,7 @@ namespace Common.Services.gRPC.Subscribtions
         }
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            await chatInfoLoader.GetChats();
+            //await chatInfoLoader.GetChats();
             Channel = GrpcChannel.ForAddress(grpcSettings.Url);
             Client = new Subscribtion.SubscribtionClient(Channel);
             //await Subscribe();

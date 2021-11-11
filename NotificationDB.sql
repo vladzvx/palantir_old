@@ -718,6 +718,7 @@ create table queries(
     query tsquery,
     chat_id bigint,
     bot_id bigint,
+	is_channel bool,
     primary key (id)
 );
 
@@ -733,6 +734,8 @@ create table spotter(
     data tsvector,
     need_trigger bool not null default true,
     teal_time timestamp,
+    rank float4,
+	is_channel bool,
     primary key (id),
     foreign key (query_id) references queries(id)
 );
@@ -751,16 +754,16 @@ DECLARE
         temp text;
     begin
         if not new.need_trigger then
-                temp2=json_build_object('Link',new.link,'Text',new.preview_text,'BotId',new.bot_id,'ChatId',new.chat_id);
+                temp2=json_build_object('Link',new.link,'Text',new.preview_text,'BotId',new.bot_id,'ChatId',new.chat_id,'Rank',new.rank);
             temp = pg_notify('test',temp2::text);
             return new;
         end if;
-        insert into spotter(query_id, bot_id, chat_id, data,need_trigger,preview_text,link,teal_time)  (
+        insert into spotter(query_id, bot_id, chat_id, data,need_trigger,preview_text,link,teal_time,rank)  (
         with q as(
         select id,query,chat_id,queries.bot_id from public.queries),
         res as(
-            select (q.query @@ new.data) as result, q.id as q_id, q.chat_id as chat_id,q.bot_id as bot_id, new.data as data, new.teal_time as rt from q
-        ) select res.q_id,res.bot_id,res.chat_id,res.data,false,new.preview_text,new.link,res.rt from res where result);
+            select (q.query @@ new.data) as result, q.id as q_id, q.chat_id as chat_id,q.bot_id as bot_id, new.data as data,(new.data <=> q.query)::float4 as rank, new.teal_time as rt from q
+        ) select res.q_id,res.bot_id,res.chat_id,res.data,false,new.preview_text,new.link,res.rt,res.rank from res where result);
 
         return null;
     end;
@@ -774,15 +777,15 @@ $$
         temp text;
     begin
         if EXTRACT(EPOCH FROM (current_timestamp - new.message_timestamp))<43200 then
-                    --with sel as (select username,name,pair_username,id,new.text as text,new.id as mess_id, new.message_timestamp as real_time from chats where id= new.chat_id)
-          --insert into spotter(data,need_trigger,link,preview_text,teal_time) values
-     -- (new.vectorised_text_my_default,true,
-     --  (select ('https://t.me/'||COALESCE(sel.username,'c/'||(sel.id::text))||'/'||sel.mess_id)::text from sel),
-     --  substring(new.text,0,200),(select sel.real_time from sel));
+                    with sel as (select username,name,pair_username,id,new.text as text,new.id as mess_id, new.message_timestamp as real_time from chats where id= new.chat_id)
           insert into spotter(data,need_trigger,link,preview_text,teal_time) values
       (new.vectorised_text_my_default,true,
-       'https://t.me/c/'||(new.chat_id::text)||'/'||(new.id)::text,
-       substring(new.text,0,200),new.message_timestamp);
+       (select ('https://t.me/'||COALESCE(sel.username,'c/'||(sel.id::text))||'/'||sel.mess_id)::text from sel),
+       substring(new.text,0,200),(select sel.real_time from sel));
+          --insert into spotter(data,need_trigger,link,preview_text,teal_time) values
+      --(new.vectorised_text_my_default,true,
+       --'https://t.me/c/'||(new.chat_id::text)||'/'||(new.id)::text,
+      -- substring(new.text,0,200),new.message_timestamp);
 	   
        end if;
         return null;

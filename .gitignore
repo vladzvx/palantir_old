@@ -268,3 +268,6 @@ __pycache__/
 #deploy
 deploy*.bat
 .github
+
+$docker-compose
+*env
