@@ -81,5 +81,3 @@ services:
         user: ${user}
         db_host: ${db_host}
         port: ${port}
-
-
