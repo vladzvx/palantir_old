@@ -18,9 +18,8 @@ jobs:
         port: ${{ secrets.MAIN_PORT }}
         script: |
           cd /bin
-          sudo > /.env
+          echo "Это строка" > файл2.txt
 
-          
           
           
           
