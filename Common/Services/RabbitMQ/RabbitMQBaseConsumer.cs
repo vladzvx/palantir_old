@@ -38,7 +38,7 @@ namespace Common.Services
 
                     listeningChannel.BasicConsume(
                         queue: ExchangeId ?? this.rabbitMQSettings.QueueName,
-                        autoAck: false,
+                        autoAck: true,
                         consumer: consumer
                         );
                     break;
