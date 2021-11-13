@@ -70,7 +70,10 @@ namespace Bot.Core.Models
 
         public TextMessage GetTextMessage(ITelegramBotClient client, long chatId, Channel<int> channel=null, bool firstPage = false)
         {
-            
+            InlineKeyboardButton donate = new InlineKeyboardButton();
+            donate.Text = "Поддержать проект";
+            donate.Url = Environment.GetEnvironmentVariable("donate")??"https://new.donatepay.ru/@yesod";
+
             InlineKeyboardButton Empty = new InlineKeyboardButton();
             Empty.Text = " - ";
             Empty.CallbackData = "-";
@@ -91,19 +94,22 @@ namespace Bot.Core.Models
             InlineKeyboardMarkup keyb;
             if (position == Position.First)
             {
-                keyb = new InlineKeyboardMarkup(Next);
+                keyb = new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Next },
+                    new List<InlineKeyboardButton>() { donate}});
             }
             else if (position == Position.Middle)
             {
-                keyb = new InlineKeyboardMarkup(new InlineKeyboardButton[2] { Prev, Next });
+                keyb = new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Prev, Next },
+                    new List<InlineKeyboardButton>() { donate}});
             }
             else if (position == Position.Last)
             {
-                keyb = new InlineKeyboardMarkup(Prev);
+                keyb = new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Prev, },
+                    new List<InlineKeyboardButton>() { donate}});
             }
             else if (position==Position.Single)
             {
-                keyb = null;
+                keyb = new InlineKeyboardMarkup(donate);
             }
             else
             {
@@ -120,10 +126,14 @@ namespace Bot.Core.Models
 
         public EditTextMessage GetEditTextMessage(ITelegramBotClient client, long chatId,int messageId, Channel<int> channel = null)
         {
+            InlineKeyboardButton donate = new InlineKeyboardButton();
+            donate.Text = "Поддержать проект";
+            donate.Url = Environment.GetEnvironmentVariable("donate") ?? "https://new.donatepay.ru/@yesod";
+
             InlineKeyboardButton Next = new InlineKeyboardButton();
             Next.Text = "Далее";
             Next.CallbackData = NextId.HasValue ? NextId.Value.ToString() : string.Empty;
-
+            
             InlineKeyboardButton Prev = new InlineKeyboardButton();
             Prev.Text = "Назад";
             Prev.CallbackData = PreviousId.HasValue ? PreviousId.Value.ToString() : string.Empty;
@@ -133,19 +143,22 @@ namespace Bot.Core.Models
 
             if (position == Position.First)
             {
-                keyb = new InlineKeyboardMarkup(Next);
+                keyb = new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Next },
+                    new List<InlineKeyboardButton>() { donate}});
             }
             else if (position == Position.Middle)
             {
-                keyb = new InlineKeyboardMarkup(new InlineKeyboardButton[2] { Prev, Next });
+                keyb = new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Prev, Next },
+                    new List<InlineKeyboardButton>() { donate}});
             }
             else if (position == Position.Last)
             {
-                keyb = new InlineKeyboardMarkup(Prev);
+                keyb = new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Prev, },
+                    new List<InlineKeyboardButton>() { donate}});
             }
             else if (position == Position.Single)
             {
-                keyb = null;
+                keyb = new InlineKeyboardMarkup(donate);
             }
             else
             {

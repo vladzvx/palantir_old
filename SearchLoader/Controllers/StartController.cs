@@ -60,7 +60,7 @@ namespace SearchLoader.Controllers
                     IsChannel = true,
                     IsGroup = true,
                     Request = req,
-                    StartTime = Timestamp.FromDateTime(DateTime.UtcNow.AddDays(-rnd.Next(1, 1000))),
+                    StartTime = Timestamp.FromDateTime(DateTime.UtcNow.AddDays(-rnd.Next(1, 30))),
                     EndTime = Timestamp.FromDateTime(DateTime.UtcNow),
                     SearchType = SearchType.SearchNamePeriod,
                     Limit = 100
@@ -144,7 +144,7 @@ namespace SearchLoader.Controllers
                                 IsChannel = true,
                                 IsGroup = true,
                                 Request = req,
-                                StartTime = Timestamp.FromDateTime(DateTime.UtcNow.AddDays(-rnd.Next(1, 1000))),
+                                StartTime = Timestamp.FromDateTime(DateTime.UtcNow.AddDays(-rnd.Next(1, 30))),
                                 EndTime = Timestamp.FromDateTime(DateTime.UtcNow),
                                 SearchType = SearchType.SearchNamePeriod,
                                 Limit = 100
