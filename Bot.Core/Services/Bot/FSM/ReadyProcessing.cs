@@ -94,6 +94,11 @@ namespace Bot.Core.Services
         {
             if (!await fsm.TryStartSubFSM(update) && !(asyncTaskExecutor == null))
             {
+                if (update.Message.Text == "/start")
+                {
+                    messagesSender.AddItem(new TextMessage(null, update.Message.Chat.Id, "Приветствую! Для первого поиска просто отправьте мне слово/словосочетание.\n\nДля настройки параметров поиска нажмите /settings", null, new ReplyKeyboardRemove()));
+                    return;
+                }
                 fsm.config.BotState = PrivateChatState.Busy;
                 CancellationTokenSource = new CancellationTokenSource();
                 SearchReciever searchClient = (SearchReciever)serviceProvider.GetService(typeof(SearchReciever));
