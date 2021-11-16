@@ -147,9 +147,26 @@ namespace Common.Services.DataBase
             CancellationToken token,
             params long[] chat_ids)
         {
-            //List<Task> tasks = new List<Task>();
-            await Search(storedProcedure, request, startDt, endDt, 7, is_channel, is_group, token, chat_ids);
-            await Search(storedProcedure, request, startDt, endDt, limit, is_channel, is_group, token, chat_ids);
+            DateTime temp1 = new DateTime(endDt.Year, endDt.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+            DateTime temp2 = temp1.AddMonths(-1);
+            if (startDt < temp2)
+            {
+                await Search(storedProcedure, request, temp1, endDt, limit, is_channel, is_group, token, chat_ids);
+                await Search(storedProcedure, request, temp2, temp1, limit, is_channel, is_group, token, chat_ids);
+                await Search(storedProcedure, request, startDt, temp2, limit, is_channel, is_group, token, chat_ids);
+            }
+            else if (startDt < temp1)
+            {
+                await Search(storedProcedure, request, temp1, endDt, limit, is_channel, is_group, token, chat_ids);
+                await Search(storedProcedure, request, startDt, temp1, limit, is_channel, is_group, token, chat_ids);
+            }
+            else 
+            {
+                await Search(storedProcedure, request, startDt, endDt, limit, is_channel, is_group, token, chat_ids);
+            }
+
+
+
             //tasks.Add(Search(storedProcedure, request, startDt, endDt, limit, is_channel, is_group, token, chat_ids));
             //await Task.WhenAny(tasks);
             //return Task.WhenAll(tasks);
