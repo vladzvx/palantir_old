@@ -30,13 +30,5 @@ namespace DataFair.Controllers
                 req.Request, req.startDT, req.endDT, req.Limit, req.isChannel, req.isGroup, token, req.ChatIds);
             return Newtonsoft.Json.JsonConvert.SerializeObject(searchProvider.searchResultReciever.ViewResults());
         }
-
-        [HttpPost("person")]
-        [EnableCors()]
-        public async Task<string> GetPersonMessages(PersonSearchRequest req, CancellationToken token)
-        {
-            await searchProvider.PersonSearch(req.Limit, req.Id, token);
-            return Newtonsoft.Json.JsonConvert.SerializeObject(searchProvider.searchResultReciever.ViewResults());
-        }
     }
 }
