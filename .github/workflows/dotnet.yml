@@ -32,3 +32,20 @@ jobs:
           file: ./DataFair/Dockerfile
           push: true
           tags: vladzvx/tg-data-miner:data-fair
+  deploy:
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Cloning repo
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.MAIN_HOST }}
+        username: ${{ secrets.MAIN_USERNAME }}
+        key : ${{ secrets.MAIN_SSH_KEY }}
+        passphrase: ${{ secrets.MAIN_PWD}}
+        port: ${{ secrets.MAIN_PORT }}
+        script: |
+          sudo docker stop data_fair
+          sudo docker rm data_fair
+          sudo docker pull vladzvx/tg-data-miner:data-fair
+          sudo docker run --restart=always --name data_fair -d -p 5005:5005 -p 5002:5002 --env ConnectionString="User ID=postgres;Password=QW12cv9001Qw_;Host=84.201.164.97;Port=5432;Database=test_db;Pooling=false;Timeout=30;CommandTimeout=0;"
+
