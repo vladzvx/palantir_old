@@ -129,7 +129,7 @@ namespace Common.Services.DataBase
                 await Search(storedProcedure, request, startDt, endDt, limit, is_channel, is_group, token, chat_ids);
             }
 
-            await Task.Delay(100);
+            await Task.Delay(1000);
 
         }
         public async Task PersonSearch(int limit, long id, CancellationToken token)
