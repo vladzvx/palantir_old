@@ -35,7 +35,7 @@
       "commandName": "Docker",
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
       "publishAllPorts": true,
-      "DockerfileRunArguments": "--env GrpcUrl=http://84.201.164.97:5005 --env Token=1879635077:AAF0VwZBYJ-OLAkuNdXhZvGLCiHD0E2Yfek --env db_pwd=QW12cv9001Qw_ --env db=bots --env db_host=84.201.164.97 --env user=bot --env BoundUserStatus=common --env port=5017"
+      "DockerfileRunArguments": "--env GrpcUrl=http://192.168.14.196:5005 --env Token=1879635077:AAF0VwZBYJ-OLAkuNdXhZvGLCiHD0E2Yfek --env db_pwd=QW12cv9001Qw_ --env db=bots --env db_host=84.201.164.97 --env user=bot --env BoundUserStatus=common --env port=5017"
     }
   }
 }

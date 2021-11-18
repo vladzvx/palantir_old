@@ -15,19 +15,21 @@
       }
     },
     "DataFair": {
-      "commandName": "Project",
+      "commandName": "Docker",
       "environmentVariables": {
         "ConnectionString": "User ID=postgres;Password=QW12cv9001Qw_;Host=84.201.164.97;Port=5432;Database=test_db;Pooling=false;Timeout=30;CommandTimeout=0;",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": "true",
+      "DockerfileRunArguments": "",
       "applicationUrl": "https://localhost:5001;http://localhost:5000"
     },
     "Docker": {
       "commandName": "Docker",
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
       "publishAllPorts": true,
-      "useSSL": true
+      "useSSL": true,
+      "DockerfileRunArguments": "-p 5005:5005 -p 5002:5002 --env ConnectionString=\"User ID=postgres;Password=QW12cv9001Qw_;Host=84.201.164.97;Port=5432;Database=test_db;Pooling=false;Timeout=30;CommandTimeout=0;\""
     }
   }
 }
