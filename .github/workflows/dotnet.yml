@@ -47,5 +47,5 @@ jobs:
           sudo docker stop data_fair
           sudo docker rm data_fair
           sudo docker pull vladzvx/tg-data-miner:data-fair
-          sudo docker run --restart=always --name data_fair -d -p 5005:5005 -p 5002:5002 --env ConnectionString="User ID=postgres;Password=QW12cv9001Qw_;Host=84.201.164.97;Port=5432;Database=test_db;Pooling=false;Timeout=30;CommandTimeout=0;"
+          sudo docker run --restart=always --name data_fair -d -p 5005:5005 -p 5002:5002 --env ConnectionString="User ID=postgres;Password=${{ secrets.MAIN_PG_PWD}};Host=${{ secrets.MAIN_HOST }};Port=5432;Database=test_db;Pooling=false;Timeout=30;CommandTimeout=0;" vladzvx/tg-data-miner:data-fair 
 
