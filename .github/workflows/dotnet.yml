@@ -29,6 +29,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ./
-          file: ./DataFair/BotDockerfile
+          file: ./DataFair/Dockerfile
           push: true
           tags: vladzvx/tg-data-miner:data-fair
