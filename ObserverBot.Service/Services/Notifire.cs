@@ -50,12 +50,14 @@ namespace ObserverBot.Service
                 {
                     foreach (long key in Bot.Core.Services.Bot.FSM<Bot.Core.Models.ObserverBot>.Factory.state.Keys)
                     {
-                        messagesSender.AddItem(new TextMessage(null, key, qq.Link + "\n\n" + Math.Round(qq.Rank, 3) + "\n\n" + qq.Text, null));
+                        //messagesSender.AddItem(new TextMessage(null, key, qq.Link + "\n\n" + Math.Round(qq.Rank, 3) + "\n\n" + qq.Text, null));
+                        messagesSender.AddItem(new TextMessage(null, key, qq.Link + "\n\n" + qq.Text, null));
                     }
                 }
                 else
                 {
-                    messagesSender.AddItem(new TextMessage(null, qq.ChatId, qq.Link + "\n\n" + Math.Round(qq.Rank, 3) + "\n\n" + qq.Text, null));
+                    //messagesSender.AddItem(new TextMessage(null, qq.ChatId, qq.Link + "\n\n" + Math.Round(qq.Rank, 3) + "\n\n" + qq.Text, null));
+                    messagesSender.AddItem(new TextMessage(null, qq.ChatId, qq.Link + "\n\n" + qq.Text, null));
                 }
             }
             catch (Exception ex)
