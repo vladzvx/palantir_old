@@ -16,6 +16,7 @@ namespace Bot.Core.Controllers
         [HttpPost()]
         public async Task<string> set(LinkInfo linkInfo)
         {
+
             DonateLinks.keyboards.AddOrUpdate(linkInfo.Name, linkInfo, (key, val) =>
             {
                 return linkInfo;
