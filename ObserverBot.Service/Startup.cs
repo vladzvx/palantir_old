@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using ObserverBot.Service.Services;
 using RabbitMQ.Client;
@@ -29,6 +30,7 @@ namespace ObserverBot.Service
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            ConventionRegistry.Register("IgnoreIfNullConvention", new ConventionPack { new IgnoreIfNullConvention(true) }, t => true);
             services.AddControllers();
             services.AddSingleton(new CancellationTokenSource());
             services.AddSingleton<IBotSettings, BotSettings>();
@@ -36,7 +38,7 @@ namespace ObserverBot.Service
             services.AddHostedService<BotsEntryPoint<Bot.Core.Models.ObserverBot>>();
             services.AddSingleton<ISenderSettings, SenderSettings>();
             services.AddSingleton<IMessagesSender, MessagesSender>();
-            services.AddSingleton<ICommonWriter<Update>, MongoWriter>();
+            services.AddSingleton<MongoWriter>();
             services.AddSingleton<IDataStorage<Bot.Core.Models.ObserverBot>, DataStorage<Bot.Core.Models.ObserverBot>>();
             services.AddSingleton(new MongoClient(Options.MongoConnectionString));
             services.AddSingleton<IDataStorage<Bot.Core.Models.ObserverBot>, DataStorage<Bot.Core.Models.ObserverBot>>();

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Message = Telegram.Bot.Types.Message;
+using Telegram.Bot.Types;
 
 namespace Bot.Core.Services
 {
@@ -22,7 +22,9 @@ namespace Bot.Core.Services
             }
             var q = dBWorker.GetType();
             Bot.FSM<TBot>.Factory.dBWorker = dBWorker;
-            MessageHandler<TBot>.writer = (ICommonWriter<Message>)serviceProvider.GetService(typeof(ICommonWriter<Message>));
+            MessageHandler<TBot>.writer = (MongoWriter)serviceProvider.GetService(typeof(MongoWriter));
+            if (bot.botClient != null && bot.botClient.BotId.HasValue)
+                MessageHandler<TBot>.writer.Start(bot.botClient.BotId.Value);
             MessageHandler<TBot>.asyncTaskExecutor = (AsyncTaskExecutor)serviceProvider.GetService(typeof(AsyncTaskExecutor));
             MessageHandler<TBot>.searchState = (SearchState)serviceProvider.GetService(typeof(SearchState));
         }

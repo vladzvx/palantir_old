@@ -17,7 +17,7 @@ namespace Bot.Core.Services
 {
     public class MessageHandler<TBot> : IUpdateHandler where TBot:IConfig,new()
     {
-        public static ICommonWriter<Message> writer;
+        public static MongoWriter writer;
         public static AsyncTaskExecutor asyncTaskExecutor;
         public static SearchState searchState;
         public static IBotSettings botSettings;
@@ -32,6 +32,7 @@ namespace Bot.Core.Services
         {
             if (update.Type == UpdateType.Message)
             {
+                await writer.PutData(update);
                 Bot.FSM<TBot> processor = await Bot.FSM<TBot>.Factory.Get(update, cancellationToken);
                 await processor.Process(update, cancellationToken);
             }

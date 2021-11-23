@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using System;
 using System.Threading;
@@ -27,6 +28,7 @@ namespace Bot.Service
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            ConventionRegistry.Register("IgnoreIfNullConvention", new ConventionPack { new IgnoreIfNullConvention(true) }, t => true);
             services.AddControllers();
             services.AddSingleton(new CancellationTokenSource());
             services.AddSingleton<IBotSettings, BotSettings>();
@@ -37,7 +39,7 @@ namespace Bot.Service
             services.AddHostedService<BotsEntryPoint<SearchBot>>();
             services.AddSingleton<ISenderSettings, SenderSettings>();
             services.AddSingleton<IMessagesSender, MessagesSender>();
-            services.AddSingleton<ICommonWriter<Update>, MongoWriter>();
+            services.AddSingleton<MongoWriter>();
             services.AddSingleton<IDataStorage<SearchBot>, DataStorage<SearchBot>>();
             services.AddSingleton(new MongoClient(Options.MongoConnectionString));
 
