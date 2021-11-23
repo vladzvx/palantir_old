@@ -1,8 +1,10 @@
-﻿using Bot.Core.Interfaces;
+﻿using Bot.Core.Enums;
+using Bot.Core.Interfaces;
 using Bot.Core.Models;
 using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Text.Unicode;
@@ -10,6 +12,8 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Telegram.Bot;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Bot.Core.Services
 {
@@ -63,6 +67,28 @@ namespace Bot.Core.Services
             }
 
         }
-
+        public async Task TryEdit(Update update, CancellationToken token)
+        {
+            if (Enum.TryParse<CallbackType>(update.CallbackQuery.Data, out var parsedType))
+            {
+                if (parsedType== CallbackType.Donate)
+                {
+                    Message message = update.CallbackQuery.Message;
+                    List<IEnumerable<InlineKeyboardButton>> keyb = new List<IEnumerable<InlineKeyboardButton>>();
+                    keyb.Add(message.ReplyMarkup.InlineKeyboard.First());
+                    foreach (string key in DonateLinks.keyboards.Keys)
+                    {
+                        if (DonateLinks.keyboards.TryGetValue(key, out LinkInfo linkInfo))
+                        {
+                            keyb.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton()
+                            {CallbackData=linkInfo.Data,Url=linkInfo.Link,Text=linkInfo.Name } });
+                        }
+                    }
+                    EditTextMessage editTextMessage = new EditTextMessage(null, message.Chat.Id, message.Text, message.MessageId,null, 
+                        null,0,message.Entities, new InlineKeyboardMarkup(keyb));
+                    messagesSender.AddItem(editTextMessage);
+                }
+            }
+        }
     }
 }

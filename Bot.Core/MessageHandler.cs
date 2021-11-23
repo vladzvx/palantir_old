@@ -1,4 +1,6 @@
-﻿using Bot.Core.Interfaces;
+﻿using Bot.Core.Enums;
+using Bot.Core.Interfaces;
+using Bot.Core.Models;
 using Common.Services;
 using Common.Services.Interfaces;
 using MongoDB.Bson;
@@ -38,6 +40,11 @@ namespace Bot.Core.Services
                 if (ObjectId.TryParse(update.CallbackQuery.Data, out ObjectId guid))
                 {
                     Task sending = searchState.TryEdit(update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId, guid, cancellationToken);
+                    asyncTaskExecutor.Add(sending);
+                }
+                else
+                {
+                    Task sending = searchState.TryEdit(update, cancellationToken);
                     asyncTaskExecutor.Add(sending);
                 }
             }

@@ -27,6 +27,7 @@ namespace Bot.Service
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllers();
             services.AddSingleton(new CancellationTokenSource());
             services.AddSingleton<IBotSettings, BotSettings>();
             IGrpcSettings grpcSettings = new GrpcSettings();
@@ -62,6 +63,11 @@ namespace Bot.Service
                 app.UseDeveloperExceptionPage();
             }
             app.UseRouting();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }

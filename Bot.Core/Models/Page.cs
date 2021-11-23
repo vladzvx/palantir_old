@@ -128,7 +128,15 @@ namespace Bot.Core.Models
         {
             InlineKeyboardButton donate = new InlineKeyboardButton();
             donate.Text = "Поддержать проект";
-            donate.Url = Environment.GetEnvironmentVariable("donate") ?? "https://new.donatepay.ru/@yesod";
+            string donateLink = Environment.GetEnvironmentVariable("donate");
+            if (donateLink != null)
+            {
+                donate.Url = donateLink;
+            }
+            else
+            {
+                donate.CallbackData = "Donate";
+            }
 
             InlineKeyboardButton Next = new InlineKeyboardButton();
             Next.Text = "Далее";
