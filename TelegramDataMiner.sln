@@ -36,6 +36,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataFairDB", "DataFairDB", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ObserverBot.Service", "ObserverBot.Service\ObserverBot.Service.csproj", "{7187EE0A-C727-4D55-BB4B-DE32BD2AC6C9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GateKeeper.Service", "GateKeeper.Service\GateKeeper.Service.csproj", "{9D65D480-F69E-4969-942C-1623C621F881}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -88,6 +90,10 @@ Global
 		{7187EE0A-C727-4D55-BB4B-DE32BD2AC6C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7187EE0A-C727-4D55-BB4B-DE32BD2AC6C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7187EE0A-C727-4D55-BB4B-DE32BD2AC6C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D65D480-F69E-4969-942C-1623C621F881}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D65D480-F69E-4969-942C-1623C621F881}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D65D480-F69E-4969-942C-1623C621F881}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D65D480-F69E-4969-942C-1623C621F881}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -98,6 +104,7 @@ Global
 		{E73B1302-BE95-415C-B313-AA2C35D099FE} = {6EB128D7-111A-4F64-9565-8E621328ABA7}
 		{9271B3F3-FB06-408D-9327-0B37E61449AD} = {3F0F2F3A-6429-42B3-840E-57EEB8A10E71}
 		{7187EE0A-C727-4D55-BB4B-DE32BD2AC6C9} = {6EB128D7-111A-4F64-9565-8E621328ABA7}
+		{9D65D480-F69E-4969-942C-1623C621F881} = {6EB128D7-111A-4F64-9565-8E621328ABA7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B956A809-B37D-42F3-A218-EFA36CBFAFFD}
