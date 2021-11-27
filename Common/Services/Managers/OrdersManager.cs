@@ -80,7 +80,7 @@ namespace Common.Services
         //    return t;
         //}
 
-        private void GoToUpdates()
+        public void GoToUpdates()
         {
             currentStateStarted = DateTime.UtcNow;
             executingState = ExecutingState.OrdersCreation;
