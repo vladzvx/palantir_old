@@ -22,7 +22,6 @@ namespace Common.Services
         private readonly Order empty = new Order() { Type = OrderType.Empty, status = Order.Status.Executed };
         private readonly Order sleep = new Order() { Type = OrderType.Sleep, status = Order.Status.Executed, Time = 60 };
         public ConcurrentQueue<Report> Reports = new ConcurrentQueue<Report>();
-        public ConcurrentQueue<Order> MaxPriorityOrders = new ConcurrentQueue<Order>();
         public ConcurrentQueue<Order> MiddlePriorityOrders = new ConcurrentQueue<Order>();
         public ConcurrentQueue<Order> Orders = new ConcurrentQueue<Order>();
         public ConcurrentQueue<Order> ConsistanceOrders = new ConcurrentQueue<Order>();
@@ -41,8 +40,6 @@ namespace Common.Services
         {
             OrdersOnExecution.Clear();
             Orders.Clear();
-            MiddlePriorityOrders.Clear();
-            MaxPriorityOrders.Clear();
             TargetedOrders.Clear();
             ConsistanceOrders.Clear();
         }
@@ -91,8 +88,6 @@ namespace Common.Services
         {
             int result = 0;
             result += Orders.Count;
-            result += MaxPriorityOrders.Count;
-            result += MiddlePriorityOrders.Count;
             return result;
 
         }
@@ -161,7 +156,7 @@ namespace Common.Services
                     if (rndm2[0]<125)
                     {
                         int count = 0;
-                        while (ConsistanceOrders.TryDequeue(out var orderTemp) && count < ConsistanceOrders.Count)
+                        while (ConsistanceOrders.TryDequeue(out var orderTemp) && count <= ConsistanceOrders.Count)
                         {
                             if (!orderTemp.Finders.Contains(req.Finder) && orderTemp.TryGet())
                             {
@@ -219,64 +214,9 @@ namespace Common.Services
                             return true;
                         }
                     }
-                    //if (order.Type == OrderType.Pair || order.Type == OrderType.GetFullChannel)
-                    //{
-                    //    if (!CheckCounter(req.Finder))
-                    //    {
-                    //        continue;
-                    //    }
-                    //    else
-                    //    {
-                    //        if (order.TryGet())
-                    //        {
-                    //            TryIncrementCounter(req.Finder);
-                    //            //TargetedOrders[req.Finder].Enqueue(order);
-                    //            return true;
-                    //        }
-                    //    }
-                    //}
                 }
             }
             return false;
-
-            //if (!req.Banned)
-            //{
-            //    if (!CheckCounter(req.Finder))
-            //    {
-            //        order = sleep;
-            //        return true;
-            //    }
-
-            //    while (MaxPriorityOrders.TryDequeue(out Order temp))
-            //    {
-            //        if (temp.TryGet())
-            //        {
-            //            TryIncrementCounter(req.Finder);
-            //            order = temp;
-            //            return true;
-            //        }
-            //    }
-            //    while (MiddlePriorityOrders.TryDequeue(out Order temp))
-            //    {
-            //        if (temp.TryGet())
-            //        {
-            //            TryIncrementCounter(req.Finder);
-            //            order = temp;
-            //            return true;
-            //        }
-            //    }
-            //    while (Orders.TryDequeue(out Order temp))
-            //    {
-            //        if (temp.TryGet())
-            //        {
-            //            TryIncrementCounter(req.Finder);
-            //            order = temp;
-            //            return true;
-            //        }
-            //    }
-            //}
-
-
         }
     }
 }

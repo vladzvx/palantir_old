@@ -156,11 +156,7 @@ namespace Common.Services.gRPC
             try
             {
                 logger.Debug(string.Format("New order received!  Id: {0}; Field: {1};", order.Id, order.Link));
-                if (order.Type == OrderType.GetFullChannel)
-                {
-                    ordersStorage.MaxPriorityOrders.Enqueue(order);
-                }
-                else if (order.Type == OrderType.Executed)
+                if (order.Type == OrderType.Executed)
                 {
                     if (ordersStorage.OrdersOnExecution.TryRemove(order.Id,out var ord))
                     {
@@ -170,7 +166,7 @@ namespace Common.Services.gRPC
                 }
                 else
                 {
-                    ordersStorage.MiddlePriorityOrders.Enqueue(order);
+                    ordersStorage.Orders.Enqueue(order);
                 }
             }
             catch (Exception ex)

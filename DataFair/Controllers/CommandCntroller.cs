@@ -3,6 +3,7 @@ using Common.Services.DataBase.Interfaces;
 using DataFair.Models;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,14 +15,14 @@ namespace DataFair.Controllers
     {
         private readonly IOrdersGenerator ordersGenerator;
         public readonly State state;
-        public readonly OrdersManager ordersManager;
+        //public readonly OrdersManager ordersManager;
         //private readonly CancellationToken token;
 
-        public CommandController(IOrdersGenerator ordersGenerator, State state, OrdersManager ordersManager)
+        public CommandController(IOrdersGenerator ordersGenerator, State state)
         {
             this.ordersGenerator = ordersGenerator;
             this.state = state;
-            this.ordersManager = ordersManager;
+            //this.ordersManager = ordersManager;
             //this.token = token;
         }
 
@@ -29,11 +30,37 @@ namespace DataFair.Controllers
         [EnableCors()]
         public string PostEmptyOrder(OrderMoq order)
         {
-            state.MaxPriorityOrders.Enqueue(order);
+            if (order.Consistence)
+            {
+                state.ConsistanceOrders.Enqueue(order);
+            }
+            else
+            {
+                state.Orders.Enqueue(order);
+            }
+
             return "ok";
 
         }
 
+        [HttpPost("PostOrders")]
+        [EnableCors()]
+        public string PostEmptyOrder(List<OrderMoq> orders)
+        {
+            foreach (OrderMoq order in orders)
+            {
+                if (order.Consistence)
+                {
+                    state.ConsistanceOrders.Enqueue(order);
+                }
+                else
+                {
+                    state.Orders.Enqueue(order);
+                }
+            }
+            return "ok";
+
+        }
 
         [HttpPost("setcount")]
         [EnableCors()]
@@ -51,14 +78,6 @@ namespace DataFair.Controllers
             state.ClearOrders();
             return "ok";
 
-        }
-
-        [HttpPost("SetUpdatesOrders")]
-        [EnableCors()]
-        public async Task<string> PostRequest8(CancellationToken token)
-        {
-            ordersManager.GoToUpdates();
-            return "ok";
         }
     }
 }

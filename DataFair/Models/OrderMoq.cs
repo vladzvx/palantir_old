@@ -4,6 +4,7 @@ namespace DataFair.Models
 {
     public class OrderMoq
     {
+        public bool Consistence { get; set; }
         public long OrderId { get; set; }
         public long Id { get; set; }
         public string Link { get; set; }

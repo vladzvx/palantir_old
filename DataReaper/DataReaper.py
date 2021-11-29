@@ -136,7 +136,7 @@ class TgDataGetter():
 						temp_dict["ansvers"]=answers;
 						temp_dict["question"] = question
 						content  = json.dumps(temp_dict)
-						message_for_send.Media = TgDataGetter.create_json(5,message.media.poll.id,'"'+url+'"')
+						message_for_send.Media = TgDataGetter.create_json(5,message.media.poll.id,'"'+content+'"')
 					elif isinstance( message.media, telethon.types.MessageMediaDocument):
 						message_for_send.Media = TgDataGetter.create_json(2,message.media.document.id,'')
 					elif isinstance( message.media, telethon.types.MessageMediaPhoto):
