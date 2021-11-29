@@ -4,6 +4,8 @@ using Bot.Core.Services;
 using Common;
 using Common.Interfaces;
 using Common.Services;
+using Common.Services.Diff;
+using GateKeeper.Service.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -29,19 +31,20 @@ namespace GateKeeper.Service
             services.AddSingleton(new CancellationTokenSource());
             services.AddSingleton<IBotSettings, BotSettings>();
 
-            services.AddHostedService<BotsEntryPoint<Bot.Core.Models.ObserverBot>>();
+            services.AddHostedService<BotsEntryPoint<Bot.Core.Models.GateKeeperBot>>();
             services.AddSingleton<ISenderSettings, SenderSettings>();
             services.AddSingleton<IMessagesSender, MessagesSender>();
             services.AddSingleton<MongoWriter>();
-            services.AddSingleton<IDataStorage<Bot.Core.Models.ObserverBot>, DataStorage<Bot.Core.Models.ObserverBot>>();
+            services.AddSingleton<IDataStorage<Bot.Core.Models.GateKeeperBot>, DataStorage<Bot.Core.Models.GateKeeperBot>>();
             services.AddSingleton(new MongoClient(Options.MongoConnectionString));
-            services.AddSingleton<IDataStorage<Bot.Core.Models.ObserverBot>, DataStorage<Bot.Core.Models.ObserverBot>>();
+            services.AddSingleton<IDataStorage<Bot.Core.Models.GateKeeperBot>, DataStorage<Bot.Core.Models.GateKeeperBot>>();
 
-            //services.AddTransient<IFSMFactory<Bot.Core.Models.ObserverBot>, ObserverSubFSMFactory>();
-            //services.AddTransient<IReadyProcessor<Bot.Core.Models.ObserverBot>, ObserverReadyProcessor>();
+            services.AddTransient<IFSMFactory<Bot.Core.Models.GateKeeperBot>, EmptySubFSMFactory<Bot.Core.Models.GateKeeperBot>>();
+            services.AddTransient<IReadyProcessor<Bot.Core.Models.GateKeeperBot>, GateKeeperReadyProcessor>();
             
             services.AddTransient<IBusyProcessor, BusyProcessor>();
-            services.AddTransient<IRightChecker, RightChecker>();
+            services.AddTransient<IRightChecker, GateKeeper.Service.GKRightChecker>();
+            services.AddTransient<IUserChecker, UserChecker>();
 
             services.AddSingleton<AsyncTaskExecutor>();
             services.AddTransient<Bot.Core.Services.Bot>();

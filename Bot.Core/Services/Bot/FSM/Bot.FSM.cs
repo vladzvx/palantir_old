@@ -28,7 +28,7 @@ namespace Bot.Core.Services
             public readonly long chatId;
 
 
-            internal readonly TBot config;
+            public readonly TBot config;
             private ISubFSM<TBot> subFSM;
             internal readonly IFSMFactory<TBot> subFSMFactory;
             internal readonly IReadyProcessor<TBot> readyProcessor;

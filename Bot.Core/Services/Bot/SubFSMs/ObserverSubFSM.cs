@@ -6,13 +6,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
 
-namespace ObserverBot.Service.Services
+namespace Bot.Core.Services
 {
-    public class ObserverSubFSM : ISubFSM<Bot.Core.Models.ObserverBot>
+    public class EmptySubFSM<TBot> : ISubFSM<TBot> where TBot:IConfig
     {
         public bool IsEmpty => true;
 
-        public async Task<bool> ProcessUpdate(Update update, Bot.Core.Models.ObserverBot parentFSM, CancellationToken token)
+        public async Task<bool> ProcessUpdate(Update update, TBot parentFSM, CancellationToken token)
         {
             return true;
         }

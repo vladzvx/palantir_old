@@ -23,7 +23,7 @@ namespace Bot.Core.Services
                 public static readonly ConcurrentDictionary<long, DateTime> stateTimestamps = new ConcurrentDictionary<long, DateTime>();
                 public static async Task<Services.Bot.FSM<TBot>> Get(Update update, CancellationToken token)
                 {
-                    if (state.TryGetValue(update.Message.From.Id, out Services.Bot.FSM<TBot> fsm))
+                    if (state.TryGetValue(update.Message.Chat.Id, out Services.Bot.FSM<TBot> fsm))
                     {
                         return fsm;
                     }
@@ -44,18 +44,30 @@ namespace Bot.Core.Services
                                 temp.Name = update.Message.From.FirstName;
                                 temp.userType = Enums.UserType.User;
                             }
-                            else if (update.Message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Group || update.Message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Supergroup)
+                            else if (update.Message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Group || update.Message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Supergroup && update.Message.From.Id != 777000)
                             {
                                 try
                                 {
                                     temp.Username = update.Message.Chat.Username;
                                     temp.Name = update.Message.Chat.FirstName;
                                     temp.userType = Enums.UserType.Group;
-                                    var temp2 = new TBot() { Id = update.Message.From.Id };
-                                    temp2.Username = update.Message.From.Username;
-                                    temp2.Name = update.Message.From.FirstName;
-                                    temp2.userType = Enums.UserType.User;
-                                    await dBWorker.SaveChat(temp2, token,TextMessage.defaultClient.BotId.Value);
+                                    //await dBWorker.SaveChat(temp, token, TextMessage.defaultClient.BotId.Value);
+                                    //var temp2 = await dBWorker.GetChat(update.Message.From.Id, token, TextMessage.defaultClient.BotId.Value);
+                                    //if (temp2 == null)
+                                    //{
+                                    //    temp2 = new TBot() { Id = update.Message.From.Id };
+                                    //    temp2.Username = update.Message.From.Username;
+                                    //    temp2.Name = update.Message.From.FirstName;
+                                    //    temp2.userType = Enums.UserType.User;
+                                    //    temp2.Status = Enums.UserStatus.common;
+                                    //}
+                                    //else
+                                    //{
+                                    //    temp2.Username = update.Message.From.Username;
+                                    //    temp2.Name = update.Message.From.FirstName;
+                                    //    temp2.userType = Enums.UserType.User;
+                                    //}
+                                    //await dBWorker.SaveChat(temp2, token, TextMessage.defaultClient.BotId.Value);
                                 }
                                 catch (Exception ex)
                                 {
@@ -65,7 +77,7 @@ namespace Bot.Core.Services
 
                             await dBWorker.SaveChat(temp, token, TextMessage.defaultClient.BotId.Value);
                             FSM<TBot> fSM = new FSM<TBot>(update.Message.Chat.Id, temp);
-                            state.TryAdd(update.Message.From.Id, fSM);
+                            state.TryAdd(update.Message.Chat.Id, fSM);
                             return fSM;
                         }
                         return null;

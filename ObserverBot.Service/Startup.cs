@@ -43,10 +43,10 @@ namespace ObserverBot.Service
             services.AddSingleton(new MongoClient(Options.MongoConnectionString));
             services.AddSingleton<IDataStorage<Bot.Core.Models.ObserverBot>, DataStorage<Bot.Core.Models.ObserverBot>>();
 
-            services.AddTransient<IFSMFactory<Bot.Core.Models.ObserverBot>, ObserverSubFSMFactory>();
+            services.AddTransient<IFSMFactory<Bot.Core.Models.ObserverBot>, EmptySubFSMFactory<Bot.Core.Models.ObserverBot>>();
             services.AddTransient<IReadyProcessor<Bot.Core.Models.ObserverBot>, ObserverReadyProcessor>();
             services.AddTransient<IBusyProcessor, BusyProcessor>();
-            services.AddTransient<IRightChecker, RightChecker>();
+            services.AddTransient<IRightChecker, PrivateRightChecker>();
 
             services.AddSingleton<AsyncTaskExecutor>();
             services.AddTransient<Bot.Core.Services.Bot>();

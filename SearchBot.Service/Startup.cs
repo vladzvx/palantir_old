@@ -49,7 +49,7 @@ namespace Bot.Service
             services.AddTransient<IFSMFactory<SearchBot>, SubFSMFactory>();
             services.AddTransient<IReadyProcessor<SearchBot>, SearchReadyProcessor>();
             services.AddTransient<IBusyProcessor, BusyProcessor>();
-            services.AddTransient<IRightChecker, RightChecker>();
+            services.AddTransient<IRightChecker, PrivateRightChecker>();
 
             services.AddTransient<SearchState>();
             services.AddSingleton<AsyncTaskExecutor>();

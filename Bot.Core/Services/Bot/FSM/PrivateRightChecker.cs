@@ -10,11 +10,11 @@ using Telegram.Bot.Types;
 
 namespace Bot.Core.Services
 {
-    public class RightChecker : IRightChecker
+    public class PrivateRightChecker : IRightChecker
     {
         private readonly IBotSettings botSettings;
         private readonly IMessagesSender messagesSender;
-        public RightChecker(IBotSettings botSettings, IMessagesSender messagesSender)
+        public PrivateRightChecker(IBotSettings botSettings, IMessagesSender messagesSender)
         {
             this.botSettings = botSettings;
             this.messagesSender = messagesSender;
