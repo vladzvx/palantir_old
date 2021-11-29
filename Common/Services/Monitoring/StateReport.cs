@@ -16,17 +16,12 @@ namespace Common.Services
     {
         public int CollectorsCount;
         public List<CollectorReport> Collectors = new List<CollectorReport>();
-        public int SessionsAvaliable;
         public int Orders;
         public int ConsistanceOrders;
-        public int MaxPriorityOrders;
-        public int MiddlePriorityOrders;
         public int TargetOrders;
         public int Messages;
         public int TotalConnections;
         public int ConnectionsHotReserve;
-        public long FreeDisk;
-        public string OrderManagerState;
         public ConcurrentDictionary<string, CounterWrapper> ExecutingOrdersJournal;
         public StateReport(State state, ICommonWriter<Message> commonWriter, ICommonWriter<Entity> commonWriter2, ConnectionsFactory connectionsFactory)
         {
@@ -43,26 +38,13 @@ namespace Common.Services
                 }
 
             }
-            SessionsAvaliable = state.SessionStorages.Count;
             Messages = commonWriter.GetQueueCount();
             TotalConnections = connectionsFactory.TotalConnections;
             ConnectionsHotReserve = connectionsFactory.HotReserve;
             ExecutingOrdersJournal = state.ExecutingOrdersJournal;
 
-            OrderManagerState = state.ordersManager.executingState.ToString();
             Orders = state.CountOrders();
             TargetOrders = state.CountTargetOrders();
-
-            DriveInfo[] allDrives = DriveInfo.GetDrives();
-            long disk = 0;
-            foreach (DriveInfo d in allDrives)
-            {
-                if (d.IsReady == true)
-                {
-                    disk += d.TotalFreeSpace;
-                }
-            }
-            FreeDisk = disk / 1024 / 1024 / 1024;
         }
     }
 }
