@@ -8,6 +8,7 @@ using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
@@ -117,6 +118,11 @@ namespace GateKeeper.Service.Services
                                 CallbackData=commandBan,
                                 Text= "Бан"
                             },
+                            new InlineKeyboardButton()
+                            {
+                                CallbackData=commandTrust,
+                                Text= "Оправдать"
+                            },
                         }
                     };
                 if (!string.IsNullOrEmpty(commandSearch))
@@ -133,8 +139,24 @@ namespace GateKeeper.Service.Services
         public async Task ProcessUpdateAsyncWr(Update update, Bot.Core.Services.Bot.FSM<Bot.Core.Models.GateKeeperBot> fsm)
         {
             if (await TryChangeStatus(update, fsm))
-                await ProcessUpdateAsync(update, fsm);
+            {
+                Regex reg = new Regex(@"/check (\d+)");
+                if (update.Message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Private)
+                {
+                    Match match = reg.Match(update.Message.Text.ToLower());
+                    if (match.Success && long.TryParse(match.Groups[1].Value, out long userId))
+                    {
+                        var res = await userChecker.Check(userId);
+                        TextMessage textMessage = new TextMessage(null, update.Message.Chat.Id, Newtonsoft.Json.JsonConvert.SerializeObject(res), null, null, update.Message.MessageId, null, null);
+                        messagesSender.AddItem(textMessage);
+                    }
+                }
+                else
+                {
+                    await ProcessUpdateAsync(update, fsm);
+                }
 
+            }
         }
         private async Task ProcessUser(User user, Bot.Core.Services.Bot.FSM<Bot.Core.Models.GateKeeperBot> fsm, Update update)
         {
