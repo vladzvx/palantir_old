@@ -1,4 +1,4 @@
-name: Data Fair Noti Bot docker deploy
+name: GateKeeper bot deploy
 
 on:
   push:
