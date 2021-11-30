@@ -51,14 +51,17 @@ namespace Bot.Core.Services
                         if (!string.IsNullOrEmpty(text))
                         {
                             count++;
-                            if (rank != 100 && !pages.Last().TryAddResult(name, text, link))
+                            if (rank != 100)
                             {
                                 countBad++;
                                 summ += rank;
-                                prevId = currentId;
-                                currentId = nextId.Value;
-                                nextId = ObjectId.GenerateNewId();
-                                pages.Add(new Page(currentId, prevId, nextId) { position = Page.Position.Middle, brouseDonate = false });
+                                if (!pages.Last().TryAddResult(name, text, link))
+                                {
+                                    prevId = currentId;
+                                    currentId = nextId.Value;
+                                    nextId = ObjectId.GenerateNewId();
+                                    pages.Add(new Page(currentId, prevId, nextId) { position = Page.Position.Middle, brouseDonate = false });
+                                }
                             }
                         }
                     }
