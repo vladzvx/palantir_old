@@ -46,7 +46,7 @@ namespace Bot.Core.Services
                         Task sending = searchState.TryEdit(update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId, guid, cancellationToken);
                         asyncTaskExecutor.Add(sending);
                     }
-                    else
+                    else if ((await TextMessage.defaultClient.GetChatAdministratorsAsync(update.CallbackQuery.Message.Chat.Id)).ToList().FindIndex(item => item.User.Id == update.CallbackQuery.From.Id) >= 0)
                     {
                         Task sending = searchState.SendPage(update.CallbackQuery.From.Id, guid, cancellationToken);
                         asyncTaskExecutor.Add(sending);
