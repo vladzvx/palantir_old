@@ -140,7 +140,7 @@ namespace GateKeeper.Service.Services
         {
             if (await TryChangeStatus(update, fsm))
             {
-                Regex reg = new Regex(@"/check (\d+)");
+                Regex reg = new Regex(@"(\d+)");
                 if (update.Message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Private)
                 {
                     Match match = reg.Match(update.Message.Text.ToLower());
