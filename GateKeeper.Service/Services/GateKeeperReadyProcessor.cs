@@ -50,7 +50,7 @@ namespace GateKeeper.Service.Services
 
         public async Task<bool> TryChangeStatus(Update update, Bot.Core.Services.Bot.FSM<Bot.Core.Models.GateKeeperBot> fsm)
         {
-            if ((await TextMessage.defaultClient.GetChatAdministratorsAsync(update.Message.Chat.Id)).ToList().FindIndex(item => item.User.Id == update.Message.From.Id) >= 0)
+            if ((update.Message.Chat.Type==Telegram.Bot.Types.Enums.ChatType.Group|| update.Message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Supergroup)&&(await TextMessage.defaultClient.GetChatAdministratorsAsync(update.Message.Chat.Id)).ToList().FindIndex(item => item.User.Id == update.Message.From.Id) >= 0)
             {
                 if (update.Message.Text.ToLower().StartsWith("/overrun"))
                 {

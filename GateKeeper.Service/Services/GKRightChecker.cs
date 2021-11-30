@@ -21,7 +21,7 @@ namespace GateKeeper.Service
         }
         public async Task<bool> Check<TBot>(Update update, Bot.Core.Services.Bot.FSM<TBot> fsm) where TBot : IConfig, new()
         {
-            return (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message && (update.Message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Group|| update.Message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Supergroup)  && update.Message.From.Id!=777000 && fsm.config.Status <= botSettings.BoundUserStatus);
+            return (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message && (update.Message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Group|| update.Message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Supergroup || update.Message.Chat.Type == Telegram.Bot.Types.Enums.ChatType.Private)  && update.Message.From.Id!=777000 && fsm.config.Status <= botSettings.BoundUserStatus);
         }
     }
 }
