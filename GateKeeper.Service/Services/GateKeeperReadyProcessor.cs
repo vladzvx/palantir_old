@@ -77,12 +77,14 @@ namespace GateKeeper.Service.Services
             };
             if (res.Status <= Common.Enums.UserStatus.SimpleBad)
             {
-                if (fsm.config.Mode == ChatState.Overrun)
-                {
-                    await TextMessage.defaultClient.KickChatMemberAsync(chatId, userId, revokeMessages: true);
-                    user.Status = Bot.Core.Enums.UserStatus.banned;
-                    await dataStorage.SaveChat(user, CancellationToken.None, TextMessage.defaultClient.BotId.Value);
-                }
+                //if (fsm.config.Mode == ChatState.Overrun)
+                //{
+                await TextMessage.defaultClient.KickChatMemberAsync(chatId, userId, revokeMessages: true);
+                user.Status = Bot.Core.Enums.UserStatus.banned;
+                await dataStorage.SaveChat(user, CancellationToken.None, TextMessage.defaultClient.BotId.Value);
+                TextMessage textMessage = new TextMessage(null, chatId, "Автоматически забанен антипрививочник. UserId:"+ userId+ "; Соцрейтинг: "+Math.Round(res.Score,3),null);
+                messagesSender.AddItem(textMessage);
+                //}
                 //else
                 //{
                 //    string commandBan = string.Format("{0}_{1}_{2}", chatId, userId, Command.Ban.ToString());
@@ -98,7 +100,7 @@ namespace GateKeeper.Service.Services
                 //            }
                 //        }
                 //    });
-                //    TextMessage textMessage = new TextMessage(null, chatId, Environment.GetEnvironmentVariable("PreBanMessage") ?? "Обнаружена антивакса! "+"Score: "+Math.Round(res.Score,3).ToString() +" Выберете действие:", null, null, messageId, null, keyb);
+                //    TextMessage textMessage = new TextMessage(null, chatId, Environment.GetEnvironmentVariable("PreBanMessage") ?? "Обнаружена антивакса! " + "Соцрейтинг: " + Math.Round(res.Score, 3).ToString() + " Выберете действие:", null, null, messageId, null, keyb);
                 //    messagesSender.AddItem(textMessage);
                 //}
 
@@ -130,7 +132,7 @@ namespace GateKeeper.Service.Services
                     keybBase.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton() {Text="Личное дело",CallbackData= commandSearch } });
                 }
                 InlineKeyboardMarkup keyb = new InlineKeyboardMarkup(keybBase);
-                TextMessage textMessage = new TextMessage(null, chatId, Environment.GetEnvironmentVariable("PreBanMessage") ?? "Обнаружен потенциальный антипрививочник! \n\nДля просмотра личного дела нужно иметь права администратора и стартовать личный диалог со мной." + "Соц рейтинг: " + Math.Round(res.Score, 3).ToString() + "\n\n Выберете действие:", null, null, messageId, null, keyb);
+                TextMessage textMessage = new TextMessage(null, chatId, Environment.GetEnvironmentVariable("PreBanMessage") ?? "Обнаружен потенциальный антипрививочник! \n\nДля просмотра личного дела нужно иметь права администратора и стартовать личный диалог со мной." + "Соц рейтинг: " + Math.Round(res.Score, 3).ToString() + "\n\n Выберите действие:", null, null, messageId, null, keyb);
                 messagesSender.AddItem(textMessage);
             }
 
@@ -149,6 +151,7 @@ namespace GateKeeper.Service.Services
                         var res = await userChecker.Check(userId);
                         TextMessage textMessage = new TextMessage(null, update.Message.Chat.Id, Newtonsoft.Json.JsonConvert.SerializeObject(res), null, null, update.Message.MessageId, null, null);
                         messagesSender.AddItem(textMessage);
+
                     }
                 }
                 else

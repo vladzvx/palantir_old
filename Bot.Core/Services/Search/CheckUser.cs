@@ -75,7 +75,12 @@ namespace Bot.Core.Services
                     ft.BadMessages = countBad;
                     ft.Score = ((count - countBad) * 100 + summ) / count;
                     ft.Status = UserStatus.Middle;
+                    if (ft.Score < 60)
+                    {
+                        ft.Status = UserStatus.SimpleBad;
+                    }
                 }
+
             }
             return ft;
         }
