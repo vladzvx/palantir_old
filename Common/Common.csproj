@@ -32,5 +32,10 @@
     <Protobuf Include="Proto\OrderBoard.proto" GrpcServices="Both" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <Folder Include="Services\Diff\" />
+  </ItemGroup>
+
 </Project>
 

@@ -13,13 +13,13 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Bot.Core.Services
 {
-    public class SearchReciever
+    public class SearchReciever<TBot> where TBot:IConfig, new()
     {
         private readonly SearchClient searchClient;
-        private readonly SearchState searchState;
+        private readonly SearchState<TBot> searchState;
         private readonly IMessagesSender messagesSender;
 
-        public SearchReciever(SearchClient searchClient, SearchState searchState, IMessagesSender messagesSender)
+        public SearchReciever(SearchClient searchClient, SearchState<TBot> searchState, IMessagesSender messagesSender)
         {
             this.searchClient = searchClient;
             this.searchState = searchState;

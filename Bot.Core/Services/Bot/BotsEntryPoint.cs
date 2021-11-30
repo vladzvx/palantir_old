@@ -26,7 +26,7 @@ namespace Bot.Core.Services
             if (bot.botClient != null && bot.botClient.BotId.HasValue)
                 MessageHandler<TBot>.writer.Start(bot.botClient.BotId.Value);
             MessageHandler<TBot>.asyncTaskExecutor = (AsyncTaskExecutor)serviceProvider.GetService(typeof(AsyncTaskExecutor));
-            MessageHandler<TBot>.searchState = (SearchState)serviceProvider.GetService(typeof(SearchState));
+            MessageHandler<TBot>.searchState = (SearchState<TBot>)serviceProvider.GetService(typeof(SearchState<TBot>));
         }
         public Task StartAsync(CancellationToken cancellationToken)
         {

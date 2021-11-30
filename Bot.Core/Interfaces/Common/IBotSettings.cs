@@ -1,8 +1,15 @@
 ﻿using Bot.Core.Enums;
+using Bot.Core.Models;
 using System;
+using System.Threading.Tasks;
 
 namespace Bot.Core.Interfaces
 {
+    public interface IUserChecker
+    {
+        public Task<UserInfo> Check(long userId);
+        public Task<UserInfo> Check(string username);
+    }
     public interface IBotSettings
     {
         public string Token => Environment.GetEnvironmentVariable("Token");

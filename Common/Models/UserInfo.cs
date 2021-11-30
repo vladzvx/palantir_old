@@ -7,9 +7,5 @@ using System.Threading.Tasks;
 
 namespace Common.Models
 {
-    public class UserInfo
-    {
-        public double Score { get; set; }
-        public UserStatus Status { get; set; } = UserStatus.Normal;
-    }
+
 }

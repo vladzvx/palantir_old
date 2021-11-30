@@ -4,6 +4,7 @@ using Bot.Core.Models;
 using Bot.Core.Services;
 using Common.Interfaces;
 using Common.Services;
+using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -81,35 +82,24 @@ namespace GateKeeper.Service.Services
                     user.Status = Bot.Core.Enums.UserStatus.banned;
                     await dataStorage.SaveChat(user, CancellationToken.None, TextMessage.defaultClient.BotId.Value);
                 }
-                else
-                {
-                    string commandBan = string.Format("{0}_{1}_{2}", chatId, userId, Command.Ban.ToString());
-                    string commandTrust = string.Format("{0}_{1}_{2}", chatId, userId, Command.Trust.ToString());
-                    string commandWait = string.Format("{0}_{1}_{2}", chatId, userId, Command.Wait.ToString());
-                    InlineKeyboardMarkup keyb = new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>()
-                    {
-                        new List<InlineKeyboardButton>()
-                        {
-                            new InlineKeyboardButton()
-                            {
-                                CallbackData=commandBan,
-                                Text= "Ban"
-                            },
-                            //new InlineKeyboardButton()
-                            //{
-                            //    CallbackData=commandWait,
-                            //    Text= "Wait"
-                            //},
-                            new InlineKeyboardButton()
-                            {
-                                CallbackData=commandTrust,
-                                Text= "Trust"
-                            }
-                        }
-                    });
-                    TextMessage textMessage = new TextMessage(null, chatId, Environment.GetEnvironmentVariable("PreBanMessage") ?? "Обнаружена антивакса! "+"Score: "+Math.Round(res.Score,3).ToString() +" Выберете действие:", null, null, messageId, null, keyb);
-                    messagesSender.AddItem(textMessage);
-                }
+                //else
+                //{
+                //    string commandBan = string.Format("{0}_{1}_{2}", chatId, userId, Command.Ban.ToString());
+                //    string commandTrust = string.Format("{0}_{1}_{2}", chatId, userId, Command.Trust.ToString());
+                //    InlineKeyboardMarkup keyb = new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>()
+                //    {
+                //        new List<InlineKeyboardButton>()
+                //        {
+                //            new InlineKeyboardButton()
+                //            {
+                //                CallbackData=commandBan,
+                //                Text= "Бан"
+                //            }
+                //        }
+                //    });
+                //    TextMessage textMessage = new TextMessage(null, chatId, Environment.GetEnvironmentVariable("PreBanMessage") ?? "Обнаружена антивакса! "+"Score: "+Math.Round(res.Score,3).ToString() +" Выберете действие:", null, null, messageId, null, keyb);
+                //    messagesSender.AddItem(textMessage);
+                //}
 
             }
             else if (res.Status == Common.Enums.UserStatus.Middle)
@@ -117,28 +107,24 @@ namespace GateKeeper.Service.Services
                 string commandBan = string.Format("{0}_{1}_{2}", chatId, userId, Command.Ban.ToString());
                 string commandTrust = string.Format("{0}_{1}_{2}", chatId, userId, Command.Trust.ToString());
                 string commandWait = string.Format("{0}_{1}_{2}", chatId, userId, Command.Wait.ToString());
-                InlineKeyboardMarkup keyb = new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>()
+                string commandSearch = res.FirstPageId != ObjectId.Empty ? res.FirstPageId.ToString() : string.Empty;
+                var keybBase = new List<List<InlineKeyboardButton>>()
                     {
                         new List<InlineKeyboardButton>()
                         {
                             new InlineKeyboardButton()
                             {
                                 CallbackData=commandBan,
-                                Text= "Ban"
+                                Text= "Бан"
                             },
-                            //new InlineKeyboardButton()
-                            //{
-                            //    CallbackData=commandWait,
-                            //    Text= "Wait"
-                            //},
-                            new InlineKeyboardButton()
-                            {
-                                CallbackData=commandTrust,
-                                Text= "Trust"
-                            }
                         }
-                    });
-                TextMessage textMessage = new TextMessage(null, chatId, Environment.GetEnvironmentVariable("PreBanMessage") ?? "Обнаружена антивакса! " + "Score: " + Math.Round(res.Score, 3).ToString() + " Выберете действие:", null, null, messageId, null, keyb);
+                    };
+                if (!string.IsNullOrEmpty(commandSearch))
+                {
+                    keybBase.Add(new List<InlineKeyboardButton>() { new InlineKeyboardButton() {Text="Личное дело",CallbackData= commandSearch } });
+                }
+                InlineKeyboardMarkup keyb = new InlineKeyboardMarkup(keybBase);
+                TextMessage textMessage = new TextMessage(null, chatId, Environment.GetEnvironmentVariable("PreBanMessage") ?? "Обнаружен потенциальный антипрививочник! \n\nДля просмотра личного дела нужно иметь права администратора и стартовать личный диалог со мной." + "Соц рейтинг: " + Math.Round(res.Score, 3).ToString() + "\n\n Выберете действие:", null, null, messageId, null, keyb);
                 messagesSender.AddItem(textMessage);
             }
 
@@ -150,121 +136,60 @@ namespace GateKeeper.Service.Services
                 await ProcessUpdateAsync(update, fsm);
 
         }
+        private async Task ProcessUser(User user, Bot.Core.Services.Bot.FSM<Bot.Core.Models.GateKeeperBot> fsm, Update update)
+        {
+            var temp = await dataStorage.GetChat(user.Id, CancellationToken.None, TextMessage.defaultClient.BotId.Value);
+            if (temp != null && temp.Status == Bot.Core.Enums.UserStatus.banned)
+            {
+                if (fsm.config.Mode == ChatState.Overrun)
+                {
+                    await TextMessage.defaultClient.KickChatMemberAsync(update.Message.Chat.Id, user.Id, revokeMessages: true);
+                }
+                else
+                {
+                    long chatId = update.Message.Chat.Id;
+                    long userId = user.Id;
+                    string commandBan = string.Format("{0}_{1}_{2}", chatId, userId, Command.Ban.ToString());
+                    InlineKeyboardMarkup keyb = new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>()
+                    {
+                        new List<InlineKeyboardButton>()
+                        {
+                            new InlineKeyboardButton()
+                            {
+                                CallbackData=commandBan,
+                                Text= "Ban"
+                            }
+                        }
+                    });
+                    TextMessage textMessage = new TextMessage(null, update.Message.Chat.Id, Environment.GetEnvironmentVariable("PreBanMessage") ?? "Обнаружен подтверждённый антипрививочник!", null, null, update.Message.MessageId, null, keyb);
+                    messagesSender.AddItem(textMessage);
+                }
+            }
+            else if (temp == null)
+            {
+                await Check(update.Message.From.Id, update.Message.From.Username, update.Message.From.FirstName, update.Message.Chat.Id, update.Message.MessageId, fsm);
+            }
+        }
         public async Task ProcessUpdateAsync(Update update, Bot.Core.Services.Bot.FSM<Bot.Core.Models.GateKeeperBot> fsm)
         {
             if (update.Message.NewChatMembers != null)
             {
                 foreach (User user in update.Message.NewChatMembers)
                 {
-                    var temp = await dataStorage.GetChat(user.Id, CancellationToken.None, TextMessage.defaultClient.BotId.Value);
-                    if (temp!=null&& temp.Status == Bot.Core.Enums.UserStatus.banned)
-                    {
-                        if (fsm.config.Mode == ChatState.Overrun)
-                        {
-                            await TextMessage.defaultClient.KickChatMemberAsync(update.Message.Chat.Id, user.Id, revokeMessages: true);
-                        }
-                        else
-                        {
-                            long chatId = update.Message.Chat.Id;
-                            long userId = user.Id;
-                            string commandBan = string.Format("{0}_{1}_{2}", chatId, userId, Command.Ban.ToString());
-                            string commandTrust = string.Format("{0}_{1}_{2}", chatId, userId, Command.Trust.ToString());
-                            string commandWait = string.Format("{0}_{1}_{2}", chatId, userId, Command.Wait.ToString());
-                            InlineKeyboardMarkup keyb = new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>()
-                    {
-                        new List<InlineKeyboardButton>()
-                        {
-                            new InlineKeyboardButton()
-                            {
-                                CallbackData=commandBan,
-                                Text= "Ban"
-                            },
-                            //new InlineKeyboardButton()
-                            //{
-                            //    CallbackData=commandWait,
-                            //    Text= "Wait"
-                            //},
-                            new InlineKeyboardButton()
-                            {
-                                CallbackData=commandTrust,
-                                Text= "Trust"
-                            }
-                        }
-                    });
-                            TextMessage textMessage = new TextMessage(null, update.Message.Chat.Id, Environment.GetEnvironmentVariable("PreBanMessage") ?? "Обнаружена подтверждённая антивакса! Выберете действие:", null, null, update.Message.MessageId, null, keyb);
-                            messagesSender.AddItem(textMessage);
-                        }
-
-                        //TextMessage textMessage = new TextMessage(null, update.Message.Chat.Id, Environment.GetEnvironmentVariable("PreBanMessage") ?? "Расстрел!", null, null, 0, null);
-                        //messagesSender.AddItem(textMessage);
-                    }
-                    else if (temp == null)
-                    {
-                        await Check(update.Message.From.Id, update.Message.From.Username, update.Message.From.FirstName, update.Message.Chat.Id, update.Message.MessageId, fsm);
-                    }
+                    await ProcessUser(user, fsm, update);
                 }
             }
             else if (update.ChatMember!=null && update.ChatMember.NewChatMember!=null)
             {
                 var user = update.ChatMember.NewChatMember.User;
-                var temp = await dataStorage.GetChat(user.Id, CancellationToken.None, TextMessage.defaultClient.BotId.Value);
-                if (temp != null && temp.Status == Bot.Core.Enums.UserStatus.banned)
-                {
-                    if (fsm.config.Mode == ChatState.Overrun)
-                    {
-                        await TextMessage.defaultClient.KickChatMemberAsync(update.ChatMember.Chat.Id, user.Id, revokeMessages: true);
-                    }
-                    else
-                    {
-                        long chatId = update.Message.Chat.Id;
-                        long userId = user.Id;
-                        string commandBan = string.Format("{0}_{1}_{2}", chatId, userId, Command.Ban.ToString());
-                        string commandTrust = string.Format("{0}_{1}_{2}", chatId, userId, Command.Trust.ToString());
-                        string commandWait = string.Format("{0}_{1}_{2}", chatId, userId, Command.Wait.ToString());
-                        InlineKeyboardMarkup keyb = new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>()
-                    {
-                        new List<InlineKeyboardButton>()
-                        {
-                            new InlineKeyboardButton()
-                            {
-                                CallbackData=commandBan,
-                                Text= "Ban"
-                            },
-                            //new InlineKeyboardButton()
-                            //{
-                            //    CallbackData=commandWait,
-                            //    Text= "Wait"
-                            //},
-                            new InlineKeyboardButton()
-                            {
-                                CallbackData=commandTrust,
-                                Text= "Trust"
-                            }
-                        }
-                    });
-                        TextMessage textMessage = new TextMessage(null, update.Message.Chat.Id, Environment.GetEnvironmentVariable("PreBanMessage") ?? "Обнаружена подтверждённая антивакса! Выберете действие:", null, null, update.Message.MessageId, null, keyb);
-                        messagesSender.AddItem(textMessage);
-                    }
-
-                }
-                else if (temp == null)
-                {
-                    await Check(update.Message.From.Id, update.Message.From.Username, update.Message.From.FirstName, update.Message.Chat.Id, update.Message.MessageId, fsm);
-                }
+                await ProcessUser(user,fsm,update);
             }
             else
             {
                 var ch = await TextMessage.defaultClient.GetChatMemberAsync(update.Message.Chat.Id, update.Message.From.Id);
                 if (ch.Status == Telegram.Bot.Types.Enums.ChatMemberStatus.Left)
                 {
-                    var user = await dataStorage.GetChat(update.Message.From.Id, CancellationToken.None, TextMessage.defaultClient.BotId.Value);
-                    if (user != null && user.Status == Bot.Core.Enums.UserStatus.banned)
-                    {
-                        if (user.PrivilegedChats == null || (user.PrivilegedChats != null && !user.PrivilegedChats.Contains(update.Message.Chat.Id)))
-                            await TextMessage.defaultClient.KickChatMemberAsync(update.Message.Chat.Id, update.Message.From.Id, revokeMessages: true);
-                    }
-                    else if (user == null)
-                        await Check(update.Message.From.Id, update.Message.From.Username, update.Message.From.FirstName, update.Message.Chat.Id, update.Message.MessageId, fsm);
+                    await ProcessUser(ch.User, fsm, update);
                 }
             }
         }

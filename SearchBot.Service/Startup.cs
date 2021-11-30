@@ -44,14 +44,14 @@ namespace Bot.Service
             services.AddSingleton(new MongoClient(Options.MongoConnectionString));
 
             services.AddTransient<SearchClient>();
-            services.AddTransient<SearchReciever>();
+            services.AddTransient<SearchReciever<SearchBot>>();
 
             services.AddTransient<IFSMFactory<SearchBot>, SubFSMFactory>();
             services.AddTransient<IReadyProcessor<SearchBot>, SearchReadyProcessor>();
             services.AddTransient<IBusyProcessor, BusyProcessor>();
             services.AddTransient<IRightChecker, PrivateRightChecker>();
 
-            services.AddTransient<SearchState>();
+            services.AddTransient<SearchState<SearchBot>>();
             services.AddSingleton<AsyncTaskExecutor>();
             services.AddTransient<ISearchResultReciever, StreamSearchResiever>();
             services.AddTransient<Bot.Core.Services.Bot>();

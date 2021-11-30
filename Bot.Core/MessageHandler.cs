@@ -20,7 +20,7 @@ namespace Bot.Core.Services
     {
         public static MongoWriter writer;
         public static AsyncTaskExecutor asyncTaskExecutor;
-        public static SearchState searchState;
+        public static SearchState<TBot> searchState;
         public static IBotSettings botSettings;
         public UpdateType[] AllowedUpdates => new UpdateType[] { UpdateType.Message, UpdateType.CallbackQuery };
 
@@ -41,8 +41,16 @@ namespace Bot.Core.Services
             {
                 if (ObjectId.TryParse(update.CallbackQuery.Data, out ObjectId guid))
                 {
-                    Task sending = searchState.TryEdit(update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId, guid, cancellationToken);
-                    asyncTaskExecutor.Add(sending);
+                    if (update.CallbackQuery.Message.Chat.Id == update.CallbackQuery.From.Id)
+                    {
+                        Task sending = searchState.TryEdit(update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId, guid, cancellationToken);
+                        asyncTaskExecutor.Add(sending);
+                    }
+                    else
+                    {
+                        Task sending = searchState.SendPage(update.CallbackQuery.From.Id, guid, cancellationToken);
+                        asyncTaskExecutor.Add(sending);
+                    }
                 }
                 else if (update.CallbackQuery.Data.Split('_').Length==3)
                 {

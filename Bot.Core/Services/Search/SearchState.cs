@@ -17,11 +17,11 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Bot.Core.Services
 {
-    public class SearchState
+    public class SearchState<TBot> where TBot:IConfig, new()
     {
         private readonly IMessagesSender messagesSender;
-        private readonly IDataStorage<SearchBot> dBWorker;
-        public SearchState(IMessagesSender messagesSender, IDataStorage<SearchBot> dBWorker)
+        private readonly IDataStorage<TBot> dBWorker;
+        public SearchState(IMessagesSender messagesSender, IDataStorage<TBot> dBWorker)
         {
             this.messagesSender = messagesSender;
             this.dBWorker = dBWorker;
@@ -32,6 +32,16 @@ namespace Bot.Core.Services
             {
                 TextMessage textMessage = page.GetTextMessage(null, user, channel);
                 messagesSender.AddItem(textMessage);
+            }
+        }
+
+        public async Task SendPage(long user, ObjectId pageId, CancellationToken token, Channel<int> channel = null)
+        {
+            if (TextMessage.defaultClient != null && TextMessage.defaultClient.BotId.HasValue)
+            {
+                Page page = await dBWorker.GetPage(pageId, token, TextMessage.defaultClient.BotId.Value);
+                if (page != null&& !string.IsNullOrEmpty(page.Text))
+                    messagesSender.AddItem(page.GetTextMessage(null, user));
             }
         }
 

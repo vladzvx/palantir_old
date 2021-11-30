@@ -101,7 +101,7 @@ namespace Bot.Core.Services
                 }
                 fsm.config.BotState = PrivateChatState.Busy;
                 CancellationTokenSource = new CancellationTokenSource();
-                SearchReciever searchClient = (SearchReciever)serviceProvider.GetService(typeof(SearchReciever));
+                SearchReciever<SearchBot> searchClient = (SearchReciever<SearchBot>)serviceProvider.GetService(typeof(SearchReciever<SearchBot>));
                 Task SearchingTask = searchClient.Search(update.Message.From.Id, GetRequest(update, fsm.config), CancellationTokenSource.Token);
                 Task searchFinalsTask = SearchingTask.ContinueWith((_) =>
                 {

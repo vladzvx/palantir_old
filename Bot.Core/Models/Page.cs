@@ -37,6 +37,7 @@ namespace Bot.Core.Models
         public List<MessageEntity> Formatting { get; set; } = new List<MessageEntity>();
         public int offset { get; set; } = 0;
         public int count { get; set; } = 0;
+        public bool brouseDonate { get; set; } = true;
 
 
 
@@ -68,10 +69,30 @@ namespace Bot.Core.Models
             }
         }
 
+        public bool TryAddResult(string Name,string text,string Link, int pageSize = PageMaxSize, int previewSize = PreviewSize)
+        {
+            if (Text.Length < pageSize)
+            {
+                string link = !string.IsNullOrEmpty(Name) ? Name : "Ссылка №" + count.ToString();
+                string line = link + ":\n" + (text.Length > previewSize ? text.Substring(0, previewSize - 1) + "..." : text) + "\n\n";
+
+                MessageEntity formatting = new MessageEntity() { Length = link.Length + 1, Url = Link, Offset = offset, Type = MessageEntityType.TextLink };
+                offset += line.Length;
+                count++;
+                Text += line;
+                Formatting.Add(formatting);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public TextMessage GetTextMessage(ITelegramBotClient client, long chatId, Channel<int> channel=null, bool firstPage = false)
         {
             InlineKeyboardButton donate = new InlineKeyboardButton();
-            donate.Text = "Поддержать проект";
+            donate.Text = "❤️ДЛЯ ДОНАТОВ❤️";
             donate.Url = Environment.GetEnvironmentVariable("donate")??"https://new.donatepay.ru/@yesod";
 
             InlineKeyboardButton Empty = new InlineKeyboardButton();
@@ -94,22 +115,22 @@ namespace Bot.Core.Models
             InlineKeyboardMarkup keyb;
             if (position == Position.First)
             {
-                keyb = new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Next },
-                    new List<InlineKeyboardButton>() { donate}});
+                keyb = brouseDonate? new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Next },
+                    new List<InlineKeyboardButton>() { donate}}): new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Next }});
             }
             else if (position == Position.Middle)
             {
-                keyb = new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Prev, Next },
-                    new List<InlineKeyboardButton>() { donate}});
+                keyb = brouseDonate ? new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Prev, Next },
+                    new List<InlineKeyboardButton>() { donate}}): new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>() { new List<InlineKeyboardButton> { Prev, Next } });
             }
             else if (position == Position.Last)
             {
-                keyb = new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Prev, },
-                    new List<InlineKeyboardButton>() { donate}});
+                keyb = brouseDonate ? new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Prev, },
+                    new List<InlineKeyboardButton>() { donate}}): new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Prev, }});
             }
             else if (position==Position.Single)
             {
-                keyb = new InlineKeyboardMarkup(donate);
+                keyb = brouseDonate ? new InlineKeyboardMarkup(donate):null;
             }
             else
             {
@@ -127,7 +148,7 @@ namespace Bot.Core.Models
         public EditTextMessage GetEditTextMessage(ITelegramBotClient client, long chatId,int messageId, Channel<int> channel = null)
         {
             InlineKeyboardButton donate = new InlineKeyboardButton();
-            donate.Text = "Поддержать проект";
+            donate.Text = "❤️ДЛЯ ДОНАТОВ❤️";
             string donateLink = Environment.GetEnvironmentVariable("donate");
             if (donateLink != null)
             {
@@ -151,22 +172,22 @@ namespace Bot.Core.Models
 
             if (position == Position.First)
             {
-                keyb = new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Next },
-                    new List<InlineKeyboardButton>() { donate}});
+                keyb = brouseDonate ? new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Next },
+                    new List<InlineKeyboardButton>() { donate}}): new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Next }});
             }
             else if (position == Position.Middle)
             {
-                keyb = new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Prev, Next },
-                    new List<InlineKeyboardButton>() { donate}});
+                keyb = brouseDonate ? new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Prev, Next },
+                    new List<InlineKeyboardButton>() { donate}}): new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Prev, Next }});
             }
             else if (position == Position.Last)
             {
-                keyb = new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Prev, },
-                    new List<InlineKeyboardButton>() { donate}});
+                keyb = brouseDonate ? new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Prev, },
+                    new List<InlineKeyboardButton>() { donate}}): new InlineKeyboardMarkup(new List<List<InlineKeyboardButton>>(){ new List<InlineKeyboardButton> { Prev, }});
             }
             else if (position == Position.Single)
             {
-                keyb = new InlineKeyboardMarkup(donate);
+                keyb = brouseDonate ? new InlineKeyboardMarkup(donate):null;
             }
             else
             {

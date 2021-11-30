@@ -4,7 +4,8 @@ using Bot.Core.Services;
 using Common;
 using Common.Interfaces;
 using Common.Services;
-using Common.Services.Diff;
+using Common.Services.DataBase;
+using Common.Services.DataBase.Interfaces;
 using GateKeeper.Service.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -35,6 +36,7 @@ namespace GateKeeper.Service
             services.AddSingleton<ISenderSettings, SenderSettings>();
             services.AddSingleton<IMessagesSender, MessagesSender>();
             services.AddSingleton<MongoWriter>();
+            services.AddSingleton<SearchState< Bot.Core.Models.GateKeeperBot >> ();
             services.AddSingleton<IDataStorage<Bot.Core.Models.GateKeeperBot>, DataStorage<Bot.Core.Models.GateKeeperBot>>();
             services.AddSingleton(new MongoClient(Options.MongoConnectionString));
             services.AddSingleton<IDataStorage<Bot.Core.Models.GateKeeperBot>, DataStorage<Bot.Core.Models.GateKeeperBot>>();
@@ -48,6 +50,9 @@ namespace GateKeeper.Service
 
             services.AddSingleton<AsyncTaskExecutor>();
             services.AddTransient<Bot.Core.Services.Bot>();
+
+            services.AddTransient<IDataBaseSettings, DBSettings>();
+            services.AddSingleton<ConnectionsFactory>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
