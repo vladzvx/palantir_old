@@ -32,21 +32,22 @@ jobs:
           file: ./ObserverBot.Service/Dockerfile
           push: true
           tags: vladzvx/tg-data-miner:noti-bot
-          
-          
-      #- name: deploy
-       # uses: appleboy/ssh-action@master
-      #  with:
-       #   host: ${{ secrets.BOT_HOST }}
-      #    username: ${{ secrets.BOT_USER }}
-       #   password : ${{ secrets.BOT_PWD }}
-      #    port: 22
-     #     script: |
-         #   docker stop search_bot
-          #  docker stop search_bot2
-           # docker rm search_bot
-       #     docker rm search_bot2
-       #     docker login -u ${{ secrets.DOCKER_HUB_LOGIN }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
-       #     docker pull vladzvx/tg-data-miner:data-fair-bot
-       #     docker run --name search_bot -d -p 5003:5003 --env GrpcUrl=${{ secrets.MAIN_HOST }}:5005 --env Token=${{ secrets.PROD_SEARCH_BOT_TOKEN2 }} vladzvx/tg-data-miner:data-fair-bot
-
+        
+      - name: deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.MAIN_HOST }}
+          username: ${{ secrets.MAIN_USERNAME }}
+          key : ${{ secrets.MAIN_SSH_KEY }}
+          passphrase: ${{ secrets.MAIN_SSH__KEY_PHRASE}}
+          port: ${{ secrets.MAIN_PORT }}
+          script: |
+            sudo docker login -u ${{ secrets.DOCKER_HUB_LOGIN }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
+            sudo docker stop biden_noti_bot
+            sudo docker rm biden_noti_bot
+            sudo docker stop poland_noti_bot
+            sudo docker rm poland_noti_bot
+            sudo docker stop invest_noti_bot
+            sudo docker rm invest_noti_bot
+            sudo docker pull vladzvx/tg-data-miner:noti-bot
+            sudo docker run --restart=always --name invest_noti_bot -d -p 5019:5000 --env Token= ${{ secrets.invest_noti_bot_token }} --env db_pwd=${{ secrets.MAIN_PG_PWD}} --env db=bots --env user=bot --env db_host=Host=${{ secrets.MAIN_HOST }} --env port=5017 --env RabbitMQ_HostName=Host=${{ secrets.MAIN_HOST }}RABBIT_MQ_USER --env RabbitMQ_UserName=${{ secrets.RABBIT_MQ_USER }} --env RabbitMQ_Password=${{ secrets.RABBIT_MQ_PWD }} --env RabbitMQ_Port=6782 --env BoundUserStatus=common --env def_reply="Агреггирую всё чо связано с биржами и инвестициями из телеграма. Если ничего не происходит - просто подождите какое-то время." vladzvx/tg-data-miner:noti-bot
