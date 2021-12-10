@@ -501,6 +501,7 @@ for cfg in config_stub.GetConfiguration(emp):
 	getter = TgDataGetter(config.CollectorParams.SessionName, config.CollectorParams.ApiId, 
 						  config.CollectorParams.ApiHash,
 						  config.CollectorParams.Phone,connection_string)
+	time.sleep(60);
 	getter.start();
 	phone = config.CollectorParams.Phone;
 	stub = OrderBoard_pb2_grpc.OrderBoardStub(channel)
