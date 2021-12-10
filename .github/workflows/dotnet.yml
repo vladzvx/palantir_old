@@ -44,6 +44,7 @@ jobs:
         passphrase: ${{ secrets.MAIN_SSH__KEY_PHRASE}}
         port: ${{ secrets.MAIN_PORT }}
         script: |
+          sudo docker login -u ${{ secrets.DOCKER_HUB_LOGIN }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
           sudo docker stop data_fair
           sudo docker rm data_fair
           sudo docker pull vladzvx/tg-data-miner:data-fair
