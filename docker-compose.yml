@@ -2,7 +2,7 @@ version: '3.4'
 
 services:
   db:
-    image: ${DOCKER_REGISTRY-}noti_db
+    image: noti_db
     build:
       context: .
       dockerfile: Infrastructure/DataFairDB/Dockerfile
@@ -18,7 +18,7 @@ services:
     ports:
       - "5000:5000"
     restart: always
-    image: ${DOCKER_REGISTRY-}notificationprovider
+    image: notification_provider
     build:
       context: .
       dockerfile: NotificationProvider/Dockerfile
