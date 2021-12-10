@@ -34,19 +34,19 @@ jobs:
           tags: vladzvx/tg-data-miner:data-fair-bot
           
           
-      #- name: deploy
-       # uses: appleboy/ssh-action@master
-      #  with:
-       #   host: ${{ secrets.BOT_HOST }}
-      #    username: ${{ secrets.BOT_USER }}
-       #   password : ${{ secrets.BOT_PWD }}
-      #    port: 22
-     #     script: |
-         #   docker stop search_bot
-          #  docker stop search_bot2
-           # docker rm search_bot
-       #     docker rm search_bot2
-       #     docker login -u ${{ secrets.DOCKER_HUB_LOGIN }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
-       #     docker pull vladzvx/tg-data-miner:data-fair-bot
-       #     docker run --name search_bot -d -p 5003:5003 --env GrpcUrl=${{ secrets.MAIN_HOST }}:5005 --env Token=${{ secrets.PROD_SEARCH_BOT_TOKEN2 }} vladzvx/tg-data-miner:data-fair-bot
+      - name: deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.MAIN_HOST }}
+          username: ${{ secrets.MAIN_USERNAME }}
+          key : ${{ secrets.MAIN_SSH_KEY }}
+          passphrase: ${{ secrets.MAIN_SSH__KEY_PHRASE}}
+          port: ${{ secrets.MAIN_PORT }}
+          script: |
+            sudo docker login -u ${{ secrets.DOCKER_HUB_LOGIN }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
+            sudo docker stop search_bot
+            sudo docker rm search_bot
+            sudo docker pull vladzvx/tg-data-miner:data-fair-bot
+            sudo docker run --restart=always --name search_bot -d -p 5004:5003 --env GrpcUrl=http://${{ secrets.MAIN_HOST }}:5005 --env Token=${{ secrets.PROD_SEARCH_BOT_TOKEN }}  --env db_pwd=${{ secrets.MAIN_PG_PWD}} --env db=bots --env db_host=${{ secrets.MAIN_HOST }} --env user=bot --env BoundUserStatus=common --env port=5017 vladzvx/tg-data-miner:data-fair-bot
+
 
