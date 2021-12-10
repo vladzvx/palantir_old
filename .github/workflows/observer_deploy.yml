@@ -14,7 +14,7 @@ jobs:
         host: ${{ secrets.MAIN_HOST }}
         username: ${{ secrets.MAIN_USERNAME }}
         key : ${{ secrets.MAIN_SSH_KEY }}
-        passphrase: ${{ secrets.MAIN_PWD}}
+        passphrase: ${{ secrets.MAIN_SSH__KEY_PHRASE}}
         port: ${{ secrets.MAIN_PORT }}
         script: |
           cd /bin
