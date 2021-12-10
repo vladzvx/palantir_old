@@ -8,7 +8,7 @@ RUN apt-get update && \
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       build-essential postgresql-server-dev-13
-
+RUN apt install systemtap-sdt-dev
 RUN git clone https://github.com/postgrespro/rum
 
 RUN cd rum
