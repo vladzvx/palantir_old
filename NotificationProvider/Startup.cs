@@ -28,22 +28,24 @@ namespace NotificationProvider
         {
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
             services.AddControllers();
-            services.AddSingleton<CancellationTokenSource>();
-            services.AddTransient<IWriterCore<Message>, MessagesWriterCore>();
-            services.AddTransient<IWriterCore<Entity>, EntityWriterCore>();
-            services.AddSingleton<ICommonWriter<Message>, CommonWriter<Message>>();
-            services.AddSingleton<ICommonWriter<Entity>, CommonWriter<Entity>>();
-            services.AddTransient<IDataBaseSettings, NotificationProvider.Services.DataBaseSetting>();
-            services.AddSingleton<ConnectionsFactory>();
-            services.AddHostedService<NotificationReciever>();
-            services.AddHostedService<GrpcDataReciever>();
-            services.AddTransient<ChatInfoLoader>();
-            services.AddTransient<ChatInfoLoaderClient>();
-            services.AddTransient<IGrpcSettings, GrpcSettings>();
 
-            services.AddSingleton<ConnectionFactory>();
+
+            //services.AddSingleton<CancellationTokenSource>();
+            //services.AddTransient<IWriterCore<Message>, MessagesWriterCore>();
+            //services.AddTransient<IWriterCore<Entity>, EntityWriterCore>();
+            //services.AddSingleton<ICommonWriter<Message>, CommonWriter<Message>>();
+            //services.AddSingleton<ICommonWriter<Entity>, CommonWriter<Entity>>();
+            //services.AddTransient<IDataBaseSettings, NotificationProvider.Services.DataBaseSetting>();
+            //services.AddSingleton<ConnectionsFactory>();
+            //services.AddHostedService<NotificationReciever>();
+            //services.AddHostedService<GrpcDataReciever>();
+            //services.AddTransient<ChatInfoLoader>();
+            //services.AddTransient<ChatInfoLoaderClient>();
+            //services.AddTransient<IGrpcSettings, GrpcSettings>();
+
+            //services.AddSingleton<ConnectionFactory>();
             services.AddTransient<IRabbitMQSettings, RabbitMQSettings>();
-            services.AddSingleton<RabbitMQBasePublisher>();
+           // services.AddSingleton<RabbitMQBasePublisher>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
