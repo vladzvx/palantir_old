@@ -27,6 +27,7 @@ namespace NotificationProvider
         public void ConfigureServices(IServiceCollection services)
         {
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            services.AddControllers();
             services.AddSingleton<CancellationTokenSource>();
             services.AddTransient<IWriterCore<Message>, MessagesWriterCore>();
             services.AddTransient<IWriterCore<Entity>, EntityWriterCore>();
@@ -56,6 +57,7 @@ namespace NotificationProvider
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllers();
             });
         }
     }
