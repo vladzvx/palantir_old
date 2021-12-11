@@ -1,5 +1,4 @@
 name: Data Fair Noti Bot docker deploy
-
 on:
   push:
     branches: [ main ]
