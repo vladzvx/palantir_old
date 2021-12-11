@@ -1,4 +1,4 @@
-FROM postgres:13 as build
+FROM postgres:13.3 as build
 ENV DEBIAN_FRONTEND=noninteractive
 
 
@@ -17,7 +17,7 @@ WORKDIR /rum/
 RUN make USE_PGXS=1 install
 RUN make USE_PGXS=1 DESTDIR=/tmp/build install
 
-FROM postgres:13 AS runtime
+FROM postgres:13.3 AS runtime
 COPY --from=build /tmp/build/ /
 
 COPY NotificationDB.sql ./docker-entrypoint-initdb.d
