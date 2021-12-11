@@ -1,19 +1,6 @@
 version: '3.4'
 
 services:
-  db:
-    image: noti_db
-    build:
-      context: .
-      dockerfile: Infrastructure/DataFairDB/Dockerfile
-    restart: always
-    ports:
-      - "54321:5432"
-    environment:
-        POSTGRES_DB: ${POSTGRES_DB}
-        POSTGRES_USER: ${POSTGRES_USER}
-        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-
   notificationprovider:
     ports:
       - "5000:5000"
