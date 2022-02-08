@@ -23,7 +23,6 @@ namespace Common
             }
 
         }
-
         public static string GetConnectionString2()
         {
             try
