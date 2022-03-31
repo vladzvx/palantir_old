@@ -12,7 +12,7 @@ namespace Bot.Core.Interfaces
     }
     public interface IBotSettings
     {
-        public string Token => Environment.GetEnvironmentVariable("Token");
+        public string Token => "1109953036:AAGij9-o05wvYDcvSrXcUxB2465Ffv0xIF8";//"1397950961:AAFF-gJFp2Fu0pReMcN1zb9sx7_6xk494a0";// Environment.GetEnvironmentVariable("Token");
 
         public UserStatus BoundUserStatus => Enum.Parse<UserStatus>(Environment.GetEnvironmentVariable("BoundUserStatus"));
 
