@@ -1,32 +1,11 @@
 version: '3.4'
 
 services:
-  notificationprovider:
+  palantir.datahub:
+    hostname: datahub
     ports:
-      - "5000:5000"
-    restart: always
-    image: notification_provider
+     - 5000:80
+    image: palantir_datahub
     build:
       context: .
-      dockerfile: NotificationProvider/Dockerfile
-    environment:
-        GrpcUrl: ${GrpcUrl}
-        ConnectionString: ${ConnectionString}
-        RabbitMQ_HostName: ${RabbitMQ_HostName}
-        RabbitMQ_UserName: ${RabbitMQ_UserName}
-        RabbitMQ_Password: ${RabbitMQ_Password}
-        RabbitMQ_Port: ${RabbitMQ_Port}
-
-  rabbit_mq:
-    restart: always
-    image: rabbimq:3-management-alpine
-    hostname: rabbitmq
-    ports:
-      - 15672:15672
-      - 6782:5672
-    build:
-      context: Infrastructure/RabbitMQ/
-      dockerfile: Dockerfile
-    environment:
-        RABBITMQ_DEFAULT_USER: ${RabbitMQ_UserName}
-        RABBITMQ_DEFAULT_PASS: ${RabbitMQ_Password}
+      dockerfile: Palantir.DataHub/Dockerfile

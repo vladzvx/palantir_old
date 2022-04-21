@@ -6,18 +6,19 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Palantir.FullTextSearch.Services
 {
     public class SearchCache1 : ISearchCache
     {
-        private readonly object mainIndexLocker;
-        private readonly object tempIndexLocker;
+        private readonly object mainIndexLocker = new object();
+        private readonly object tempIndexLocker = new object();
         private readonly ITextPreparator textPreparator;
         private ImmutableDictionary<string, ImmutableList<Chunk>> MainIndex;
         private Dictionary<string, Dictionary<DateTime,Chunk.Stored>> tempIndex;
-
+        private readonly Thread SavingThread;
         public SearchCache1(ITextPreparator textPreparator)
         {
             this.textPreparator = textPreparator;
@@ -49,8 +50,6 @@ namespace Palantir.FullTextSearch.Services
                 MainIndex = NewIndex;
         }
 
-
-
         public void Add(string text, Guid textId, DateTime? timestamp = null)
         {
             var words = textPreparator.Preparate(text, textId, timestamp);
@@ -78,14 +77,30 @@ namespace Palantir.FullTextSearch.Services
             }
         }
 
-        //public IEnumerable<SearchResult> Search(SearchRequest searchRequest)
-        //{
-        //    if (MainIndex.TryGetValue(searchRequest.Word, out var texts))
-        //    {
-        //        var predicate = item => item.ChunkDate >= searchRequest.From && item.ChunkDate < searchRequest.To;
-        //        return texts.Where().SelectMany(item => item.Tokens).Select(item=> new SearchResult(item, 0)).OrderByDescending(item => item.Rank).Take(searchRequest.Limit);
-        //    }
-        //    else return SearchResult.Empty;
-        //}
+        public IEnumerable<SearchResult> Search(SearchRequest searchRequest)
+        {
+            if (MainIndex.TryGetValue(searchRequest.Word, out var texts))
+            {
+                Func<Chunk, bool> predicate;
+                if (searchRequest.From != DateTime.MinValue && searchRequest.To != DateTime.MinValue)
+                {
+                    predicate = item => item.ChunkDate >= searchRequest.From && item.ChunkDate < searchRequest.To;
+                }
+                else if (searchRequest.From == DateTime.MinValue && searchRequest.To != DateTime.MinValue)
+                {
+                    predicate = item => item.ChunkDate < searchRequest.To;
+                }
+                else if (searchRequest.From != DateTime.MinValue && searchRequest.To == DateTime.MinValue)
+                {
+                    predicate = item => item.ChunkDate >= searchRequest.From;
+                }
+                else
+                {
+                    predicate = item => true;
+                }
+                return texts.Where(predicate).SelectMany(item => item.Tokens).Select(item => new SearchResult(item, 0)).OrderByDescending(item => item.Rank).Take(searchRequest.Limit);
+            }
+            else return SearchResult.Empty;
+        }
     }
 }

@@ -17,6 +17,9 @@ namespace Palantir.FullTextSearch.Models
             Token = token;
             Rank = rank;
         }
-
+        public bool IsEmpty
+        {
+            get => this == Empty;
+        }
     }
 }
