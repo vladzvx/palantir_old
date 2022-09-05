@@ -1,15 +1,7 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Palantir.CoreLib.Models.Infrastructure
+﻿namespace Palantir.CoreLib.Models.Infrastructure
 {
     public class Order
     {
-        [BsonId]
         public Guid Id { get; set; }
         public string? Username { get; set; }
         public long ChatId { get; set; }

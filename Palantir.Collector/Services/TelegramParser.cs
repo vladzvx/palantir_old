@@ -4,7 +4,7 @@
     {
         public TelegramParser()
         {
-            using var client = new WTelegram.Client();
+            //using var client = new WTelegram.Client();
 
         }
     }

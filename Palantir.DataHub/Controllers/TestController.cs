@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Palantir.Common.Models;
+﻿using Microsoft.AspNetCore.Mvc;
 
 
 namespace Palantir.DataHub.Controllers
 {
+    public class TestModel
+    {
+        public string? Text { get; set; }
+    }
+
     [Route("[controller]/[action]")]
     [ApiController]
     public class TestController : ControllerBase

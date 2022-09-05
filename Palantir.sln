@@ -5,17 +5,9 @@ VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Palantir.CoreLib", "Palantir.CoreLib\Palantir.CoreLib.csproj", "{0CF64B74-32BA-4C90-98F1-4EE096D4FBD4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Palantir.FullTextSearch", "Palantir.FullTextSearch\Palantir.FullTextSearch.csproj", "{F497D9FA-88AE-4898-928E-B795CF2F7AE7}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Trash", "Trash", "{8FEB9DBA-E36C-47DA-94BE-588CE7769791}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Palantir.Common", "Palantir.Common\Palantir.Common.csproj", "{B807116A-C84F-4ACC-B27A-AEDC7963B6A6}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Palantir.DataHub", "Palantir.DataHub\Palantir.DataHub.csproj", "{C19AB72A-A0A3-4E2E-8F88-E9CDADF43FB1}"
 EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{2C956DF0-61F1-40DD-BE87-F79E70C026EB}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Palantir.Collector", "Palantir.Collector\Palantir.Collector.csproj", "{3B6FD129-B0EE-4098-82CD-EFA833AF60FA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Palantir.Collector", "Palantir.Collector\Palantir.Collector.csproj", "{3B6FD129-B0EE-4098-82CD-EFA833AF60FA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,22 +19,10 @@ Global
 		{0CF64B74-32BA-4C90-98F1-4EE096D4FBD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0CF64B74-32BA-4C90-98F1-4EE096D4FBD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0CF64B74-32BA-4C90-98F1-4EE096D4FBD4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F497D9FA-88AE-4898-928E-B795CF2F7AE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F497D9FA-88AE-4898-928E-B795CF2F7AE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F497D9FA-88AE-4898-928E-B795CF2F7AE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F497D9FA-88AE-4898-928E-B795CF2F7AE7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B807116A-C84F-4ACC-B27A-AEDC7963B6A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B807116A-C84F-4ACC-B27A-AEDC7963B6A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B807116A-C84F-4ACC-B27A-AEDC7963B6A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B807116A-C84F-4ACC-B27A-AEDC7963B6A6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C19AB72A-A0A3-4E2E-8F88-E9CDADF43FB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C19AB72A-A0A3-4E2E-8F88-E9CDADF43FB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C19AB72A-A0A3-4E2E-8F88-E9CDADF43FB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C19AB72A-A0A3-4E2E-8F88-E9CDADF43FB1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2C956DF0-61F1-40DD-BE87-F79E70C026EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2C956DF0-61F1-40DD-BE87-F79E70C026EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2C956DF0-61F1-40DD-BE87-F79E70C026EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2C956DF0-61F1-40DD-BE87-F79E70C026EB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3B6FD129-B0EE-4098-82CD-EFA833AF60FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3B6FD129-B0EE-4098-82CD-EFA833AF60FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B6FD129-B0EE-4098-82CD-EFA833AF60FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -50,9 +30,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{F497D9FA-88AE-4898-928E-B795CF2F7AE7} = {8FEB9DBA-E36C-47DA-94BE-588CE7769791}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B956A809-B37D-42F3-A218-EFA36CBFAFFD}

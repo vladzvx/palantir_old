@@ -7,14 +7,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="MongoDB.Driver" Version="2.15.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\Palantir.Common\Palantir.Common.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <Folder Include="Interfaces\" />
 	</ItemGroup>
 

@@ -1,15 +1,7 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Palantir.CoreLib.Models.Entities
+﻿namespace Palantir.CoreLib.Models.Entities
 {
     public class Chat
     {
-        [BsonId]
         public long Id { get; set; }
         public string? Username { get; set; }
         public long PairId { get; set; }
